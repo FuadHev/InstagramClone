@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/home_nav"
+
+    app:startDestination="@id/homeFragment">
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.instagramclone.ui.fragments.HomeFragment"
+        android:label="HomeFragment"
+        tools:layout="@layout/fragment_home"/>
+    <fragment
+        android:id="@+id/searctoFragment"
+        android:name="com.example.instagramclone.ui.fragments.SearchFragment"
+        android:label="SearchFragment"
+        tools:layout="@layout/fragment_search"/>
+    <fragment
+        android:id="@+id/heartFragment"
+        android:name="com.example.instagramclone.ui.fragments.HeartFragment"
+        android:label="HeartFragment"
+        tools:layout="@layout/fragment_heart"/>
+    <fragment
+        android:id="@+id/profilfragment"
+        android:name="com.example.instagramclone.ui.fragments.ProfileFragment"
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile"/>
+    <fragment
+        android:id="@+id/addPostFragment"
+        android:name="com.example.instagramclone.ui.fragments.AddPostFragment"
+        android:label="AddPostFragment"
+        tools:layout="@layout/fragment_add_post"/>
+</navigation>
