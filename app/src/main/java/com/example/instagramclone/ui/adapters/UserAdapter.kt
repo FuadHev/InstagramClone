@@ -100,12 +100,18 @@ class UserAdapter(val mContext: Context, var usersList: ArrayList<Users>) :
                         val follow=documentSnapshot.data
 
                         if (follow != null) {
-                            val following= follow["following"] as HashMap<*,*>
-                           for (i in following){
-                               if (i.key==userId){
-                                   button.text="following"
-                               }
-                           }
+
+                            try {
+                                val following= follow["following"] as HashMap<*,*>
+                                for (i in following){
+                                    if (i.key==userId){
+                                        button.text="following"
+                                    }
+                                }
+                            }catch (_:java.lang.NullPointerException){
+
+                            }
+
                         }
 
                     }else{

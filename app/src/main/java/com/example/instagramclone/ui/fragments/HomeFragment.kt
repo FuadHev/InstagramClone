@@ -48,7 +48,8 @@ class HomeFragment : Fragment() {
         linerLayoutManager.reverseLayout = true
         linerLayoutManager.stackFromEnd = true
         binding.postRv.layoutManager = linerLayoutManager
-
+        adapter = PostsAdapters(requireContext(), postList)
+        binding.postRv.adapter=adapter
 
         checkFollowing()
 
@@ -73,17 +74,26 @@ class HomeFragment : Fragment() {
                     error.localizedMessage?.let { Log.e("", it)
                         return@addSnapshotListener}
                 }else{
+
+
                     if (documentSnapshot!=null&&documentSnapshot.exists()){
                         val follow=documentSnapshot.data
 
                         if (follow != null) {
-                            val following= follow["following"] as HashMap<*,*>
-                            followList.clear()
-                            for (i in following){
-                                followList.add(i.key as String)
+
+                            try {
+
+                                val following= follow["following"] as HashMap<*,*>
+                                followList.clear()
+                                for (i in following){
+                                    followList.add(i.key as String)
+
+                                }
+                                readPost()
+                            }catch (_:java.lang.NullPointerException){
 
                             }
-                            readPost()
+
                         }
 
                     }else{
@@ -106,23 +116,34 @@ class HomeFragment : Fragment() {
 
                 if (value != null) {
 
-                    for (document in value.documents) {
-                        val post_id = document.get("postId") as String
-                        val postImage = document.get("postImage") as String
-                        val description = document.get("description") as String
-                        val publisher = document.get("publisher") as String
-                        val post = Posts(post_id, postImage, description, publisher)
 
-                        for (id in followList) {
-                            if (publisher == id) {
-                                postList.add(post)
+
+                    for (document in value.documents) {
+
+                        try {
+
+                            Log.e("sdfsdfsfdfsfsdfsdfs",document.get("postId") as String )
+                            val post_id = document.get("postId") as String
+                            val postImage = document.get("postImage") as String
+                            val description = document.get("description") as String
+                            val publisher = document.get("publisher") as String
+                            val post = Posts(post_id, postImage, description, publisher)
+
+                            for (id in followList) {
+                                if (publisher == id) {
+                                    postList.add(post)
+                                }
                             }
+
+                        }catch (_:java.lang.NullPointerException){
+
+
                         }
 
 
+
                     }
-                    adapter = PostsAdapters(requireContext(), postList)
-                    binding.postRv.adapter=adapter
+                    adapter.notifyDataSetChanged()
 
                 }
 

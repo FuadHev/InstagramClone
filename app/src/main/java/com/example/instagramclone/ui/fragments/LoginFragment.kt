@@ -18,9 +18,12 @@ import com.example.instagramclone.databinding.FragmentLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
+import java.util.Objects
+import kotlin.random.Random
 
 
 class LoginFragment : Fragment() {
@@ -56,9 +59,6 @@ class LoginFragment : Fragment() {
 
 
 
-
-
-
         if (email == "" || password==""){
             Toast.makeText(requireContext(), "Enter Email and Password ", Toast.LENGTH_SHORT).show()
 
@@ -88,6 +88,8 @@ class LoginFragment : Fragment() {
         Navigation.findNavController(sing).navigate(R.id.goToSingUp)
 
     }
+
+
 
 
 }

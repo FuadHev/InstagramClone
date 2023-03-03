@@ -1,6 +1,8 @@
 package com.example.instagramclone.ui.adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View.GONE
@@ -9,11 +11,16 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+
 import androidx.recyclerview.widget.RecyclerView
+import com.example.instagramclone.CommentsActivity
+import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Posts
 import com.example.instagramclone.databinding.PostsCardViewBinding
-import com.google.firebase.auth.FirebaseUser
+
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
@@ -24,7 +31,10 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
     val firebaseUser = Firebase.auth.currentUser
     val firestore = Firebase.firestore
 
-    inner class CardViewHolder(val view: PostsCardViewBinding) : RecyclerView.ViewHolder(view.root)
+
+    inner class CardViewHolder(val view: PostsCardViewBinding) : RecyclerView.ViewHolder(view.root){
+
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -39,8 +49,8 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
         val post = postsList[position]
         val b = holder.view
 
-        val imageUrl=post.postImage
 
+        b.like.tag = "like"
         Picasso.get().load(post.postImage).into(b.postImage)
 
         if (post.description == "") {
@@ -52,6 +62,105 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
 
         }
         publisherInfo(b.profileImage, b.userName, b.publisher, post.publisher)
+        isLiked(post.post_id, b.like)
+        nrLike(b.likeCount, post.post_id)
+        getComments(post.post_id, b.comments)
+
+
+        b.like.setOnClickListener {
+
+
+            if (b.like.tag=="like") {
+
+                val map = hashMapOf<String, Boolean>()
+
+                map[firebaseUser!!.uid] = true
+                firestore.collection("Likes").document(post.post_id).set(map, SetOptions.merge())
+                    .addOnSuccessListener {
+
+                        nrLike(b.likeCount, post.post_id)
+                        b.like.setImageResource(R.drawable.like)
+                        b.like.tag="liked"
+                    }
+
+
+            } else {
+                val docRef = firestore.collection("Likes").document(post.post_id)
+
+
+                val updates = hashMapOf<String, Any>(
+                    firebaseUser!!.uid to FieldValue.delete()
+                )
+
+                docRef.update(updates).addOnSuccessListener {
+                    nrLike(b.likeCount, post.post_id)
+                    b.like.setImageResource(R.drawable.heart_noselected)
+                    b.like.tag="like"
+                }
+
+
+            }
+
+
+        }
+
+        b.comments.setOnClickListener {
+
+
+            val intent = Intent(mContext, CommentsActivity::class.java)
+            intent.putExtra("postId", post.post_id)
+            intent.putExtra("publisherId", post.publisher)
+            mContext.startActivity(intent)
+
+        }
+        b.comment.setOnClickListener {
+
+
+            val intent = Intent(mContext, CommentsActivity::class.java)
+            intent.putExtra("postId", post.post_id)
+            intent.putExtra("publisherId", post.publisher)
+            mContext.startActivity(intent)
+
+        }
+
+
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun getComments(postId: String, comments: TextView) {
+
+
+        firestore.collection("Comments").document(postId).addSnapshotListener { value, error ->
+            if (error != null) {
+                Toast.makeText(mContext, error.localizedMessage, Toast.LENGTH_SHORT).show()
+            } else {
+                try {
+                    if (value != null) {
+
+
+                        val allcomments = value.data as HashMap<*, *>
+                       val count =allcomments.count()
+                        comments.text = "View all $count comments"
+//                        for (comment in allcomments) {
+//                            count++
+//                        }
+//                        if (count == 3) {
+//                            comments.text = "View all 1 comments"
+//                        } else {
+//                            comments.text = "View all ${count / 2} comments"
+//                        }
+
+
+                    }
+                } catch (_: NullPointerException) {
+
+                }
+
+
+            }
+
+
+        }
 
 
     }
@@ -61,6 +170,81 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
         return postsList.size
     }
 
+
+    @SuppressLint("SetTextI18n")
+    private fun nrLike(likes: TextView, postId: String) {
+
+
+        firestore.collection("Likes").document(postId).addSnapshotListener { value, error ->
+
+            if (error != null) {
+                Toast.makeText(mContext, error.localizedMessage, Toast.LENGTH_SHORT).show()
+                return@addSnapshotListener
+            } else {
+                if (value != null) {
+                    val doc = value.data as? HashMap<*, *>
+                    val count=doc?.count()
+                    likes.text = "$count likes"
+
+//                    if (doc != null) {
+//
+//                        for (i in doc) {
+//                            count++
+//                        }
+//                        likes.text = "$count likes"
+//
+//                    }
+
+
+                } else {
+                    likes.text = "0 likes"
+                }
+
+
+            }
+
+        }
+
+
+    }
+
+    private fun isLiked(postId: String, imageView: ImageView) {
+
+        firestore.collection("Likes").document(postId).addSnapshotListener { value, error ->
+
+            if (error != null) {
+                Toast.makeText(mContext, error.localizedMessage, Toast.LENGTH_SHORT).show()
+                return@addSnapshotListener
+            } else {
+                if (value != null) {
+                    val doc = value.data as? HashMap<*, *>
+                    Log.e("asdadsdadsa",value.data.toString())
+                    if (doc != null) {
+
+                        if (doc.containsKey(firebaseUser!!.uid)){
+                            imageView.setImageResource(R.drawable.like)
+                                imageView.tag = "liked"
+                        }else{
+                            imageView.setImageResource(R.drawable.heart_noselected)
+                                imageView.tag = "like"
+                        }
+
+
+                    }
+
+
+                } else {
+                    Toast.makeText(mContext, "", Toast.LENGTH_SHORT).show()
+                }
+
+
+            }
+
+
+        }
+
+
+    }
 
     private fun publisherInfo(
         profil_image: ImageView,
@@ -89,39 +273,6 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
             }
 
         }
-
-    }
-
-    private fun isLike(postId:String,imageView: ImageView){
-
-        firestore.collection("Likes").document(postId).addSnapshotListener { value, error ->
-
-            if (error != null) {
-                Toast.makeText(mContext, error.localizedMessage, Toast.LENGTH_SHORT).show()
-                return@addSnapshotListener
-            } else {
-                if (value != null ) {
-                    val doc=value.data as? HashMap<*, *>
-                    if (doc != null) {
-                        for (i in doc){
-
-                        }
-                    }
-
-
-
-                } else {
-                    Toast.makeText(mContext, "User not found", Toast.LENGTH_SHORT).show()
-                }
-
-
-            }
-
-
-        }
-
-
-
 
     }
 }
