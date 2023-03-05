@@ -1,5 +1,6 @@
 package com.example.instagramclone.ui.fragments
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -17,6 +18,7 @@ import com.example.instagramclone.R
 import com.example.instagramclone.databinding.FragmentLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -55,6 +57,15 @@ class LoginFragment : Fragment() {
     }
 
     fun singIn(btn:Button,email:String,password:String){
+
+
+
+        firestore.collection("Follow").document("hSpoVThm3mhA4dLuYr7th6nhYJB2").update("following.a08y0pgL0BN0mpAEyw5H3wxmjyq2",FieldValue.delete())
+
+
+
+
+
 
 
 

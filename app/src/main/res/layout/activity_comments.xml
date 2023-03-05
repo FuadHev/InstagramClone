@@ -15,13 +15,17 @@
         android:theme="?attr/actionBarTheme"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:padding="10dp"
+        app:titleMarginStart="30dp"
+        app:title="Comments"
+        app:titleTextColor="@color/black"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/comments_rv"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="1dp"
+        android:layout_marginTop="3dp"
         app:layout_constraintBottom_toTopOf="@+id/add_to_comment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

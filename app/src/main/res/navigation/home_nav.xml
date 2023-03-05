@@ -14,7 +14,11 @@
         android:id="@+id/searctoFragment"
         android:name="com.example.instagramclone.ui.fragments.SearchFragment"
         android:label="SearchFragment"
-        tools:layout="@layout/fragment_search"/>
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_searctoFragment_to_profilfragment"
+            app:destination="@id/profilfragment" />
+    </fragment>
     <fragment
         android:id="@+id/heartFragment"
         android:name="com.example.instagramclone.ui.fragments.HeartFragment"

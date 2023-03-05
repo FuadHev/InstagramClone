@@ -141,15 +141,6 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
                         val allcomments = value.data as HashMap<*, *>
                        val count =allcomments.count()
                         comments.text = "View all $count comments"
-//                        for (comment in allcomments) {
-//                            count++
-//                        }
-//                        if (count == 3) {
-//                            comments.text = "View all 1 comments"
-//                        } else {
-//                            comments.text = "View all ${count / 2} comments"
-//                        }
-
 
                     }
                 } catch (_: NullPointerException) {
@@ -217,8 +208,7 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
                 return@addSnapshotListener
             } else {
                 if (value != null) {
-                    val doc = value.data as? HashMap<*, *>
-                    Log.e("asdadsdadsa",value.data.toString())
+                    val doc = value.data as? HashMap<*,*>
                     if (doc != null) {
 
                         if (doc.containsKey(firebaseUser!!.uid)){

@@ -122,12 +122,12 @@ class HomeFragment : Fragment() {
 
                         try {
 
-                            Log.e("sdfsdfsfdfsfsdfsdfs",document.get("postId") as String )
                             val post_id = document.get("postId") as String
                             val postImage = document.get("postImage") as String
                             val description = document.get("description") as String
                             val publisher = document.get("publisher") as String
                             val post = Posts(post_id, postImage, description, publisher)
+
 
                             for (id in followList) {
                                 if (publisher == id) {

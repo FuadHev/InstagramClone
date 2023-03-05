@@ -81,8 +81,6 @@ class SearchFragment : Fragment() {
                 val password=users.get("password") as String
                 val imageurl=users.get("image_url") as String
                 val bio=users.get("bio") as String
-
-
                 val user=Users(user_id,email,username,password,imageurl,bio)
                     usersList.add(user)
 

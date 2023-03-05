@@ -2,16 +2,20 @@ package com.example.instagramclone.ui.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
+import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Users
 import com.example.instagramclone.databinding.UsersItemBinding
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 
@@ -50,6 +54,13 @@ class UserAdapter(val mContext: Context, var usersList: ArrayList<Users>) :
 
         v.cardView.setOnClickListener {
 
+            val editor=mContext.getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit()
+
+            editor.putString("profileid",user.user_id)
+            editor.apply()
+
+            Navigation.findNavController(it).navigate(R.id.action_searctoFragment_to_profilfragment)
+
 
 
         }
@@ -72,8 +83,12 @@ class UserAdapter(val mContext: Context, var usersList: ArrayList<Users>) :
 
 
             } else {
-                firestore.collection("Follow").document(auth.currentUser!!.uid).delete()
-                firestore.collection("Follow").document(user.user_id).delete()
+
+                firestore.collection("Follow").document(auth.currentUser!!.uid).update("following.${user.user_id}",
+                    FieldValue.delete())
+                firestore.collection("Follow").document(user.user_id).update("followers.${auth.currentUser!!.uid}",
+                    FieldValue.delete())
+
                 v.follow.text="follow"
 
             }
