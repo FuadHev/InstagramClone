@@ -1,6 +1,6 @@
 package com.example.instagramclone.ui.fragments
 
-import android.app.Activity.RESULT_OK
+import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -14,15 +14,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-
 import androidx.activity.result.contract.ActivityResultContracts
-
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import androidx.navigation.Navigation
 import com.example.instagramclone.R
-
-import com.example.instagramclone.databinding.FragmentAddPostBinding
+import com.example.instagramclone.databinding.FragmentEditProfileBinding
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -33,12 +31,13 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
-
+import com.squareup.picasso.Picasso
 import java.util.*
 
+class EditProfileFragment : Fragment() {
 
-class AddPostFragment : Fragment() {
-    private lateinit var binding: FragmentAddPostBinding
+
+    private lateinit var binding: FragmentEditProfileBinding
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     private lateinit var permissionResultLauncher: ActivityResultLauncher<String>
     private lateinit var auth: FirebaseAuth
@@ -49,76 +48,77 @@ class AddPostFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentAddPostBinding.inflate(inflater, container, false)
+        binding=DataBindingUtil.inflate(inflater,R.layout.fragment_edit_profile, container,false)
         // Inflate the layout for this fragment
-        val view = binding.root
+        return binding.root
+    }
+
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         auth = Firebase.auth
         firestore = Firebase.firestore
         storage = Firebase.storage
+        getUserInfo()
 
 
         registerLauncher()
 
-        binding.imageView.setOnClickListener {
+        binding.changeProfilPhoto.setOnClickListener {
             selectImage(it)
-
         }
-
-
-        binding.sharePost.setOnClickListener {
-
+        binding.save.setOnClickListener {
             upload(it)
-
         }
 
 
 
-
-
-
-
-
-
-
-
-
-
-        return view
     }
+
+    fun getUserInfo(){
+        firestore.collection("user").document(auth.currentUser!!.uid).addSnapshotListener { value, error ->
+            if (error!=null){
+
+            }else{
+                val bio=value?.get("bio") as String
+                val username= value.get("username") as String
+                val image_url=value.get("image_url") as String
+
+                Picasso.get().load(image_url).into(binding.profilImage)
+                binding.bio.setText(bio)
+                binding.username.setText(username)
+                binding.profilName.text=username
+            }
+        }
+    }
+
+
 
 
     fun upload(view: View) {
 
         val progress= ProgressDialog(requireContext())
-        progress.setMessage("Please wait adding the post")
+        progress.setMessage("Please wait updating profile")
         progress.show()
+
         val uuid = UUID.randomUUID()
         val imageName = "$uuid.jpg"
 
         val reference = storage.reference
-        val imageReference = reference.child("images/$imageName")
+        val imageReference = reference.child("profilImage/$imageName")
 
         if (selectPicture != null) {
             imageReference.putFile(selectPicture!!).addOnSuccessListener {
-                val uploadPictureReference = storage.reference.child("images").child(imageName)
+                val uploadPictureReference = storage.reference.child("profilImage").child(imageName)
                 uploadPictureReference.downloadUrl.addOnSuccessListener {
                     val downloadUrl = it.toString()
+                    val ref=firestore.collection("user").document(auth.currentUser!!.uid)
 
-                    val ref = firestore.collection("Posts").document()
-                    val hmap = hashMapOf<String, Any>(
-                    )
-                    val time=Timestamp.now()
-                    hmap["description"] = binding.editMyComment.text.toString()
-                    hmap["postId"] = ref.id
-                    hmap["postImage"] = downloadUrl
-                    hmap["publisher"] = auth.currentUser!!.uid
-                    hmap["time"]=time
-
-                    ref.set(hmap, SetOptions.merge()).addOnSuccessListener {
+                    ref.update("bio",binding.bio.text.toString())
+                    ref.update("image_url",downloadUrl)
+                    ref.update("username",binding.username.text.toString()).addOnSuccessListener {
                         progress.dismiss()
-                       Navigation.findNavController(view).navigate(R.id.action_addPostFragment_to_homeFragment)
-                    }.addOnFailureListener {
-                        Toast.makeText(context, it.localizedMessage, Toast.LENGTH_SHORT).show()
                     }
 
                 }
@@ -127,6 +127,14 @@ class AddPostFragment : Fragment() {
             }.addOnFailureListener {
                 Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
             }
+        }else{
+            val ref=firestore.collection("user").document(auth.currentUser!!.uid)
+
+            ref.update("bio",binding.bio.text.toString())
+            ref.update("username",binding.username.text.toString()).addOnSuccessListener {
+                progress.dismiss()
+            }
+
         }
 
 
@@ -170,13 +178,13 @@ class AddPostFragment : Fragment() {
 
         activityResultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
+                if (result.resultCode == Activity.RESULT_OK) {
                     val intentFromResult = result.data
 
                     if (intentFromResult != null) {
                         selectPicture = intentFromResult.data
                         selectPicture?.let {
-                            binding.imageView.setImageURI(it)
+                            binding.profilImage.setImageURI(it)
                         }
                     }
                 }

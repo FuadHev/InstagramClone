@@ -1,18 +1,27 @@
 package com.example.instagramclone.ui.fragments
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.viewModels
+import androidx.navigation.Navigation
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.instagramclone.R
+import com.example.instagramclone.data.entity.Posts
 import com.example.instagramclone.databinding.FragmentProfileBinding
 import com.example.instagramclone.ui.adapters.MyFotoAdapter
+import com.example.instagramclone.ui.viewmodel.ProfileViewModel
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -29,12 +38,24 @@ class ProfileFragment : Fragment() {
     private lateinit var adapter: MyFotoAdapter
     private lateinit var firestore: FirebaseFirestore
     private var profileid: String? = null
+    private lateinit var postList: ArrayList<Posts>
+    private lateinit var viewModel: ProfileViewModel
+    private lateinit var sp:SharedPreferences
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val tempViewModel: ProfileViewModel by viewModels()
+        viewModel = tempViewModel
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_profile, container, false)
+        binding = DataBindingUtil.inflate(inflater,R.layout.fragment_profile,container,false)
+
 
         return binding.root
     }
@@ -44,12 +65,31 @@ class ProfileFragment : Fragment() {
 
         firbaseUser = Firebase.auth.currentUser!!
         firestore = Firebase.firestore
-        val sp = requireActivity().getSharedPreferences("PREFS", Context.MODE_PRIVATE)
+        sp = requireActivity().getSharedPreferences("PREFS", Context.MODE_PRIVATE)
         profileid = sp.getString("profileid", firbaseUser.uid)
+        (activity as AppCompatActivity).setSupportActionBar(binding.toolbar2)
 
-        userInfo()
+        binding.fotosRv.visibility=VISIBLE
+        binding.savesRv.visibility= GONE
+
+
+        binding.fotosRv.setHasFixedSize(true)
+
+        binding.fotosRv.layoutManager = GridLayoutManager(requireContext(), 3)
+        binding.savesRv.layoutManager= GridLayoutManager(requireContext(), 3)
+        adapter = MyFotoAdapter(emptyList())
+
+        viewModel.postsList.observe(viewLifecycleOwner) {
+            adapter.updateMyPosts(it)
+            binding.fotosRv.adapter = adapter
+        }
+
+        profileid?.let { viewModel.userInfo(requireContext(),firestore, it,binding.username,binding.bio,binding.imageProfile) }
         getFollower()
         getNrPost()
+        profileid?.let { viewModel.myFotos(firestore, it) }
+        viewModel.mySaves(firestore,firbaseUser)
+
 
         if (profileid == firbaseUser.uid) {
 
@@ -57,14 +97,14 @@ class ProfileFragment : Fragment() {
         } else {
             checkFollow()
             binding.save.visibility = GONE
-
-
         }
-
 
         binding.editProfil.setOnClickListener {
             val btn = binding.editProfil.text.toString().lowercase()
-            if (btn == "edit erofil") {
+            if (btn == "edit profile") {
+
+                Navigation.findNavController(it).navigate(R.id.action_profilfragment_to_editProfileFragment)
+
 
             } else if (btn == "follow") {
 
@@ -87,24 +127,95 @@ class ProfileFragment : Fragment() {
                 binding.editProfil.text = "following"
 
             } else if (btn == "following") {
-//                firestore.collection("Follow").document("hSpoVThm3mhA4dLuYr7th6nhYJB2").update(
-//                    "following.a08y0pgL0BN0mpAEyw5H3wxmjyq2",
-//                    FieldValue.delete()
-//                )
 
-                firestore.collection("Follow").document(firbaseUser.uid).update("following.${profileid}",FieldValue.delete())
-                firestore.collection("Follow").document(profileid!!).update("followers.${firbaseUser.uid}",FieldValue.delete())
+
+                firestore.collection("Follow").document(firbaseUser.uid)
+                    .update("following.${profileid}", FieldValue.delete())
+                firestore.collection("Follow").document(profileid!!)
+                    .update("followers.${firbaseUser.uid}", FieldValue.delete())
                 binding.editProfil.text = "follow"
 
             }
 
 
         }
+        binding.save.setOnClickListener {
+            viewModel.savesList.observe(viewLifecycleOwner){
+                adapter.updateMyPosts(it)
+                binding.savesRv.adapter=adapter
+            }
+            binding.fotosRv.visibility=GONE
+            binding.savesRv.visibility= VISIBLE
+        }
+        binding.myPhotos.setOnClickListener {
+            viewModel.postsList.observe(viewLifecycleOwner) {
+                adapter.updateMyPosts(it)
+                binding.fotosRv.adapter = adapter
+            }
+            binding.fotosRv.visibility=VISIBLE
+            binding.savesRv.visibility= GONE
+        }
 
-        sp.edit().remove("profileid").apply()
 
 
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        sp.edit().remove("profileid").apply()
+    }
+
+
+
+
+
+
+
+//    private fun myFotos(){
+//        firestore.collection("Posts").addSnapshotListener { value, error ->
+//            if (error != null) {
+//                error.localizedMessage?.let { Log.e("", it) }
+//            } else {
+//
+//                if (value != null) {
+//                    for (document in value.documents) {
+//
+//                        try {
+//                            val post_id = document.get("postId") as String
+//                            val postImage = document.get("postImage") as String
+//                            val description = document.get("description") as String
+//                            val publisher = document.get("publisher") as String
+//                            val time = document.get("time") as Timestamp
+//                            val post = Posts(post_id, postImage, description, publisher, time)
+//
+//                            if (publisher==profileid){
+//                                postList.add(post)
+//                            }
+//
+//
+//                        } catch (_: java.lang.NullPointerException) {
+//
+//
+//                        }
+//
+//
+//                    }
+//                    postList.sortByDescending {
+//                        it.time
+//                    }
+//                    adapter.notifyDataSetChanged()
+//
+//
+//
+//                }
+//
+//
+//            }
+//
+//        }
+//
+//
+//    }
 
     private fun userInfo() {
 

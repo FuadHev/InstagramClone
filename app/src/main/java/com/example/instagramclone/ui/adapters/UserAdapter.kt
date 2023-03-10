@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ import com.example.instagramclone.databinding.UsersItemBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.auth.User
 import com.google.firebase.firestore.ktx.firestore
 
 import com.google.firebase.ktx.Firebase
@@ -30,6 +32,7 @@ class UserAdapter(val mContext: Context, var usersList: ArrayList<Users>) :
     RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
     inner class ViewHolder(val view: UsersItemBinding) : RecyclerView.ViewHolder(view.root)
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -55,12 +58,10 @@ class UserAdapter(val mContext: Context, var usersList: ArrayList<Users>) :
         v.cardView.setOnClickListener {
 
             val editor=mContext.getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit()
-
             editor.putString("profileid",user.user_id)
             editor.apply()
 
             Navigation.findNavController(it).navigate(R.id.action_searctoFragment_to_profilfragment)
-
 
 
         }

@@ -1,5 +1,6 @@
 package com.example.instagramclone.ui.fragments
 
+import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
@@ -15,7 +16,11 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.Navigation
 import com.example.instagramclone.HomeActivity
 import com.example.instagramclone.R
+import com.example.instagramclone.data.entity.Posts
 import com.example.instagramclone.databinding.FragmentLoginBinding
+import com.example.instagramclone.ui.adapters.MyFotoAdapter
+import com.google.android.material.transition.platform.MaterialContainerTransform.ProgressThresholds
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -49,38 +54,27 @@ class LoginFragment : Fragment() {
 
 
 
-
-
-
-
         return view
     }
 
     fun singIn(btn:Button,email:String,password:String){
 
 
-
-        firestore.collection("Follow").document("hSpoVThm3mhA4dLuYr7th6nhYJB2").update("following.a08y0pgL0BN0mpAEyw5H3wxmjyq2",FieldValue.delete())
-
-
-
-
-
-
-
+        val progress=ProgressDialog(requireContext())
+        progress.setMessage("Please wait")
 
 
         if (email == "" || password==""){
             Toast.makeText(requireContext(), "Enter Email and Password ", Toast.LENGTH_SHORT).show()
 
         }else{
-
+            progress.show()
             auth.signInWithEmailAndPassword(email,password).addOnSuccessListener {
 
+                progress.dismiss()
                 activity?.let {
                     val intent= Intent(it,HomeActivity::class.java)
                     it.startActivity(intent)
-
                 }
 
             }.addOnFailureListener {

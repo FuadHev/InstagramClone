@@ -1,19 +1,23 @@
 package com.example.instagramclone.ui.fragments
 
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Posts
 import com.example.instagramclone.databinding.FragmentHomeBinding
 import com.example.instagramclone.ui.adapters.PostsAdapters
-import com.google.api.Distribution.BucketOptions.Linear
+import com.example.instagramclone.ui.viewmodel.HomeViewModel
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -29,8 +33,19 @@ class HomeFragment : Fragment() {
     private lateinit var adapter: PostsAdapters
     private lateinit var postList: ArrayList<Posts>
     private lateinit var followList: ArrayList<String>
+    private lateinit var viewModel: HomeViewModel
 
     private lateinit var userUID: String
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val tempViewModel: HomeViewModel by viewModels()
+        viewModel = tempViewModel
+
+
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -42,66 +57,78 @@ class HomeFragment : Fragment() {
         auth = Firebase.auth
 
         firestore = Firebase.firestore
+        viewModel.auth = auth.currentUser!!
+
+        val progress = ProgressDialog(requireContext())
+        progress.setMessage("Please wait")
+        progress.show()
 
         binding.postRv.setHasFixedSize(true)
         val linerLayoutManager = LinearLayoutManager(requireActivity())
-        linerLayoutManager.reverseLayout = true
-        linerLayoutManager.stackFromEnd = true
+//        linerLayoutManager.reverseLayout = true
+//        linerLayoutManager.stackFromEnd = true
         binding.postRv.layoutManager = linerLayoutManager
-        adapter = PostsAdapters(requireContext(), postList)
-        binding.postRv.adapter=adapter
+        adapter = PostsAdapters(requireContext(), emptyList())
 
-        checkFollowing()
+        viewModel.checkFollowing()
+        viewModel.readPost()
+
+        viewModel.postsList.observe(viewLifecycleOwner) {
+            adapter.updatePosts(it)
+            binding.postRv.adapter = adapter
+            Handler().postDelayed({
+                progress.dismiss()
+            }, 2000)
+        }
 
 
 
 
 
-
-
+//        checkFollowing()
+//
+//        readPost()
 
 
         return binding.root
     }
 
-    private fun checkFollowing(){
 
-
+    private fun checkFollowing() {
 
         firestore.collection("Follow").document(auth.currentUser!!.uid)
             .addSnapshotListener { documentSnapshot, error ->
-                if(error!=null){
-                    error.localizedMessage?.let { Log.e("", it)
-                        return@addSnapshotListener}
-                }else{
+                if (error != null) {
+                    error.localizedMessage?.let {
+                        Log.e("", it)
+                        return@addSnapshotListener
+                    }
+                } else {
 
 
-                    if (documentSnapshot!=null&&documentSnapshot.exists()){
-                        val follow=documentSnapshot.data
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                        val follow = documentSnapshot.data
 
                         if (follow != null) {
-
                             try {
 
-                                val following= follow["following"] as HashMap<*,*>
+                                val following = follow["following"] as HashMap<*, *>
                                 followList.clear()
-                                for (i in following){
+                                for (i in following) {
                                     followList.add(i.key as String)
 
                                 }
-                                readPost()
-                            }catch (_:java.lang.NullPointerException){
+
+                            } catch (_: java.lang.NullPointerException) {
 
                             }
-
                         }
 
-                    }else{
-                        Log.e("","")
+                    } else {
+                        Log.e("", "")
                     }
                 }
             }
-
 
 
     }
@@ -115,18 +142,14 @@ class HomeFragment : Fragment() {
             } else {
 
                 if (value != null) {
-
-
-
                     for (document in value.documents) {
-
                         try {
-
                             val post_id = document.get("postId") as String
                             val postImage = document.get("postImage") as String
                             val description = document.get("description") as String
                             val publisher = document.get("publisher") as String
-                            val post = Posts(post_id, postImage, description, publisher)
+                            val time = document.get("time") as Timestamp
+                            val post = Posts(post_id, postImage, description, publisher, time)
 
 
                             for (id in followList) {
@@ -135,11 +158,10 @@ class HomeFragment : Fragment() {
                                 }
                             }
 
-                        }catch (_:java.lang.NullPointerException){
+                        } catch (_: java.lang.NullPointerException) {
 
 
                         }
-
 
 
                     }

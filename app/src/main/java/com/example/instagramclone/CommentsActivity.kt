@@ -42,10 +42,6 @@ class CommentsActivity : AppCompatActivity() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var alluser:ArrayList<Users>
     private lateinit var adapter:CommentAdapter
-//    private val adapter by lazy {
-//        CommentAdapter(this, emptyList())
-//    }
-    private lateinit var commentList: ArrayList<Comment>
     private lateinit var viewModel: CommentsViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +50,7 @@ class CommentsActivity : AppCompatActivity() {
         val tempViewModel: CommentsViewModel by viewModels()
         viewModel = tempViewModel
         firebaseUser = Firebase.auth.currentUser!!
-        commentList = ArrayList()
+
         alluser=ArrayList()
         binding.toolbar.title = "Comments"
         setSupportActionBar(binding.toolbar)
@@ -76,13 +72,8 @@ class CommentsActivity : AppCompatActivity() {
         adapter= CommentAdapter(this, emptyList(),alluser)
 
         viewModel.commentsList.observe(this) {
-
                 adapter.updateElements(it)
-                binding.commentsRv.adapter = adapter
-
-
-
-
+            binding.commentsRv.adapter = adapter
         }
 
         binding.post.setOnClickListener {
@@ -90,14 +81,14 @@ class CommentsActivity : AppCompatActivity() {
             if (binding.addToComment.text.trim().toString() == "") {
                 Toast.makeText(this, "Please add the comment", Toast.LENGTH_SHORT).show()
             } else {
-
                 addComment()
-
             }
             binding.addToComment.text.clear()
 
         }
 
+
+        getImage()
         readComment()
 
 
@@ -105,6 +96,7 @@ class CommentsActivity : AppCompatActivity() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun addComment() {
+
         val randomValue = (20..28).random()
         val commentId = randomAlphaNumericString(randomValue)
         val time = Timestamp.now()
@@ -115,9 +107,9 @@ class CommentsActivity : AppCompatActivity() {
         hmap["publisher"] = firebaseUser.uid
         hmap["time"] = time
         hmapkey[commentId] = hmap
-        val newcomment = Comment(binding.addToComment.text.toString(), firebaseUser.uid, time)
-        viewModel.commentList.clear()
         reference.set(hmapkey, SetOptions.merge())
+
+
     }
 
     private fun getImage() {
@@ -145,7 +137,6 @@ class CommentsActivity : AppCompatActivity() {
 
     private fun readComment() {
         viewModel.readComment()
-        getImage()
     }
 
 
@@ -156,7 +147,6 @@ class CommentsActivity : AppCompatActivity() {
             } else {
                 if (value != null ) {
                     for (users in value.documents){
-
                         val user_id=users.get("user_id") as String
                         val email=users.get("email") as String
                         val username=users.get("username") as String

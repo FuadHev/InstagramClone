@@ -11,5 +11,4 @@ class MyDiffUtilCallBack(val oldElements:List<Comment>,val newElements:List<Comm
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =oldElements[oldItemPosition]==newElements[newItemPosition]
 
-
 }

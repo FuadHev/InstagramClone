@@ -12,10 +12,8 @@ import com.google.firebase.ktx.Firebase
 class CommentsViewModel:ViewModel() {
 
     val commentsList=MutableLiveData<ArrayList<Comment>>()
-    val commentList=ArrayList<Comment>()
     var postId=""
     var firestore= Firebase.firestore
-
 
 
     fun readComment(){
@@ -25,6 +23,8 @@ class CommentsViewModel:ViewModel() {
                 if (value != null && value.exists()) {
                     val doc = value.data as HashMap<*, *>
                     try {
+
+                        val commentList=ArrayList<Comment>()
                         for (i in doc) {
                             val com = i.value as HashMap<*, *>
                             val comm = com.get("comment") as String
@@ -32,13 +32,13 @@ class CommentsViewModel:ViewModel() {
                             val time = com.get("time") as Timestamp
                             val comment = Comment(comm, publisher, time)
                             commentList.add(comment)
-
                         }
+
                         commentList.sortByDescending {
                             it.time
                         }
-                        commentsList.value=commentList
 
+                        commentsList.value=commentList
 
                     } catch (e: java.lang.NullPointerException) {
 

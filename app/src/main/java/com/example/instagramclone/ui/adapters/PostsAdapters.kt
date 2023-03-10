@@ -25,14 +25,15 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
 
-class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
+class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
     RecyclerView.Adapter<PostsAdapters.CardViewHolder>() {
 
     val firebaseUser = Firebase.auth.currentUser
     val firestore = Firebase.firestore
 
 
-    inner class CardViewHolder(val view: PostsCardViewBinding) : RecyclerView.ViewHolder(view.root){
+    inner class CardViewHolder(val view: PostsCardViewBinding) :
+        RecyclerView.ViewHolder(view.root) {
 
     }
 
@@ -65,12 +66,13 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
         isLiked(post.post_id, b.like)
         nrLike(b.likeCount, post.post_id)
         getComments(post.post_id, b.comments)
+        isSaved(post.post_id,b.save)
 
 
         b.like.setOnClickListener {
 
 
-            if (b.like.tag=="like") {
+            if (b.like.tag == "like") {
 
                 val map = hashMapOf<String, Boolean>()
 
@@ -80,7 +82,7 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
 
                         nrLike(b.likeCount, post.post_id)
                         b.like.setImageResource(R.drawable.like)
-                        b.like.tag="liked"
+                        b.like.tag = "liked"
                     }
 
 
@@ -95,7 +97,7 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
                 docRef.update(updates).addOnSuccessListener {
                     nrLike(b.likeCount, post.post_id)
                     b.like.setImageResource(R.drawable.heart_noselected)
-                    b.like.tag="like"
+                    b.like.tag = "like"
                 }
 
 
@@ -123,6 +125,29 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
 
         }
 
+        b.save.setOnClickListener {
+            if (b.save.tag == "save") {
+                val hmap = hashMapOf(
+                    post.post_id to true
+                )
+                firestore.collection("Saves").document(firebaseUser!!.uid)
+                    .set(hmap, SetOptions.merge())
+
+            } else {
+                firestore.collection("Saves").document(firebaseUser!!.uid)
+                    .update("${post.post_id}", FieldValue.delete())
+
+
+            }
+
+        }
+
+
+    }
+
+    fun updatePosts(newPostsList: ArrayList<Posts>) {
+        this.postsList = newPostsList
+        notifyDataSetChanged()
 
     }
 
@@ -139,7 +164,7 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
 
 
                         val allcomments = value.data as HashMap<*, *>
-                       val count =allcomments.count()
+                        val count = allcomments.count()
                         comments.text = "View all $count comments"
 
                     }
@@ -174,17 +199,12 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
             } else {
                 if (value != null) {
                     val doc = value.data as? HashMap<*, *>
-                    val count=doc?.count()
-                    likes.text = "$count likes"
-
-//                    if (doc != null) {
-//
-//                        for (i in doc) {
-//                            count++
-//                        }
-//                        likes.text = "$count likes"
-//
-//                    }
+                    val count = doc?.count()
+                    if (count == null) {
+                        likes.text = "0 likes"
+                    } else {
+                        likes.text = "$count likes"
+                    }
 
 
                 } else {
@@ -208,15 +228,15 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
                 return@addSnapshotListener
             } else {
                 if (value != null) {
-                    val doc = value.data as? HashMap<*,*>
+                    val doc = value.data as? HashMap<*, *>
                     if (doc != null) {
 
-                        if (doc.containsKey(firebaseUser!!.uid)){
+                        if (doc.containsKey(firebaseUser!!.uid)) {
                             imageView.setImageResource(R.drawable.like)
-                                imageView.tag = "liked"
-                        }else{
+                            imageView.tag = "liked"
+                        } else {
                             imageView.setImageResource(R.drawable.heart_noselected)
-                                imageView.tag = "like"
+                            imageView.tag = "like"
                         }
 
 
@@ -253,8 +273,6 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
                     Picasso.get().load(imageUrl).into(profil_image)
                     username.text = userName
                     publisher.text = userName
-
-
                 } else {
                     Toast.makeText(mContext, "User not found", Toast.LENGTH_SHORT).show()
                 }
@@ -265,4 +283,34 @@ class PostsAdapters(val mContext: Context, val postsList: List<Posts>) :
         }
 
     }
+
+    private fun isSaved(postId: String, imageView: ImageView) {
+        val ref = firestore.collection("Saves").document(firebaseUser!!.uid)
+
+        ref.addSnapshotListener { value, error ->
+            if (error != null) {
+                error.localizedMessage?.let { Log.e("error", it) }
+            } else {
+                if (value != null) {
+                    if (value.contains(postId)) {
+                        imageView.setImageResource(R.drawable.is_saved)
+                        imageView.tag = "saved"
+                    } else {
+                        imageView.setImageResource(R.drawable.bookmark)
+                        imageView.tag="save"
+                    }
+                }
+
+            }
+        }
+
+
+    }
+
+    override fun onViewAttachedToWindow(holder: CardViewHolder) {
+        super.onViewAttachedToWindow(holder)
+        holder.adapterPosition
+
+    }
+
 }
