@@ -70,10 +70,10 @@ class CommentsActivity : AppCompatActivity() {
         binding.commentsRv.setHasFixedSize(true)
         binding.commentsRv.layoutManager = LinearLayoutManager(this)
         adapter= CommentAdapter(this, emptyList(),alluser)
+        binding.commentsRv.adapter = adapter
 
         viewModel.commentsList.observe(this) {
-                adapter.updateElements(it)
-            binding.commentsRv.adapter = adapter
+            adapter.updateElements(it)
         }
 
         binding.post.setOnClickListener {
@@ -94,7 +94,6 @@ class CommentsActivity : AppCompatActivity() {
 
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun addComment() {
 
         val randomValue = (20..28).random()

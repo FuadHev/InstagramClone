@@ -28,14 +28,19 @@ class ProfileViewModel:ViewModel() {
             if (error!=null){
 
             }else{
-                if (value!=null){
-                    val data=value.data as HashMap<*,*>
-                    for (savekeys in data){
-                        mySaves.add(savekeys.key as String)
+                try{
+                    if (value!=null){
+                        val data=value.data as HashMap<*,*>
+                        for (savekeys in data){
+                            mySaves.add(savekeys.key as String)
+                        }
+                        readSaves(firestore,mySaves)
+
                     }
-                    readSaves(firestore,mySaves)
+                }catch (e:Exception){
 
                 }
+
             }
 
 

@@ -9,10 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Users
 import com.example.instagramclone.databinding.FragmentSearchBinding
+import com.example.instagramclone.ui.adapters.ClickListener
 import com.example.instagramclone.ui.adapters.UserAdapter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.auth.User
@@ -24,24 +26,36 @@ import java.util.Objects
 
 class SearchFragment : Fragment() {
 
-    private lateinit var binding:FragmentSearchBinding
-    private lateinit var adapter:UserAdapter
-    private lateinit var usersList:ArrayList<Users>
+    private lateinit var binding: FragmentSearchBinding
+    private lateinit var adapter: UserAdapter
+    private lateinit var usersList: ArrayList<Users>
     private lateinit var firestore: FirebaseFirestore
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding= DataBindingUtil.inflate(inflater,R.layout.fragment_search,container,false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_search, container, false)
 
-        firestore=Firebase.firestore
-        usersList= ArrayList()
+        firestore = Firebase.firestore
+        usersList = ArrayList()
         binding.rv.setHasFixedSize(true)
-        binding.rv.layoutManager=LinearLayoutManager(requireActivity())
+        binding.rv.layoutManager = LinearLayoutManager(requireActivity())
 
-        adapter= UserAdapter(requireContext(),usersList)
-        binding.rv.adapter=adapter
+        adapter = UserAdapter(object : ClickListener {
+            override fun userClickListener(bundle: Bundle) {
+
+
+
+                if ( findNavController().currentDestination?.id==R.id.searctoFragment){
+                    findNavController().navigate(R.id.action_searctoFragment_to_search_nav,bundle)
+                }else if ( findNavController().currentDestination?.id==R.id.followersFragment){
+                    findNavController().navigate(R.id.action_followersFragment_to_profileFragment,bundle)
+                }
+            }
+
+        }, usersList)
+        binding.rv.adapter = adapter
         // Inflate the layout for this fragment
         return binding.root
     }
@@ -49,7 +63,7 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.searchView.setOnQueryTextListener(object:SearchView.OnQueryTextListener,
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
             androidx.appcompat.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 searchUsers(query.toString())
@@ -57,7 +71,7 @@ class SearchFragment : Fragment() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-               searchUsers(newText.toString())
+                searchUsers(newText.toString())
                 return true
             }
 
@@ -67,22 +81,22 @@ class SearchFragment : Fragment() {
     }
 
     @SuppressLint("NotifyDataSetChanged", "SuspiciousIndentation")
-    fun searchUsers(s:String){
-        val query=firestore.collection("user").orderBy("username").startAt(s).endAt(s+"\uf8ff")
+    fun searchUsers(s: String) {
+        val query = firestore.collection("user").orderBy("username").startAt(s).endAt(s + "\uf8ff")
 
         query.addSnapshotListener { value, error ->
 
             usersList.clear()
-            for (users in value!!.documents){
+            for (users in value!!.documents) {
 
-                val user_id=users.get("user_id") as String
-                val email=users.get("email") as String
-                val username=users.get("username") as String
-                val password=users.get("password") as String
-                val imageurl=users.get("image_url") as String
-                val bio=users.get("bio") as String
-                val user=Users(user_id,email,username,password,imageurl,bio)
-                    usersList.add(user)
+                val user_id = users.get("user_id") as String
+                val email = users.get("email") as String
+                val username = users.get("username") as String
+                val password = users.get("password") as String
+                val imageurl = users.get("image_url") as String
+                val bio = users.get("bio") as String
+                val user = Users(user_id, email, username, password, imageurl, bio)
+                usersList.add(user)
 
             }
             adapter.notifyDataSetChanged()
@@ -90,11 +104,6 @@ class SearchFragment : Fragment() {
 
 
     }
-
-
-
-
-
 
 
 }

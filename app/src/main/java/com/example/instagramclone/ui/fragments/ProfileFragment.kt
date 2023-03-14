@@ -1,6 +1,5 @@
 package com.example.instagramclone.ui.fragments
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -21,7 +20,6 @@ import com.example.instagramclone.data.entity.Posts
 import com.example.instagramclone.databinding.FragmentProfileBinding
 import com.example.instagramclone.ui.adapters.MyFotoAdapter
 import com.example.instagramclone.ui.viewmodel.ProfileViewModel
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -65,8 +63,13 @@ class ProfileFragment : Fragment() {
 
         firbaseUser = Firebase.auth.currentUser!!
         firestore = Firebase.firestore
-        sp = requireActivity().getSharedPreferences("PREFS", Context.MODE_PRIVATE)
-        profileid = sp.getString("profileid", firbaseUser.uid)
+//        sp = requireActivity().getSharedPreferences("PREFS", Context.MODE_PRIVATE)
+//        profileid = sp.getString("profileid", firbaseUser.uid)
+
+        val args=arguments
+        profileid=args?.getString("profileid")?:firbaseUser.uid
+
+
         (activity as AppCompatActivity).setSupportActionBar(binding.toolbar2)
 
         binding.fotosRv.visibility=VISIBLE
@@ -156,13 +159,37 @@ class ProfileFragment : Fragment() {
             binding.savesRv.visibility= GONE
         }
 
+        binding.following.setOnClickListener {
+
+
+            val arg=Bundle()
+
+            arg.putString("id",profileid)
+            arg.putString("follow","following")
+
+            Navigation.findNavController(it).navigate(R.id.action_profilfragment_to_followersFragment,arg)
+
+        }
+
+        binding.followers.setOnClickListener {
+
+            val arg=Bundle()
+
+            arg.putString("id",profileid)
+            arg.putString("follow","followers")
+
+
+            Navigation.findNavController(it).navigate(R.id.action_profilfragment_to_followersFragment,arg)
+
+        }
+
 
 
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        sp.edit().remove("profileid").apply()
+//        sp.edit().remove("profileid").apply()
     }
 
 
@@ -244,6 +271,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun checkFollow() {
+        binding.editProfil.text = "follow"
 
         firestore.collection("Follow").document(firbaseUser.uid)
             .addSnapshotListener { documentSnapshot, error ->

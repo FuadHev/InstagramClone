@@ -127,6 +127,8 @@ class AddPostFragment : Fragment() {
             }.addOnFailureListener {
                 Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
             }
+        }else{
+            Toast.makeText(requireContext(), "Please select photo", Toast.LENGTH_SHORT).show()
         }
 
 

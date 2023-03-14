@@ -3,6 +3,7 @@ package com.example.instagramclone.ui.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -28,7 +29,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
-class UserAdapter(val mContext: Context, var usersList: ArrayList<Users>) :
+class UserAdapter(val clickListener: ClickListener,var usersList: ArrayList<Users>) :
     RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
     inner class ViewHolder(val view: UsersItemBinding) : RecyclerView.ViewHolder(view.root)
@@ -57,12 +58,16 @@ class UserAdapter(val mContext: Context, var usersList: ArrayList<Users>) :
 
         v.cardView.setOnClickListener {
 
-            val editor=mContext.getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit()
-            editor.putString("profileid",user.user_id)
-            editor.apply()
+//            val editor=mContext.getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit()
+//            editor.putString("profileid",user.user_id)
+//            editor.apply()
 
-            Navigation.findNavController(it).navigate(R.id.action_searctoFragment_to_profilfragment)
+            val bundle= Bundle()
 
+            bundle.putString("profileid",user.user_id)
+
+            clickListener.userClickListener(bundle)
+//            Navigation.findNavController(it).navigate(R.id.action_searctoFragment_to_search_nav,bundle)
 
         }
         v.follow.setOnClickListener {
@@ -143,4 +148,10 @@ class UserAdapter(val mContext: Context, var usersList: ArrayList<Users>) :
 
     }
 
+
+
+}
+
+interface ClickListener{
+    fun userClickListener(bundle:Bundle)
 }

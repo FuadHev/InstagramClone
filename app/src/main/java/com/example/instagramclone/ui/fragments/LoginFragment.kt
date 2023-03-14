@@ -14,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.example.instagramclone.HomeActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Posts
@@ -59,6 +60,34 @@ class LoginFragment : Fragment() {
 
     fun singIn(btn:Button,email:String,password:String){
 
+        Log.e("adsaadsadsad",findNavController().currentDestination?.id.toString())
+
+
+
+
+
+
+
+//        firestore.collection("Follow").document("bCJkN8a9r6X7n0cCvQ1Zje6zrGN2").addSnapshotListener { value, error ->
+//            if (error!=null){
+//
+//            }else{
+//                if (value!=null){
+//                    val data=value.get("followers") as HashMap<*,*>
+//
+//                    for (follower in data){
+//                        Log.e("keys",follower.key.toString())
+//                    }
+//
+//                    Log.e("value",data.keys.toString())
+//                }
+//            }
+//        }
+
+
+
+
+
 
         val progress=ProgressDialog(requireContext())
         progress.setMessage("Please wait")
@@ -78,6 +107,7 @@ class LoginFragment : Fragment() {
                 }
 
             }.addOnFailureListener {
+                progress.dismiss()
                 Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
 
             }
@@ -91,7 +121,6 @@ class LoginFragment : Fragment() {
 
     fun singUp(sing:TextView){
         Navigation.findNavController(sing).navigate(R.id.goToSingUp)
-
     }
 
 

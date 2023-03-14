@@ -16,8 +16,8 @@
         android:label="SearchFragment"
         tools:layout="@layout/fragment_search">
         <action
-            android:id="@+id/action_searctoFragment_to_profilfragment"
-            app:destination="@id/profilfragment" />
+            android:id="@+id/action_searctoFragment_to_search_nav"
+            app:destination="@id/search_nav" />
     </fragment>
     <fragment
         android:id="@+id/heartFragment"
@@ -25,7 +25,7 @@
         android:label="HeartFragment"
         tools:layout="@layout/fragment_heart"/>
     <fragment
-        android:id="@+id/profilfragment"
+        android:id="@+id/profilefragment"
         android:name="com.example.instagramclone.ui.fragments.ProfileFragment"
         android:label="ProfileFragment"
         tools:layout="@layout/fragment_profile">
@@ -35,6 +35,9 @@
         <action
             android:id="@+id/action_profilfragment_to_editProfileFragment"
             app:destination="@id/editProfileFragment" />
+        <action
+            android:id="@+id/action_profilfragment_to_followersFragment"
+            app:destination="@id/followersFragment" />
     </fragment>
     <fragment
         android:id="@+id/addPostFragment"
@@ -60,4 +63,16 @@
         android:name="com.example.instagramclone.ui.fragments.EditProfileFragment"
         android:label="EditProfileFragment"
         tools:layout="@layout/fragment_edit_profile"/>
+    <fragment
+        android:id="@+id/followersFragment"
+        android:name="com.example.instagramclone.ui.fragments.FollowersFragment"
+        android:label="FollowersFragment"
+        tools:layout="@layout/fragment_followers">
+
+
+        <action
+            android:id="@+id/action_followersFragment_to_profileFragment"
+            app:destination="@id/profilefragment" />
+    </fragment>
+    <include app:graph="@navigation/search_nav" />
 </navigation>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/profileFragment"
+    android:id="@+id/search_nav">
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.instagramclone.ui.fragments.ProfileFragment"
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profilfragment_to_profileDetailFragment"
+            app:destination="@id/profileDetailFragment" />
+        <action
+            android:id="@+id/action_profilfragment_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
+        <action
+            android:id="@+id/action_profilfragment_to_followersFragment"
+            app:destination="@id/followersFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.example.instagramclone.ui.fragments.EditProfileFragment"
+        android:label="EditProfileFragment"
+        tools:layout="@layout/fragment_edit_profile"/>
+    <fragment
+        android:id="@+id/profileDetailFragment"
+        android:name="com.example.instagramclone.ui.fragments.ProfileDetailFragment"
+        android:label="ProfileDetailFragment"
+        tools:layout="@layout/fragment_profile_detail"/>
+    <fragment
+        android:id="@+id/followersFragment"
+        android:name="com.example.instagramclone.ui.fragments.FollowersFragment"
+        android:label="FollowersFragment"
+        tools:layout="@layout/fragment_followers"
+        >
+        <action
+            android:id="@+id/action_followersFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+    </fragment>
+</navigation>

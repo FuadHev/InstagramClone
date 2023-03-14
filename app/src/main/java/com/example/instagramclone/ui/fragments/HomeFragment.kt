@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
@@ -33,15 +34,14 @@ class HomeFragment : Fragment() {
     private lateinit var adapter: PostsAdapters
     private lateinit var postList: ArrayList<Posts>
     private lateinit var followList: ArrayList<String>
-    private lateinit var viewModel: HomeViewModel
+    private val viewModel by activityViewModels<HomeViewModel>()
 
     private lateinit var userUID: String
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val tempViewModel: HomeViewModel by viewModels()
-        viewModel = tempViewModel
+
 
 
     }
@@ -65,8 +65,7 @@ class HomeFragment : Fragment() {
 
         binding.postRv.setHasFixedSize(true)
         val linerLayoutManager = LinearLayoutManager(requireActivity())
-//        linerLayoutManager.reverseLayout = true
-//        linerLayoutManager.stackFromEnd = true
+
         binding.postRv.layoutManager = linerLayoutManager
         adapter = PostsAdapters(requireContext(), emptyList())
 
