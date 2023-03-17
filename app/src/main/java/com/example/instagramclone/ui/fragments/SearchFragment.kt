@@ -11,11 +11,13 @@ import android.widget.SearchView
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.instagramclone.FollowFollowing
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Users
 import com.example.instagramclone.databinding.FragmentSearchBinding
 import com.example.instagramclone.ui.adapters.ClickListener
 import com.example.instagramclone.ui.adapters.UserAdapter
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.auth.User
 import com.google.firebase.firestore.ktx.firestore
@@ -31,6 +33,7 @@ class SearchFragment : Fragment() {
     private lateinit var usersList: ArrayList<Users>
     private lateinit var firestore: FirebaseFirestore
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -39,14 +42,14 @@ class SearchFragment : Fragment() {
 
         firestore = Firebase.firestore
         usersList = ArrayList()
+
+
+
         binding.rv.setHasFixedSize(true)
         binding.rv.layoutManager = LinearLayoutManager(requireActivity())
 
         adapter = UserAdapter(object : ClickListener {
             override fun userClickListener(bundle: Bundle) {
-
-
-
                 if ( findNavController().currentDestination?.id==R.id.searctoFragment){
                     findNavController().navigate(R.id.action_searctoFragment_to_search_nav,bundle)
                 }else if ( findNavController().currentDestination?.id==R.id.followersFragment){

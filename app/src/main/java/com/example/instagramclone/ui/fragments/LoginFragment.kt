@@ -37,72 +37,46 @@ import kotlin.random.Random
 class LoginFragment : Fragment() {
 
     private lateinit var binding: FragmentLoginBinding
-    private lateinit var auth:FirebaseAuth
+    private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding= DataBindingUtil.inflate(inflater,R.layout.fragment_login,container,false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_login, container, false)
         // Inflate the layout for this fragment
-        val view=binding.root
-        auth= Firebase.auth
+        val view = binding.root
+        auth = Firebase.auth
 
-        firestore=Firebase.firestore
+        firestore = Firebase.firestore
 
-        binding.loginFragment=this
+        binding.loginFragment = this
 
 
 
         return view
     }
 
-    fun singIn(btn:Button,email:String,password:String){
-
-        Log.e("adsaadsadsad",findNavController().currentDestination?.id.toString())
+    fun singIn(btn: Button, email: String, password: String) {
 
 
 
 
-
-
-
-//        firestore.collection("Follow").document("bCJkN8a9r6X7n0cCvQ1Zje6zrGN2").addSnapshotListener { value, error ->
-//            if (error!=null){
-//
-//            }else{
-//                if (value!=null){
-//                    val data=value.get("followers") as HashMap<*,*>
-//
-//                    for (follower in data){
-//                        Log.e("keys",follower.key.toString())
-//                    }
-//
-//                    Log.e("value",data.keys.toString())
-//                }
-//            }
-//        }
-
-
-
-
-
-
-        val progress=ProgressDialog(requireContext())
+        val progress = ProgressDialog(requireContext())
         progress.setMessage("Please wait")
 
 
-        if (email == "" || password==""){
+        if (email == "" || password == "") {
             Toast.makeText(requireContext(), "Enter Email and Password ", Toast.LENGTH_SHORT).show()
 
-        }else{
+        } else {
             progress.show()
-            auth.signInWithEmailAndPassword(email,password).addOnSuccessListener {
+            auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
 
                 progress.dismiss()
                 activity?.let {
-                    val intent= Intent(it,HomeActivity::class.java)
+                    val intent = Intent(it, HomeActivity::class.java)
                     it.startActivity(intent)
                 }
 
@@ -116,14 +90,11 @@ class LoginFragment : Fragment() {
         }
 
 
-
     }
 
-    fun singUp(sing:TextView){
+    fun singUp(sing: TextView) {
         Navigation.findNavController(sing).navigate(R.id.goToSingUp)
     }
-
-
 
 
 }

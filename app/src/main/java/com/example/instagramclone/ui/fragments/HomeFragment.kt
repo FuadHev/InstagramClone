@@ -84,6 +84,7 @@ class HomeFragment : Fragment() {
 
 
 
+
 //        checkFollowing()
 //
 //        readPost()

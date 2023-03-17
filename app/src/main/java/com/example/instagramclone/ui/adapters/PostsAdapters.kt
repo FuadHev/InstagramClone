@@ -24,6 +24,8 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
+import java.sql.Timestamp
+import java.util.UUID
 
 class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
     RecyclerView.Adapter<PostsAdapters.CardViewHolder>() {
@@ -66,7 +68,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
         isLiked(post.post_id, b.like)
         nrLike(b.likeCount, post.post_id)
         getComments(post.post_id, b.comments)
-        isSaved(post.post_id,b.save)
+        isSaved(post.post_id, b.save)
 
 
         b.like.setOnClickListener {
@@ -83,8 +85,8 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
                         nrLike(b.likeCount, post.post_id)
                         b.like.setImageResource(R.drawable.like)
                         b.like.tag = "liked"
+                        addNotification(post.publisher, post.post_id)
                     }
-
 
             } else {
                 val docRef = firestore.collection("Likes").document(post.post_id)
@@ -102,7 +104,6 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
 
             }
-
 
         }
 
@@ -148,6 +149,24 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
     fun updatePosts(newPostsList: ArrayList<Posts>) {
         this.postsList = newPostsList
         notifyDataSetChanged()
+
+    }
+
+    private fun addNotification(userId: String, postId: String) {
+        val ref = firestore.collection("Notification").document(userId)
+        val nKey = UUID.randomUUID()
+        val notification = hashMapOf<String, Any>()
+        val notifi = hashMapOf<String, Any>()
+        notifi["userId"] = firebaseUser!!.uid
+        notifi["nText"] = "Liked your Post"
+        notifi["postId"] = postId
+        notifi["isPost"] = true
+        notifi["time"] = com.google.firebase.Timestamp.now()
+
+        notification[nKey.toString()] = notifi
+
+        ref.set(notification, SetOptions.merge())
+
 
     }
 
@@ -297,7 +316,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
                         imageView.tag = "saved"
                     } else {
                         imageView.setImageResource(R.drawable.bookmark)
-                        imageView.tag="save"
+                        imageView.tag = "save"
                     }
                 }
 

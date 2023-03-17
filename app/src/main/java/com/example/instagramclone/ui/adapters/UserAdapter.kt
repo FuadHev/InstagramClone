@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
+import com.example.instagramclone.FollowFollowing
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Users
 import com.example.instagramclone.databinding.UsersItemBinding
@@ -24,12 +25,13 @@ import com.google.firebase.firestore.ktx.firestore
 
 import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
+import kotlinx.coroutines.NonDisposableHandle.parent
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
-class UserAdapter(val clickListener: ClickListener,var usersList: ArrayList<Users>) :
+class UserAdapter(private val clickListener: ClickListener, var usersList: ArrayList<Users>) :
     RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
     inner class ViewHolder(val view: UsersItemBinding) : RecyclerView.ViewHolder(view.root)
@@ -51,23 +53,25 @@ class UserAdapter(val clickListener: ClickListener,var usersList: ArrayList<User
         if (user.user_id == auth.currentUser!!.uid) {
             v.follow.visibility = GONE
         }
-        isFollowing(user.user_id,v.follow)
-        v.username.text=user.username
-        val url=user.imageurl
+
+
+        isFollowing(user.user_id, v.follow)
+
+
+
+
+        v.username.text = user.username
+        val url = user.imageurl
         Picasso.get().load(url).into(v.profileImage)
 
         v.cardView.setOnClickListener {
 
-//            val editor=mContext.getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit()
-//            editor.putString("profileid",user.user_id)
-//            editor.apply()
 
-            val bundle= Bundle()
+            val bundle = Bundle()
 
-            bundle.putString("profileid",user.user_id)
+            bundle.putString("profileid", user.user_id)
 
             clickListener.userClickListener(bundle)
-//            Navigation.findNavController(it).navigate(R.id.action_searctoFragment_to_search_nav,bundle)
 
         }
         v.follow.setOnClickListener {
@@ -75,26 +79,32 @@ class UserAdapter(val clickListener: ClickListener,var usersList: ArrayList<User
 
             val following = hashMapOf<String, HashMap<String, Boolean>>()
             val id = hashMapOf<String, Boolean>()
-            id[user.user_id]=true
+            id[user.user_id] = true
             following["following"] = id
 
             val follower = hashMapOf<String, HashMap<String, Boolean>>()
             val id2 = hashMapOf<String, Boolean>()
-            id2[auth.currentUser!!.uid]=true
+            id2[auth.currentUser!!.uid] = true
             follower["followers"] = id2
-            if (v.follow.text.toString().toLowerCase(Locale.ROOT).trim() == "follow") {
-                firestore.collection("Follow").document(auth.currentUser!!.uid).set(following,SetOptions.merge())
-                firestore.collection("Follow").document(user.user_id).set(follower, SetOptions.merge())
+            if (v.follow.text.toString().lowercase().trim() == "follow") {
+                firestore.collection("Follow").document(auth.currentUser!!.uid)
+                    .set(following, SetOptions.merge())
+                firestore.collection("Follow").document(user.user_id)
+                    .set(follower, SetOptions.merge())
+                addNotification(user.user_id)
                 v.follow.text="following"
 
 
             } else {
 
-                firestore.collection("Follow").document(auth.currentUser!!.uid).update("following.${user.user_id}",
-                    FieldValue.delete())
-                firestore.collection("Follow").document(user.user_id).update("followers.${auth.currentUser!!.uid}",
-                    FieldValue.delete())
-
+                firestore.collection("Follow").document(auth.currentUser!!.uid).update(
+                    "following.${user.user_id}",
+                    FieldValue.delete()
+                )
+                firestore.collection("Follow").document(user.user_id).update(
+                    "followers.${auth.currentUser!!.uid}",
+                    FieldValue.delete()
+                )
                 v.follow.text="follow"
 
             }
@@ -105,38 +115,56 @@ class UserAdapter(val clickListener: ClickListener,var usersList: ArrayList<User
 
     }
 
+
+    private fun addNotification(userId: String) {
+        val ref = Firebase.firestore.collection("Notification").document(userId)
+        val nKey = UUID.randomUUID()
+        val notification = hashMapOf<String, Any>()
+        val notifi = hashMapOf<String, Any>()
+        notifi["userId"] = Firebase.auth.currentUser!!.uid
+        notifi["nText"] = "started following you "
+        notifi["postId"] = ""
+        notifi["isPost"] = false
+        notifi["time"] = com.google.firebase.Timestamp.now()
+
+        notification[nKey.toString()] = notifi
+
+        ref.set(notification, SetOptions.merge())
+
+
+    }
+
     @SuppressLint("SetTextI18n")
     private fun isFollowing(userId: String, button: Button) {
 
         val firebaseUser = Firebase.auth.currentUser
-
         val firestore = Firebase.firestore
         firestore.collection("Follow").document(firebaseUser!!.uid)
             .addSnapshotListener { documentSnapshot, error ->
-                if(error!=null){
-                    error.localizedMessage?.let { Log.e("", it)
-                    return@addSnapshotListener}
-                }else{
-                    if (documentSnapshot!=null&&documentSnapshot.exists()){
-                        val follow=documentSnapshot.data
-
+                if (error != null) {
+                    error.localizedMessage?.let {
+                        Log.e("", it)
+                        return@addSnapshotListener
+                    }
+                } else {
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                        val follow = documentSnapshot.data
                         if (follow != null) {
-
                             try {
-                                val following= follow["following"] as HashMap<*,*>
-                                for (i in following){
+                                val following = follow["following"] as HashMap<*, *>
+                                for (i in following) {
                                     if (i.key==userId){
-                                        button.text="following"
+                                        button.text = "following"
                                     }
                                 }
-                            }catch (_:java.lang.NullPointerException){
+
+
+                            } catch (_: java.lang.NullPointerException) {
 
                             }
-
                         }
-
-                    }else{
-                        Log.e("","")
+                    } else {
+                        Log.e("", "")
                     }
                 }
             }
@@ -148,10 +176,15 @@ class UserAdapter(val clickListener: ClickListener,var usersList: ArrayList<User
 
     }
 
+    fun updateUsers(newList: ArrayList<Users>) {
+        this.usersList = newList
+        notifyDataSetChanged()
+
+    }
 
 
 }
 
-interface ClickListener{
-    fun userClickListener(bundle:Bundle)
+interface ClickListener {
+    fun userClickListener(bundle: Bundle)
 }

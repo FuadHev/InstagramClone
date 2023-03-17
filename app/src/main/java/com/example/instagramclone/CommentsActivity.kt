@@ -94,6 +94,24 @@ class CommentsActivity : AppCompatActivity() {
 
     }
 
+    private fun addNotification() {
+        val ref = firestore.collection("Notification").document(postId)
+        val nKey = UUID.randomUUID()
+        val notification = hashMapOf<String, Any>()
+        val notifi = hashMapOf<String, Any>()
+        notifi["userId"] = firebaseUser.uid
+        notifi["nText"] = "Commented ${binding.addToComment.text}"
+        notifi["postId"] = postId
+        notifi["isPost"] = true
+        notifi["time"] = Timestamp.now()
+
+        notification[nKey.toString()] = notifi
+
+        ref.set(notification, SetOptions.merge())
+
+
+    }
+
     private fun addComment() {
 
         val randomValue = (20..28).random()
@@ -107,6 +125,7 @@ class CommentsActivity : AppCompatActivity() {
         hmap["time"] = time
         hmapkey[commentId] = hmap
         reference.set(hmapkey, SetOptions.merge())
+        addNotification()
 
 
     }

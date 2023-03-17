@@ -52,11 +52,6 @@ class ProfileDetailFragment : Fragment() {
        layoutManager.scrollToPosition(position)
         binding.postsRv.layoutManager = layoutManager
 
-
-
-
-
-
         adapter = postlist?.let { PostsAdapters(requireContext(), it) }!!
 
 

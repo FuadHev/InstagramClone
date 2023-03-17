@@ -63,15 +63,10 @@ class CommentAdapter(
     @SuppressLint("CommitTransaction", "SuspiciousIndentation")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val comment = commentlist[position]
-
-
         val b = holder.view
         val user=allUser.find {
             it.user_id==comment.publiser
         }
-
-//
-//        getUserInfo(b.imageProfile, b.username, comment.publiser)
 
         Picasso.get().load(user?.imageurl).into(b.imageProfile)
         b.username.text=user?.username
@@ -85,31 +80,11 @@ class CommentAdapter(
 
         b.imageProfile.setOnClickListener {
 
-//            val intent=Intent(mContext,ProfilActivity::class.java)
-//            intent.putExtra("publisherId",comment.publiser)
-//            mContext.startActivity(intent)
-
-
         }
 
     }
 
-    private fun getUserInfo(imageView: CircleImageView, username: TextView, publisherId: String) {
-        firestore.collection("user").document(publisherId).addSnapshotListener { value, error ->
-            if (error != null) {
-                error.localizedMessage?.let { Log.e("error", it) }
-            } else {
-                if (value != null && value.exists()) {
-                    val imageUrl = value["image_url"] as String
-                    Picasso.get().load(imageUrl).into(imageView)
-                    val userName = value["username"] as String
-                    username.text = userName
-                }
-            }
-        }
 
-
-    }
 
 
 }

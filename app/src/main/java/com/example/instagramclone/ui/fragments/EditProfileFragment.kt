@@ -115,6 +115,7 @@ class EditProfileFragment : Fragment() {
                     val downloadUrl = it.toString()
                     val ref=firestore.collection("user").document(auth.currentUser!!.uid)
 
+
                     ref.update("bio",binding.bio.text.toString())
                     ref.update("image_url",downloadUrl)
                     ref.update("username",binding.username.text.toString()).addOnSuccessListener {
@@ -129,7 +130,7 @@ class EditProfileFragment : Fragment() {
             }
         }else{
             val ref=firestore.collection("user").document(auth.currentUser!!.uid)
-
+//
             ref.update("bio",binding.bio.text.toString())
             ref.update("username",binding.username.text.toString()).addOnSuccessListener {
                 progress.dismiss()

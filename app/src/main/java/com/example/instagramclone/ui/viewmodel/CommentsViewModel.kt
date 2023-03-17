@@ -27,9 +27,9 @@ class CommentsViewModel:ViewModel() {
                         val commentList=ArrayList<Comment>()
                         for (i in doc) {
                             val com = i.value as HashMap<*, *>
-                            val comm = com.get("comment") as String
-                            val publisher = com.get("publisher") as String
-                            val time = com.get("time") as Timestamp
+                            val comm = com["comment"] as String
+                            val publisher = com["publisher"] as String
+                            val time = com["time"] as Timestamp
                             val comment = Comment(comm, publisher, time)
                             commentList.add(comment)
                         }
