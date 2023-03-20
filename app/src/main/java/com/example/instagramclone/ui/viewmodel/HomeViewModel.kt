@@ -46,7 +46,9 @@ class HomeViewModel:ViewModel() {
                                     followList.add(i.key as String)
                                 }
 
-                            } catch (_: java.lang.NullPointerException) {
+                            } catch (e: java.lang.NullPointerException) {
+
+                                e.printStackTrace()
 
                             }
                         }

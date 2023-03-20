@@ -4,14 +4,17 @@ import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Notification
 import com.example.instagramclone.databinding.FragmentHeartBinding
 import com.example.instagramclone.ui.adapters.NotificationsAdapter
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -29,7 +32,7 @@ class HeartFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_heart, container, false)
-        // Inflate the layout for this fragment
+
         return binding.root
     }
 
@@ -42,6 +45,8 @@ class HeartFragment : Fragment() {
         binding.notificationrv.layoutManager = LinearLayoutManager(requireContext())
         adapter = NotificationsAdapter(nList)
         binding.notificationrv.adapter = adapter
+
+
 
         readNotification()
 
@@ -57,14 +62,14 @@ class HeartFragment : Fragment() {
                     if (value != null) {
                         nList.clear()
                         try {
-                            val datakeys = value.data as java.util.HashMap<*, *>
+                            val datakeys = value.data as HashMap<*,*>
                             for (data in datakeys){
-                                val value=data.value as HashMap<*,*>
-                                val userId=value["userId"] as String
-                                val ntext=value["nText"] as String
-                                val postId=value["postId"] as String
-                                val isPost=value["isPost"] as Boolean
-                                val time=value["time"] as Timestamp
+                                val valuedata=data.value as HashMap<*,*>
+                                val userId=valuedata["userId"] as String
+                                val ntext=valuedata["nText"] as String
+                                val postId=valuedata["postId"] as String
+                                val isPost=valuedata["isPost"] as Boolean
+                                val time=valuedata["time"] as Timestamp
                                 val notification=Notification(userId,ntext,postId,isPost,time)
                                 nList.add(notification)
 

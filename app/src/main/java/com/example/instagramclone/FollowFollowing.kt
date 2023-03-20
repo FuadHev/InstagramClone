@@ -6,10 +6,15 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.onesignal.OneSignal
+import org.json.JSONException
+import org.json.JSONObject
 
 object FollowFollowing {
 
     var arg:String?=null
+
+    var context=this
 //    val multiplaFollowList=MutableLiveData<ArrayList<String>>()
 //
 //

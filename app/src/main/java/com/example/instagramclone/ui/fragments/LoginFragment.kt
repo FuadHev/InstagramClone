@@ -58,8 +58,9 @@ class LoginFragment : Fragment() {
         return view
     }
 
-    fun singIn(btn: Button, email: String, password: String) {
 
+
+    fun singIn(btn: Button, email: String, password: String) {
 
 
 

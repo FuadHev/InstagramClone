@@ -15,6 +15,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.instagramclone.FollowFollowing
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Notification
 import com.example.instagramclone.data.entity.Posts
@@ -29,7 +30,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.onesignal.OneSignal
 import com.squareup.picasso.Picasso
+import org.json.JSONException
+import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -145,6 +149,8 @@ class ProfileFragment : Fragment() {
                     .set(follower, SetOptions.merge())
 
                 addNotification()
+                getPlayerIdSendNotification(profileid!!)
+
 
                 binding.editProfil.text = "following"
 
@@ -216,6 +222,7 @@ class ProfileFragment : Fragment() {
         notifi["nText"] = "started following you"
         notifi["postId"] = ""
         notifi["isPost"] = false
+        notifi["notificationId"]=nKey.toString()
         notifi["time"] = Timestamp.now()
 
         notification[nKey.toString()] = notifi
@@ -233,9 +240,9 @@ class ProfileFragment : Fragment() {
             } else {
                 if (value != null) {
                     try {
-                        val datakeys = value.data as HashMap<*,*>
+                        val datakeys = value.data as HashMap<*, *>
                         for (data in datakeys) {
-                            val value1 = data.value as HashMap<*,*>
+                            val value1 = data.value as HashMap<*, *>
                             val userId = value1["userId"] as String
                             val ntext = value1["nText"] as String
                             if (ntext == "started following you" && userId == firbaseUser.uid) {
@@ -257,78 +264,64 @@ class ProfileFragment : Fragment() {
 
     }
 
+    fun getPlayerIdSendNotification(userId: String) {
 
-//    private fun myFotos(){
-//        firestore.collection("Posts").addSnapshotListener { value, error ->
-//            if (error != null) {
-//                error.localizedMessage?.let { Log.e("", it) }
-//            } else {
-//
-//                if (value != null) {
-//                    for (document in value.documents) {
-//
-//                        try {
-//                            val post_id = document.get("postId") as String
-//                            val postImage = document.get("postImage") as String
-//                            val description = document.get("description") as String
-//                            val publisher = document.get("publisher") as String
-//                            val time = document.get("time") as Timestamp
-//                            val post = Posts(post_id, postImage, description, publisher, time)
-//
-//                            if (publisher==profileid){
-//                                postList.add(post)
-//                            }
-//
-//
-//                        } catch (_: java.lang.NullPointerException) {
-//
-//
-//                        }
-//
-//
-//                    }
-//                    postList.sortByDescending {
-//                        it.time
-//                    }
-//                    adapter.notifyDataSetChanged()
-//
-//
-//
-//                }
-//
-//
-//            }
-//
-//        }
-//
-//
-//    }
 
-    private fun userInfo() {
+        var username = ""
+        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
 
-        firestore.collection("user").document(profileid!!).addSnapshotListener { value, error ->
+                } else {
+                    if (value != null) {
+                        username = value.get("username") as String
+                    }
+                }
+            }
+        Firebase.firestore.collection("user").document(userId).addSnapshotListener { value, error ->
             if (error != null) {
-                Toast.makeText(requireContext(), error.localizedMessage, Toast.LENGTH_SHORT).show()
+
             } else {
-                if (value != null && value.exists()) {
+                if (value != null) {
 
-                    val username = value.get("username") as String
-                    val imageurl = value.get("image_url") as String
-                    val bio = value.get("bio") as String
-                    Picasso.get().load(imageurl).into(binding.imageProfile)
-                    binding.username.text = username
-                    binding.bio.text = bio
-
+                    val playerId = value.get("playerId") as String?
+                    if (playerId != null) {
+                        sentPushNotification(playerId, username)
+                    }
 
                 }
-
-
             }
-
         }
 
+    }
+
+    private fun sentPushNotification(playerId: String, username: String) {
+        try {
+
+            OneSignal.postNotification(
+                JSONObject(
+                    """{
+          "contents": {"en": "started following you"},
+          "include_player_ids": ["$playerId"],
+          "headings": {"en": "$username"}
+                  }
+        """.trimIndent()
+                ),
+                null
+            )
+
+
+
+//            OneSignal.postNotification(
+//                JSONObject("{'contents': {'en':'$username : started following you'}, 'include_player_ids': ['$playerId']}"),
+//                null
+//            )
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
 
     }
+
 
     private fun checkFollow() {
         binding.editProfil.text = "follow"

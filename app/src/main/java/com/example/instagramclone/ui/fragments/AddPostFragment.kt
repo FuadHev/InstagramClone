@@ -128,6 +128,7 @@ class AddPostFragment : Fragment() {
                 Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
             }
         }else{
+            progress.dismiss()
             Toast.makeText(requireContext(), "Please select photo", Toast.LENGTH_SHORT).show()
         }
 

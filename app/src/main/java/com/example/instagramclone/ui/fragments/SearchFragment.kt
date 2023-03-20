@@ -48,7 +48,7 @@ class SearchFragment : Fragment() {
         binding.rv.setHasFixedSize(true)
         binding.rv.layoutManager = LinearLayoutManager(requireActivity())
 
-        adapter = UserAdapter(object : ClickListener {
+        adapter = UserAdapter(requireContext(),object : ClickListener {
             override fun userClickListener(bundle: Bundle) {
                 if ( findNavController().currentDestination?.id==R.id.searctoFragment){
                     findNavController().navigate(R.id.action_searctoFragment_to_search_nav,bundle)

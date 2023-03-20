@@ -3,6 +3,8 @@ package com.example.instagramclone.ui.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +15,10 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.example.instagramclone.FollowFollowing
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Users
@@ -24,14 +30,25 @@ import com.google.firebase.firestore.auth.User
 import com.google.firebase.firestore.ktx.firestore
 
 import com.google.firebase.ktx.Firebase
+import com.onesignal.OSNotification
+import com.onesignal.OneSignal
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.NonDisposableHandle.parent
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import android.util.Base64
 
 
-class UserAdapter(private val clickListener: ClickListener, var usersList: ArrayList<Users>) :
+class UserAdapter(
+    var mContext: Context,
+    private val clickListener: ClickListener,
+    var usersList: ArrayList<Users>
+) :
     RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
     inner class ViewHolder(val view: UsersItemBinding) : RecyclerView.ViewHolder(view.root)
@@ -92,9 +109,9 @@ class UserAdapter(private val clickListener: ClickListener, var usersList: Array
                 firestore.collection("Follow").document(user.user_id)
                     .set(follower, SetOptions.merge())
                 addNotification(user.user_id)
-                v.follow.text="following"
+                v.follow.text = "following"
 
-
+                getPlayerIdSendNotification(user.user_id)
             } else {
 
                 firestore.collection("Follow").document(auth.currentUser!!.uid).update(
@@ -105,8 +122,7 @@ class UserAdapter(private val clickListener: ClickListener, var usersList: Array
                     "followers.${auth.currentUser!!.uid}",
                     FieldValue.delete()
                 )
-                v.follow.text="follow"
-
+                v.follow.text = "follow"
             }
 
 
@@ -115,21 +131,99 @@ class UserAdapter(private val clickListener: ClickListener, var usersList: Array
 
     }
 
+    fun getPlayerIdSendNotification(userId: String) {
+
+
+        var username = ""
+        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+
+                } else {
+                    if (value != null) {
+                        username = value.get("username") as String
+                    }
+                }
+            }
+        Firebase.firestore.collection("user").document(userId).addSnapshotListener { value, error ->
+            if (error != null) {
+
+            } else {
+                if (value != null) {
+
+                    val playerId = value.get("playerId") as String?
+                    if (playerId != null) {
+                        sentPushNotification(playerId, username)
+                    }
+
+                }
+            }
+        }
+
+    }
+
+    private fun sentPushNotification(playerId: String, username: String) {
+        try {
+
+// foto gondermeye calisirdim olmadi helelik
+// OneSignal API ile push bildirimi oluşturun.
+//            val notification = JSONObject()
+//            notification.put("contents", JSONObject()
+//                .put("en", "Bildirim İçeriği")) // Bildirim içeriği
+//            notification.put("headings", JSONObject()
+//                .put("en", "Bildirim Başlığı")) // Bildirim başlığı
+//            notification.put("include_player_ids", JSONArray()
+//                .put(playerId)) // Hedef kullanıcının OneSignal ID'si
+//            notification.put("big_picture", photoUrl)
+//
+//            OneSignal.postNotification(notification,null)
+
+            if(username!=Firebase.auth.currentUser!!.uid){
+                OneSignal.postNotification(
+                    JSONObject(
+                        """{
+          "contents": {"en": "started following you"},
+          "include_player_ids": ["$playerId"],
+          "headings": {"en": "$username"}
+                  }
+        """.trimIndent()
+                    ),
+                    null
+                )
+//            OneSignal.postNotification(
+//                JSONObject("{'contents': {'en':'$username : started following you'},{'headings': {'en': Notification Title'}, 'include_player_ids': ['$playerId']}"),
+//                null
+//            )
+            }
+
+
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+
+
+    }
+
 
     private fun addNotification(userId: String) {
-        val ref = Firebase.firestore.collection("Notification").document(userId)
-        val nKey = UUID.randomUUID()
-        val notification = hashMapOf<String, Any>()
-        val notifi = hashMapOf<String, Any>()
-        notifi["userId"] = Firebase.auth.currentUser!!.uid
-        notifi["nText"] = "started following you "
-        notifi["postId"] = ""
-        notifi["isPost"] = false
-        notifi["time"] = com.google.firebase.Timestamp.now()
 
-        notification[nKey.toString()] = notifi
+        if(userId!=Firebase.auth.currentUser!!.uid){
+            val ref = Firebase.firestore.collection("Notification").document(userId)
+            val nKey = UUID.randomUUID()
+            val notification = hashMapOf<String, Any>()
+            val notifi = hashMapOf<String, Any>()
+            notifi["userId"] = Firebase.auth.currentUser!!.uid
+            notifi["nText"] = "started following you "
+            notifi["postId"] = ""
+            notifi["isPost"] = false
+            notifi["notificationId"]=nKey.toString()
+            notifi["time"] = com.google.firebase.Timestamp.now()
 
-        ref.set(notification, SetOptions.merge())
+            notification[nKey.toString()] = notifi
+
+            ref.set(notification, SetOptions.merge())
+
+        }
 
 
     }
@@ -152,10 +246,11 @@ class UserAdapter(private val clickListener: ClickListener, var usersList: Array
                         if (follow != null) {
                             try {
                                 val following = follow["following"] as HashMap<*, *>
-                                for (i in following) {
-                                    if (i.key==userId){
-                                        button.text = "following"
-                                    }
+
+                                if (following.containsKey(userId)) {
+                                    button.text = "following"
+                                } else {
+                                    button.text = "follow"
                                 }
 
 

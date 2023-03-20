@@ -52,7 +52,7 @@ class FollowerFragment : Fragment() {
         viewModel.getFollower(id)
 
         binding.followerRv.layoutManager = LinearLayoutManager(requireContext())
-        adapter = UserAdapter(object : ClickListener {
+        adapter = UserAdapter(requireContext(),object : ClickListener {
             override fun userClickListener(bundle: Bundle) {
                 if ( findNavController().currentDestination?.id==R.id.searctoFragment){
                     findNavController().navigate(R.id.action_searctoFragment_to_search_nav,bundle)
@@ -65,7 +65,6 @@ class FollowerFragment : Fragment() {
 
         viewModel.userList.observe(viewLifecycleOwner){
             adapter.updateUsers(it)
-            adapter.notifyDataSetChanged()
         }
 
 

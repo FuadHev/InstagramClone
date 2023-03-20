@@ -1,18 +1,11 @@
 package com.example.instagramclone
 
-import android.annotation.SuppressLint
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
-import android.view.View
-import android.widget.Adapter
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.data.entity.Comment
 import com.example.instagramclone.data.entity.Users
@@ -26,11 +19,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.onesignal.OneSignal
 import com.squareup.picasso.Picasso
+import org.json.JSONException
+import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import kotlin.concurrent.timerTask
 import kotlin.random.Random
 
 class CommentsActivity : AppCompatActivity() {
@@ -40,8 +35,8 @@ class CommentsActivity : AppCompatActivity() {
     private lateinit var publisherId: String
     private lateinit var firebaseUser: FirebaseUser
     private lateinit var firestore: FirebaseFirestore
-    private lateinit var alluser:ArrayList<Users>
-    private lateinit var adapter:CommentAdapter
+    private lateinit var alluser: ArrayList<Users>
+    private lateinit var adapter: CommentAdapter
     private lateinit var viewModel: CommentsViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +46,7 @@ class CommentsActivity : AppCompatActivity() {
         viewModel = tempViewModel
         firebaseUser = Firebase.auth.currentUser!!
 
-        alluser=ArrayList()
+        alluser = ArrayList()
         binding.toolbar.title = "Comments"
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setTitleTextColor(Color.BLACK)
@@ -69,7 +64,7 @@ class CommentsActivity : AppCompatActivity() {
 
         binding.commentsRv.setHasFixedSize(true)
         binding.commentsRv.layoutManager = LinearLayoutManager(this)
-        adapter= CommentAdapter(this, emptyList(),alluser)
+        adapter = CommentAdapter(this, emptyList(), alluser)
         binding.commentsRv.adapter = adapter
 
         viewModel.commentsList.observe(this) {
@@ -94,6 +89,60 @@ class CommentsActivity : AppCompatActivity() {
 
     }
 
+    private fun getPlayerIdSendNotification(postPublisher: String,comment: String) {
+
+        var username = ""
+        firestore.collection("user").document(firebaseUser.uid)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+
+                } else {
+                    if (value != null) {
+                        username = value.get("username") as String
+                    }
+                }
+            }
+
+        firestore.collection("user").document(postPublisher).addSnapshotListener { value, error ->
+            if (error != null) {
+
+            } else {
+                if (value != null) {
+                    val playerId = value.get("playerId") as String?
+                    if (playerId!=null){
+                        sentPushNotification(playerId,username,comment)
+                    }
+
+                }
+            }
+        }
+
+    }
+
+    private fun sentPushNotification(playerId: String, username: String,comment:String) {
+        try {
+
+            OneSignal.postNotification(
+                JSONObject(
+                    """{
+          "contents": {"en": "Commented on your post: $comment"},
+          "include_player_ids": ["$playerId"],
+          "headings": {"en": "$username"}
+                 }
+        """.trimIndent()),null)
+//            OneSignal.postNotification(
+//                JSONObject(
+//                    "{'contents': {'en':' $username \n" +
+//                            " Commented on your post: $comment'}, 'include_player_ids': ['$playerId']}"
+//                ),
+//                null
+//            )
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+
+    }
+
     private fun addNotification() {
         val ref = firestore.collection("Notification").document(postId)
         val nKey = UUID.randomUUID()
@@ -103,11 +152,13 @@ class CommentsActivity : AppCompatActivity() {
         notifi["nText"] = "Commented ${binding.addToComment.text}"
         notifi["postId"] = postId
         notifi["isPost"] = true
+        notifi["notificationId"]=nKey.toString()
         notifi["time"] = Timestamp.now()
 
         notification[nKey.toString()] = notifi
 
         ref.set(notification, SetOptions.merge())
+
 
 
     }
@@ -126,6 +177,7 @@ class CommentsActivity : AppCompatActivity() {
         hmapkey[commentId] = hmap
         reference.set(hmapkey, SetOptions.merge())
         addNotification()
+        getPlayerIdSendNotification(publisherId,binding.addToComment.text.toString())
 
 
     }
@@ -158,20 +210,20 @@ class CommentsActivity : AppCompatActivity() {
     }
 
 
-    fun allUsers(){
+    fun allUsers() {
         firestore.collection("user").addSnapshotListener { value, error ->
             if (error != null) {
                 error.localizedMessage?.let { Log.e("error", it) }
             } else {
-                if (value != null ) {
-                    for (users in value.documents){
-                        val user_id=users.get("user_id") as String
-                        val email=users.get("email") as String
-                        val username=users.get("username") as String
-                        val password=users.get("password") as String
-                        val imageurl=users.get("image_url") as String
-                        val bio=users.get("bio") as String
-                        val user= Users(user_id,email,username,password,imageurl,bio)
+                if (value != null) {
+                    for (users in value.documents) {
+                        val user_id = users.get("user_id") as String
+                        val email = users.get("email") as String
+                        val username = users.get("username") as String
+                        val password = users.get("password") as String
+                        val imageurl = users.get("image_url") as String
+                        val bio = users.get("bio") as String
+                        val user = Users(user_id, email, username, password, imageurl, bio)
                         alluser.add(user)
 
                     }
@@ -181,49 +233,6 @@ class CommentsActivity : AppCompatActivity() {
 
     }
 
-
-
-
-
-
-
-//        firestore.collection("Comments").document(postId).addSnapshotListener { value, error ->
-//            if (error != null) {
-//            } else {
-//                if (value != null && value.exists()) {
-//                    val doc = value.data as HashMap<*, *>
-//                    try {
-//                        for (i in doc) {
-//                            val com = i.value as HashMap<*, *>
-//                            val comm = com.get("comment") as String
-//                            val publisher = com.get("publisher") as String
-//                            val time = com.get("time") as Timestamp
-//                            val comment = Comment(comm, publisher, time)
-//                            commentList.add(comment)
-//                        }
-//
-//                        commentList.sortByDescending {
-//                            it.time
-//                        }
-//                        adapter=CommentAdapter(this,commentList)
-//                        binding.commentsRv.adapter=adapter
-//
-//
-//
-//
-//                    } catch (e: java.lang.NullPointerException) {
-//
-//
-//                    }
-//
-//
-//                }
-//
-//            }
-//
-//        }
-//
-//    }
 
 
 }

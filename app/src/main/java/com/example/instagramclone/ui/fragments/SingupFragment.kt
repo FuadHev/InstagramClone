@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import com.example.instagramclone.HomeActivity
 import com.example.instagramclone.R
+import com.example.instagramclone.data.entity.Users
 import com.example.instagramclone.databinding.FragmentSingupBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -56,8 +57,7 @@ class SingupFragment : Fragment() {
         } else {
 
             auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
-                creatAccount(email,userName,password)
-
+                creatAccount(email, userName, password)
 
 
             }.addOnFailureListener {
@@ -69,8 +69,14 @@ class SingupFragment : Fragment() {
 
     }
 
+
     fun creatAccount(email: String, userName: String, password: String) {
         if (auth.currentUser != null) {
+
+            val ref = Firebase.firestore.collection("NotificationCount")
+                .document(Firebase.auth.currentUser!!.uid)
+            val hmap = hashMapOf<String, Any>("isawnotification" to 0)
+            ref.set(hmap)
 
             val userMap = hashMapOf<String, Any>()
 
@@ -78,22 +84,24 @@ class SingupFragment : Fragment() {
             userMap["email"] = email
             userMap["username"] = userName
             userMap["password"] = password
-            userMap["image_url"] = "https://firebasestorage.googleapis.com/v0/b/instagramclone-9f5ee.appspot.com/o/defaultimage%2Fdefaultimage.png?alt=media&token=525e573c-6b43-4730-b4a2-17b30de66234"
+            userMap["image_url"] =
+                "https://firebasestorage.googleapis.com/v0/b/instagramclone-9f5ee.appspot.com/o/defaultimage%2Fdefaultimage.png?alt=media&token=525e573c-6b43-4730-b4a2-17b30de66234"
             userMap["bio"] = ""
 
-            firestore.collection("user").document(auth.currentUser!!.uid).set(userMap).addOnSuccessListener {
+            firestore.collection("user").document(auth.currentUser!!.uid).set(userMap)
+                .addOnSuccessListener {
 
-                activity?.let {
-                    val intent = Intent(it, HomeActivity::class.java)
-                    it.startActivity(intent)
-                    it.finish()
+                    activity?.let {
+                        val intent = Intent(it, HomeActivity::class.java)
+                        it.startActivity(intent)
+                        it.finish()
 
+                    }
+
+
+                }.addOnFailureListener {
+                    Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
                 }
-
-
-            }.addOnFailureListener {
-                Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
-            }
 
 
         }
