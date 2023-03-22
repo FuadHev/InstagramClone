@@ -148,8 +148,10 @@ class ProfileFragment : Fragment() {
                 firestore.collection("Follow").document(profileid!!)
                     .set(follower, SetOptions.merge())
 
-                addNotification()
-                getPlayerIdSendNotification(profileid!!)
+
+                    addNotification()
+                    getPlayerIdSendNotification(profileid!!)
+
 
 
                 binding.editProfil.text = "following"

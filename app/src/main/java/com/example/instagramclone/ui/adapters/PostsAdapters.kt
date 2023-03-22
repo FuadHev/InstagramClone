@@ -41,7 +41,6 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
     inner class CardViewHolder(val view: PostsCardViewBinding) :
         RecyclerView.ViewHolder(view.root) {
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
@@ -81,7 +80,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
             android.os.Handler().postDelayed({
                 if (i == 2) {
-                    likePost(b.like, post.post_id, post.publisher, b.likeCount,b.likeAnim)
+                    likePost(b.like, post.post_id, post.publisher, b.likeCount, b.likeAnim,post.postImage)
                 }
 
                 i = 0
@@ -95,39 +94,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
         b.like.setOnClickListener {
 
-            likePost(b.like, post.post_id, post.publisher, b.likeCount,b.likeAnim)
-
-//            if (b.like.tag == "like") {
-//
-//                val map = hashMapOf<String, Boolean>()
-//
-//                map[firebaseUser!!.uid] = true
-//                firestore.collection("Likes").document(post.post_id).set(map, SetOptions.merge())
-//                    .addOnSuccessListener {
-//
-//                        nrLike(b.likeCount, post.post_id)
-//                        b.like.setImageResource(R.drawable.like)
-//                        b.like.tag = "liked"
-//                        addNotification(post.publisher, post.post_id)
-//                        getPlayerIdSendNotification(post.publisher)
-//                    }
-//
-//            } else {
-//                val docRef = firestore.collection("Likes").document(post.post_id)
-//
-//
-//                val updates = hashMapOf<String, Any>(
-//                    firebaseUser!!.uid to FieldValue.delete()
-//                )
-//
-//                docRef.update(updates).addOnSuccessListener {
-//                    nrLike(b.likeCount, post.post_id)
-//                    b.like.setImageResource(R.drawable.heart_noselected)
-//                    b.like.tag = "like"
-//                }
-//
-//
-//            }
+            likePost(b.like, post.post_id, post.publisher, b.likeCount, b.likeAnim,post.postImage)
 
         }
 
@@ -175,7 +142,8 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
         postId: String,
         postPublisher: String,
         likeCount: TextView,
-        likeImage:ImageView
+        likeImage: ImageView,
+        imageUrl: String
     ) {
         if (likeBtn.tag == "like") {
 
@@ -190,19 +158,22 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
                     nrLike(likeCount, postId)
                     likeBtn.setImageResource(R.drawable.like)
                     likeBtn.tag = "liked"
-                    addNotification(postPublisher, postId)
-                    getPlayerIdSendNotification(postPublisher)
+                    if (postPublisher != firebaseUser.uid) {
+                        addNotification(postPublisher, postId)
+                        getPlayerIdSendNotification(postPublisher,imageUrl)
+                    }
+
                 }
 
         } else {
-            val docRef = firestore.collection("Likes").document(postId)
+            val ref = firestore.collection("Likes").document(postId)
 
 
             val updates = hashMapOf<String, Any>(
                 firebaseUser!!.uid to FieldValue.delete()
             )
 
-            docRef.update(updates).addOnSuccessListener {
+           ref.update(updates).addOnSuccessListener {
                 nrLike(likeCount, postId)
                 likeBtn.setImageResource(R.drawable.heart_noselected)
                 likeBtn.tag = "like"
@@ -214,8 +185,8 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
     }
 
-    fun likeAnimation(likeImage:ImageView) {
-        likeImage.visibility= VISIBLE
+    fun likeAnimation(likeImage: ImageView) {
+        likeImage.visibility = VISIBLE
         val scaleanimX = ObjectAnimator.ofFloat(likeImage, "scaleX", 1.0f, 1.5f)
         val scaleanimY = ObjectAnimator.ofFloat(likeImage, "scaleY", 1.0f, 1.5f)
         val scaleanimAlpha = ObjectAnimator.ofFloat(likeImage, "alpha", 0.0f, 1.0f)
@@ -227,8 +198,9 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
         }
         animation.start()
         android.os.Handler().postDelayed({
-            likeImage.visibility= View.INVISIBLE
-        },2000)
+            likeImage.visibility = View.INVISIBLE
+        }, 2000)
+
 
 
     }
@@ -237,7 +209,6 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
     fun updatePosts(newPostsList: ArrayList<Posts>) {
         this.postsList = newPostsList
         notifyDataSetChanged()
-
     }
 
     private fun addNotification(userId: String, postId: String) {
@@ -258,7 +229,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
     }
 
-    private fun getPlayerIdSendNotification(postPublisher: String) {
+    private fun getPlayerIdSendNotification(postPublisher: String, imageUrl: String) {
 
 
         var username = ""
@@ -280,7 +251,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
                     val playerId = value.get("playerId") as String?
 
                     if (playerId != null) {
-                        sentPushNotification(playerId, username)
+                        sentPushNotification(playerId, username, imageUrl)
                     }
 
                 }
@@ -289,16 +260,30 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
     }
 
-    private fun sentPushNotification(playerId: String, username: String) {
+    private fun sentPushNotification(playerId: String, username: String, imageUrl: String) {
         try {
+//            OneSignal.postNotification(
+//                JSONObject(
+//                    """{
+//          "contents": {"en": "Liked Your Post"},
+//          "include_player_ids": ["$playerId"],
+//          "headings": {"en": "$username"},
+//        "image_url": "https://firebasestorage.googleapis.com/v0/b/instagramclone-9f5ee.appspot.com/o/images%2F0756c3f1-5545-4716-b4e4-174e564031c7.jpg?alt=media&token=9674c6a4-76b2-41a2-ac18-8dcec6e5a3ac"
+//                  }
+//        """.trimIndent()
+//                ),
+//                null
+//            )
+
             OneSignal.postNotification(
                 JSONObject(
                     """{
-          "contents": {"en": "Liked Your Post"},
-          "include_player_ids": ["$playerId"],
-          "headings": {"en": "$username"}
-                  }
-        """.trimIndent()
+        "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef",
+        "include_player_ids": ["$playerId"],
+        "headings": {"en": "$username"},
+        "contents": {"en": "Liked Your Post"},
+        "big_picture": "$imageUrl"
+    }"""
                 ),
                 null
             )

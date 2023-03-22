@@ -30,7 +30,7 @@ import kotlin.concurrent.timerTask
 class CommentAdapter(
     private val mContext: Context,
     private var commentlist: List<Comment>,
-    var allUser: kotlin.collections.ArrayList<Users>
+    var allUser:ArrayList<Users>
 ) :
     RecyclerView.Adapter<CommentAdapter.ViewHolder>() {
 

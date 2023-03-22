@@ -109,7 +109,8 @@ class CommentsActivity : AppCompatActivity() {
             } else {
                 if (value != null) {
                     val playerId = value.get("playerId") as String?
-                    if (playerId!=null){
+
+                    if (playerId!=null&&postPublisher!=firebaseUser.uid){
                         sentPushNotification(playerId,username,comment)
                     }
 
@@ -144,20 +145,24 @@ class CommentsActivity : AppCompatActivity() {
     }
 
     private fun addNotification() {
-        val ref = firestore.collection("Notification").document(postId)
-        val nKey = UUID.randomUUID()
-        val notification = hashMapOf<String, Any>()
-        val notifi = hashMapOf<String, Any>()
-        notifi["userId"] = firebaseUser.uid
-        notifi["nText"] = "Commented ${binding.addToComment.text}"
-        notifi["postId"] = postId
-        notifi["isPost"] = true
-        notifi["notificationId"]=nKey.toString()
-        notifi["time"] = Timestamp.now()
 
-        notification[nKey.toString()] = notifi
+        if (publisherId!=firebaseUser.uid){
+            val ref = firestore.collection("Notification").document(publisherId)
+            val nKey = UUID.randomUUID()
+            val notification = hashMapOf<String, Any>()
+            val notifi = hashMapOf<String, Any>()
+            notifi["userId"] = firebaseUser.uid
+            notifi["nText"] = "Commented ${binding.addToComment.text}"
+            notifi["postId"] = postId
+            notifi["isPost"] = true
+            notifi["notificationId"]=nKey.toString()
+            notifi["time"] = Timestamp.now()
 
-        ref.set(notification, SetOptions.merge())
+            notification[nKey.toString()] = notifi
+
+            ref.set(notification, SetOptions.merge())
+        }
+
 
 
 

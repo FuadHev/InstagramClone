@@ -108,7 +108,10 @@ class UserAdapter(
                     .set(following, SetOptions.merge())
                 firestore.collection("Follow").document(user.user_id)
                     .set(follower, SetOptions.merge())
-                addNotification(user.user_id)
+                if(user.user_id!=Firebase.auth.currentUser!!.uid){
+                    addNotification(user.user_id)
+                }
+
                 v.follow.text = "following"
 
                 getPlayerIdSendNotification(user.user_id)

@@ -123,11 +123,6 @@ class HomeActivity : AppCompatActivity() {
                                 badge.number = ncount
                             }
 
-
-//
-//                            ref.update("isawnotification", ncount.toLong())
-
-
                         }
                     } catch (_: NullPointerException) {
 
