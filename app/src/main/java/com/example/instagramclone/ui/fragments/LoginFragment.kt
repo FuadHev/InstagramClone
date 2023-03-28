@@ -17,7 +17,9 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.example.instagramclone.HomeActivity
 import com.example.instagramclone.R
+import com.example.instagramclone.data.entity.Comment
 import com.example.instagramclone.data.entity.Posts
+import com.example.instagramclone.data.entity.Story
 import com.example.instagramclone.databinding.FragmentLoginBinding
 import com.example.instagramclone.ui.adapters.MyFotoAdapter
 import com.google.android.material.transition.platform.MaterialContainerTransform.ProgressThresholds
@@ -31,6 +33,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
 import java.util.Objects
+import kotlin.math.log
 import kotlin.random.Random
 
 
@@ -59,9 +62,12 @@ class LoginFragment : Fragment() {
     }
 
 
-
     fun singIn(btn: Button, email: String, password: String) {
 
+//        val ref=firestore.collection("Comments").document("ref.id")
+//            ref.set({})
+//
+//        ref.update("arity",FieldValue.delete())
 
 
         val progress = ProgressDialog(requireContext())
@@ -70,6 +76,7 @@ class LoginFragment : Fragment() {
 
         if (email == "" || password == "") {
             Toast.makeText(requireContext(), "Enter Email and Password ", Toast.LENGTH_SHORT).show()
+            progress.dismiss()
 
         } else {
             progress.show()

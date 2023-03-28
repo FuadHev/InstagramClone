@@ -49,8 +49,9 @@ class ProfileDetailFragment : Fragment() {
         binding.postsRv.requestFocus()
         val layoutManager = LinearLayoutManager(requireContext())
 
-       layoutManager.scrollToPosition(position)
         binding.postsRv.layoutManager = layoutManager
+
+        layoutManager.scrollToPosition(position)
 
         adapter = postlist?.let { PostsAdapters(requireContext(), it) }!!
 

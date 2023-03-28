@@ -63,7 +63,6 @@ class HomeActivity : AppCompatActivity() {
         // get PlayerId
         val deviceState = OneSignal.getDeviceState()
         val userId = deviceState?.userId
-        Log.e("userid", userId.toString())
 
         Firebase.firestore.collection("user").document(firebaseUser!!.uid)
             .update("playerId", userId)
@@ -90,7 +89,6 @@ class HomeActivity : AppCompatActivity() {
                 try {
                     if (value != null) {
                         val data = value.data as HashMap<*, *>
-                        Log.e("", data.toString())
                         val count = data["isawnotification"] as Long
                         nshow = count.toInt()
                     }
@@ -115,7 +113,6 @@ class HomeActivity : AppCompatActivity() {
                             val allcomments = value.data as HashMap<*, *>
                             val count = allcomments.count()
                             val ncount = count - nshow
-                            Log.e("", ncount.toString())
 
                             if(ncount!=0){
                                 val badge = binding.bottomNav.getOrCreateBadge(R.id.heartFragment)

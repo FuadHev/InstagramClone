@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -56,6 +57,8 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
         val post = postsList[position]
         val b = holder.view
+        b.like.setImageResource(R.drawable.heart_noselected)
+        b.comments.text = "View all 0 comments"
 
         b.like.tag = "like"
         Picasso.get().load(post.postImage).into(b.postImage)
@@ -78,7 +81,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
         b.postImage.setOnClickListener {
             ++i
 
-            android.os.Handler().postDelayed({
+            android.os.Handler(Looper.getMainLooper()).postDelayed({
                 if (i == 2) {
                     likePost(b.like, post.post_id, post.publisher, b.likeCount, b.likeAnim,post.postImage)
                 }
@@ -275,10 +278,11 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 //                null
 //            )
 
+            /*paylasmadan  qabaq appId deyismelidi*/
             OneSignal.postNotification(
                 JSONObject(
                     """{
-        "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef",
+        "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef", 
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
         "contents": {"en": "Liked Your Post"},
@@ -306,17 +310,25 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
         firestore.collection("Comments").document(postId).addSnapshotListener { value, error ->
             if (error != null) {
                 Toast.makeText(mContext, error.localizedMessage, Toast.LENGTH_SHORT).show()
+                comments.text = "View all 0 comments"
             } else {
                 try {
                     if (value != null) {
+                        val allcomments = value.data as? HashMap<*,*>
 
+                        val count = allcomments?.count()
 
-                        val allcomments = value.data as HashMap<*, *>
-                        val count = allcomments.count()
-                        comments.text = "View all $count comments"
+                        if (count == null) {
+                            comments.text = "View all 0 comments"
+                        } else {
+                            comments.text = "View all $count comments"
+                        }
+//                        Log.e("countcomment",count.toString())
+//                        comments.text = "View all $count comments"
 
                     }
                 } catch (_: NullPointerException) {
+
 
                 }
 
@@ -354,7 +366,6 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
                         likes.text = "$count likes"
                     }
 
-
                 } else {
                     likes.text = "0 likes"
                 }
@@ -380,6 +391,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
                     if (doc != null) {
 
                         if (doc.containsKey(firebaseUser!!.uid)) {
+                            Log.e("key",doc.containsKey(firebaseUser!!.uid).toString())
                             imageView.setImageResource(R.drawable.like)
                             imageView.tag = "liked"
                         } else {

@@ -38,10 +38,6 @@ class FollowersFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val argument = arguments
 
-        val profileId = argument?.getString("id")
-
-        FollowFollowing.arg = profileId
-
         val adapter = MyViewPagerAdapter(requireActivity())
 
         binding.viewpager.adapter = adapter
@@ -73,8 +69,15 @@ class FollowersFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        fragmentList.add(FollowerFragment())
-        fragmentList.add(FollowingFragment())
+        val args = Bundle().also {
+            it.putString("profileId", arguments?.getString("id"))
+        }
+        fragmentList.add(FollowerFragment().also {
+            it.arguments = args
+        })
+        fragmentList.add(FollowingFragment().also {
+            it.arguments = args
+        })
         fragmentTitleList.add("follower")
         fragmentTitleList.add("following")
     }

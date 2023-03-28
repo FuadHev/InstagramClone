@@ -15,8 +15,10 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Posts
+import com.example.instagramclone.data.entity.Story
 import com.example.instagramclone.databinding.FragmentHomeBinding
 import com.example.instagramclone.ui.adapters.PostsAdapters
+import com.example.instagramclone.ui.adapters.StoryAdapter
 import com.example.instagramclone.ui.viewmodel.HomeViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -36,15 +38,9 @@ class HomeFragment : Fragment() {
     private lateinit var followList: ArrayList<String>
     private val viewModel by activityViewModels<HomeViewModel>()
 
-    private lateinit var userUID: String
+    private lateinit var storyAdapter: StoryAdapter
+    private var storyList = ArrayList<Story>()
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-
-
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,40 +55,91 @@ class HomeFragment : Fragment() {
         firestore = Firebase.firestore
         viewModel.auth = auth.currentUser!!
 
-        val progress = ProgressDialog(requireContext())
-        progress.setMessage("Please wait")
-        progress.show()
-
-        binding.postRv.setHasFixedSize(true)
-        val linerLayoutManager = LinearLayoutManager(requireActivity())
-
-        binding.postRv.layoutManager = linerLayoutManager
-        adapter = PostsAdapters(requireContext(), emptyList())
-
+//        val progress = ProgressDialog(requireContext())
+//        progress.setMessage("Please wait")
+//        progress.show()
         viewModel.checkFollowing()
         viewModel.readPost()
+        checkFollowing()
+        binding.postRv.setHasFixedSize(true)
+        val linerLayoutManager = LinearLayoutManager(requireActivity())
+        binding.storyRv.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.postRv.layoutManager = linerLayoutManager
 
-        viewModel.postsList.observe(viewLifecycleOwner) {
-            adapter.updatePosts(it)
-            binding.postRv.adapter = adapter
+        adapter = PostsAdapters(requireContext(), viewModel.postList)
+        storyAdapter = StoryAdapter(requireContext(), storyList)
+
+        binding.storyRv.adapter = storyAdapter
+        binding.postRv.adapter = adapter
+
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.checkFollowing()
+            viewModel.readPost()
+            checkFollowing()
+            adapter.updatePosts(viewModel.postList)
+            storyAdapter.updateStory(storyList)
             Handler().postDelayed({
-                progress.dismiss()
-            }, 2000)
+                binding.swipeRefresh.isRefreshing = false
+            }, 1200)
+
         }
-
-
-
-
-
-
-//        checkFollowing()
-//
-//        readPost()
-
-
         return binding.root
     }
 
+    private fun readStory() {
+
+
+        storyList.clear()
+        storyList.add(Story("", 0, 0, "", Firebase.auth.currentUser!!.uid))
+        for (id in followList) {
+            var countStory = 0
+            firestore.collection("Story").document(id).addSnapshotListener { value, error ->
+                if (error != null) {
+                } else {
+                    if (value != null && value.exists()) {
+                        val doc = value.data as HashMap<*, *>
+                        try {
+
+                            var ustory: Story? = null
+                            val timecurrent = System.currentTimeMillis()
+                            for (i in doc) {
+                                val story = i.value as HashMap<*, *>
+                                val timestart = story["timeStart"] as Long
+                                val timeend = story["timeEnd"] as Long
+                                val imageurl = story["imageurl"] as String
+                                val storyId = story["storyId"] as String
+                                val userId = story["userId"] as String
+                                if (timecurrent > timestart && timecurrent < timeend) {
+                                    countStory++
+                                }
+                                ustory = Story(imageurl, timestart, timeend, storyId, userId)
+
+                            }
+                            if (countStory > 0) {
+                                if (ustory != null) {
+                                    storyList.add(ustory)
+                                }
+                            }
+
+                            adapter.notifyDataSetChanged()
+
+
+                        } catch (e: java.lang.NullPointerException) {
+
+
+                        }
+
+
+                    }
+
+                }
+
+            }
+        }
+
+
+    }
 
     private fun checkFollowing() {
 
@@ -107,6 +154,7 @@ class HomeFragment : Fragment() {
 
 
                     if (documentSnapshot != null && documentSnapshot.exists()) {
+                        followList.clear()
                         val follow = documentSnapshot.data
 
                         if (follow != null) {
@@ -118,6 +166,8 @@ class HomeFragment : Fragment() {
                                     followList.add(i.key as String)
 
                                 }
+
+                                readStory()
 
                             } catch (_: java.lang.NullPointerException) {
 

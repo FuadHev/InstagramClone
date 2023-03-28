@@ -46,7 +46,7 @@ class FollowingFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         idList = ArrayList()
         usersList = ArrayList()
-        id = FollowFollowing.arg!!
+        id = arguments?.getString("profileId") as String
         firestore = Firebase.firestore
         viewModel.getFollowings(id)
 
