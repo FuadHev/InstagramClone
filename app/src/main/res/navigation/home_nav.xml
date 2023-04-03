@@ -38,6 +38,9 @@
         <action
             android:id="@+id/action_profilfragment_to_followersFragment"
             app:destination="@id/followersFragment" />
+        <action
+            android:id="@+id/action_profilefragment_to_messagesFragment3"
+            app:destination="@id/messagesFragment3" />
     </fragment>
     <fragment
         android:id="@+id/addPostFragment"
@@ -75,4 +78,13 @@
             app:destination="@id/profilefragment" />
     </fragment>
     <include app:graph="@navigation/search_nav" />
+    <fragment
+        android:id="@+id/messagesFragment3"
+        android:name="com.example.instagramclone.ui.fragments.MessagesFragment"
+        android:label="fragment_messages"
+        tools:layout="@layout/fragment_messages" >
+        <argument
+            android:name="userId"
+            app:argType="string" />
+    </fragment>
 </navigation>

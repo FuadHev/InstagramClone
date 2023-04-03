@@ -2,6 +2,7 @@ package com.example.instagramclone.ui.fragments
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -13,6 +14,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.instagramclone.ChatActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Posts
 import com.example.instagramclone.data.entity.Story
@@ -73,12 +75,16 @@ class HomeFragment : Fragment() {
         binding.storyRv.adapter = storyAdapter
         binding.postRv.adapter = adapter
 
+        binding.chat.setOnClickListener {
+            val intent=Intent(requireActivity(),ChatActivity::class.java)
+            requireActivity().startActivity(intent)
+        }
+
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.checkFollowing()
             viewModel.readPost()
             checkFollowing()
             adapter.updatePosts(viewModel.postList)
-            storyAdapter.updateStory(storyList)
             Handler().postDelayed({
                 binding.swipeRefresh.isRefreshing = false
             }, 1200)
@@ -89,13 +95,13 @@ class HomeFragment : Fragment() {
 
     private fun readStory() {
 
-
         storyList.clear()
         storyList.add(Story("", 0, 0, "", Firebase.auth.currentUser!!.uid))
         for (id in followList) {
             var countStory = 0
             firestore.collection("Story").document(id).addSnapshotListener { value, error ->
                 if (error != null) {
+                    error.localizedMessage?.let { Log.e("error", it) }
                 } else {
                     if (value != null && value.exists()) {
                         val doc = value.data as HashMap<*, *>

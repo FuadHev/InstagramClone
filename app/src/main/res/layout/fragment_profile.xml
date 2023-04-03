@@ -10,7 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.fragments.ProfileFragment" >
+        tools:context=".ui.fragments.ProfileFragment">
 
         <LinearLayout
             android:id="@+id/linearLayout4"
@@ -104,13 +104,30 @@
 
             </LinearLayout>
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/edit_profil"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:backgroundTint="#D2D3D3"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="" />
+                android:layout_height="wrap_content">
+
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/edit_profil"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#D2D3D3"
+                    android:text="follow" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#D2D3D3"
+                    android:text="message" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -121,7 +138,7 @@
             android:src="@drawable/defaultimage"
             app:layout_constraintBottom_toBottomOf="@+id/linearLayout4"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.114"
+            app:layout_constraintHorizontal_bias="0.09"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/linearLayout4"
             app:layout_constraintVertical_bias="0.466" />
@@ -130,42 +147,42 @@
             android:id="@+id/toolbar2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:strokeColor="@null"
             android:background="@color/white"
             android:minHeight="?attr/actionBarSize"
             android:theme="?attr/actionBarTheme"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" >
+            app:layout_constraintTop_toTopOf="parent"
+            app:strokeColor="@null">
 
             <RelativeLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="5dp">
+                android:padding="5dp"
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="11dp">
 
                 <TextView
                     android:id="@+id/username"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=""
-                    android:textStyle="bold"
-                    android:maxLines="1"
                     android:layout_alignParentStart="true"
-                    android:textColor="@color/black"/>
+                    android:maxLines="1"
+                    android:text=""
+                    android:textColor="@color/black"
+                    android:textStyle="bold" />
 
                 <ImageView
                     android:id="@+id/options"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/options"
-                    android:layout_marginEnd="10dp"
+                    android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"/>
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/options" />
 
 
             </RelativeLayout>
-
-
 
 
         </androidx.appcompat.widget.Toolbar>
@@ -193,21 +210,21 @@
 
             <ImageButton
                 android:id="@+id/my_photos"
-                app:strokeColor="@null"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                app:srcCompat="@drawable/my_photos" />
+                app:srcCompat="@drawable/my_photos"
+                app:strokeColor="@null" />
 
             <ImageButton
-                app:strokeColor="@null"
                 android:id="@+id/save"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:srcCompat="@drawable/bookmark" />
+                app:srcCompat="@drawable/bookmark"
+                app:strokeColor="@null" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView

@@ -42,7 +42,21 @@ class NotificationsAdapter(private val notificationList: List<Notification>) :
 
         getUserInfo(b.profilImage,b.username,notification.userId)
 
-        b.comment.text=notification.ntext
+
+
+
+
+        val maxLength = 30 // Metnin maksimum uzunluğu
+        if (notification.ntext.length> maxLength) {
+            val kisaMesaj =
+                notification.ntext.substring(0, maxLength) + "..." // Metni kısaltma ve 3 nokta ekleme
+            b.comment.text=kisaMesaj
+        } else {
+            b.comment.text=notification.ntext
+
+        }
+
+
 
         if(notification.isPost){
             b.postImage.visibility= VISIBLE

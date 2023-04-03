@@ -61,6 +61,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
         b.comments.text = "View all 0 comments"
 
         b.like.tag = "like"
+
         Picasso.get().load(post.postImage).into(b.postImage)
 
         if (post.description == "") {

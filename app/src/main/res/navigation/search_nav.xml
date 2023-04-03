@@ -19,6 +19,9 @@
         <action
             android:id="@+id/action_profilfragment_to_followersFragment"
             app:destination="@id/followersFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_messagesFragment2"
+            app:destination="@id/messagesFragment2" />
     </fragment>
     <fragment
         android:id="@+id/editProfileFragment"
@@ -39,5 +42,14 @@
         <action
             android:id="@+id/action_followersFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/messagesFragment2"
+        android:name="com.example.instagramclone.ui.fragments.MessagesFragment"
+        android:label="fragment_messages"
+        tools:layout="@layout/fragment_messages" >
+        <argument
+            android:name="userId"
+            app:argType="string" />
     </fragment>
 </navigation>

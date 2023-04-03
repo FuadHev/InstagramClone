@@ -44,6 +44,7 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
         binding.reverse.setOnClickListener {
             binding.stories.reverse()
         }
+        binding.skip.setOnTouchListener(onTouchListener)
         binding.reverse.setOnTouchListener(onTouchListener)
 
 

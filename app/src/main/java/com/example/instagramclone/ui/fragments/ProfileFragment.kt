@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.instagramclone.FollowFollowing
 import com.example.instagramclone.R
@@ -46,9 +47,7 @@ class ProfileFragment : Fragment() {
     private lateinit var adapter: MyFotoAdapter
     private lateinit var firestore: FirebaseFirestore
     private var profileid: String? = null
-    private lateinit var postList: ArrayList<Posts>
     private lateinit var viewModel: ProfileViewModel
-    private lateinit var sp: SharedPreferences
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,7 +99,6 @@ class ProfileFragment : Fragment() {
         profileid?.let {
             viewModel.userInfo(
                 requireContext(),
-                firestore,
                 it,
                 binding.username,
                 binding.bio,
@@ -116,9 +114,16 @@ class ProfileFragment : Fragment() {
         if (profileid == firbaseUser.uid) {
 
             binding.editProfil.text = "edit profile"
+            binding.message.visibility=GONE
+
         } else {
             checkFollow()
             binding.save.visibility = GONE
+        }
+
+
+        binding.message.setOnClickListener {
+            findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToMessagesFragment2(profileid!!))
         }
 
         binding.editProfil.setOnClickListener {

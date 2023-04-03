@@ -21,7 +21,7 @@ class CommentsViewModel:ViewModel() {
             if (error != null) {
             } else {
                 if (value != null && value.exists()) {
-                    val doc = value.data as HashMap<*, *>
+                    val doc = value.data as HashMap<*,*>
                     try {
 
                         val commentList=ArrayList<Comment>()

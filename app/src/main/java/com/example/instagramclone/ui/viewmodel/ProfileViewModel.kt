@@ -11,6 +11,8 @@ import com.example.instagramclone.data.entity.Posts
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 
@@ -88,9 +90,9 @@ class ProfileViewModel:ViewModel() {
 
 
 
-    fun userInfo(context: Context, firestore:FirebaseFirestore, profileId:String, userName:TextView, bioinfo:TextView, profilImage:CircleImageView) {
+    fun userInfo(context: Context, profileId:String, userName:TextView, bioinfo:TextView, profilImage:CircleImageView) {
 
-        firestore.collection("user").document(profileId).addSnapshotListener { value, error ->
+        Firebase.firestore.collection("user").document(profileId).addSnapshotListener { value, error ->
             if (error != null) {
                 Toast.makeText(context, error.localizedMessage, Toast.LENGTH_SHORT).show()
             } else {
