@@ -104,7 +104,6 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
         b.comments.setOnClickListener {
 
-
             val intent = Intent(mContext, CommentsActivity::class.java)
             intent.putExtra("postId", post.post_id)
             intent.putExtra("publisherId", post.publisher)
@@ -112,7 +111,6 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
         }
         b.comment.setOnClickListener {
-
 
             val intent = Intent(mContext, CommentsActivity::class.java)
             intent.putExtra("postId", post.post_id)
@@ -131,7 +129,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
             } else {
                 firestore.collection("Saves").document(firebaseUser!!.uid)
-                    .update("${post.post_id}", FieldValue.delete())
+                    .update(post.post_id, FieldValue.delete())
 
 
             }
@@ -392,7 +390,6 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
                     if (doc != null) {
 
                         if (doc.containsKey(firebaseUser!!.uid)) {
-                            Log.e("key",doc.containsKey(firebaseUser!!.uid).toString())
                             imageView.setImageResource(R.drawable.like)
                             imageView.tag = "liked"
                         } else {

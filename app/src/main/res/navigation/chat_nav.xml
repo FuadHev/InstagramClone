@@ -10,7 +10,7 @@
         android:label="fragment_chats"
         tools:layout="@layout/fragment_chats" >
         <action
-            android:id="@+id/action_chatsFragment_to_messagesFragment"
+            android:id="@+id/action_chatsFragment_to_messagesFragment3"
             app:destination="@id/messagesFragment" />
     </fragment>
     <fragment

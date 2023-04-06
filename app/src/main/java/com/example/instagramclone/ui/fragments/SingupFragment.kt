@@ -88,8 +88,8 @@ class SingupFragment : Fragment() {
             userMap["password"] = password
             userMap["image_url"] =
                 "https://firebasestorage.googleapis.com/v0/b/instagramclone-9f5ee.appspot.com/o/defaultimage%2Fdefaultimage.png?alt=media&token=525e573c-6b43-4730-b4a2-17b30de66234"
+            userMap["playerId"] = ""
             userMap["bio"] = ""
-
             firestore.collection("user").document(auth.currentUser!!.uid).set(userMap)
                 .addOnSuccessListener {
 

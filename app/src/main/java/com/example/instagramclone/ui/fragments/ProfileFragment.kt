@@ -123,35 +123,38 @@ class ProfileFragment : Fragment() {
 
 
         binding.message.setOnClickListener {
-            findNavController().navigate(ProfileFragmentDirections.actionProfileFragmentToMessagesFragment2(profileid!!))
+            findNavController().navigate(ProfileFragmentDirections.actionChatsFragmentToMessagesFragment(profileid!!))
+
         }
 
         binding.editProfil.setOnClickListener {
             val btn = binding.editProfil.text.toString().lowercase()
-            if (btn == "edit profile") {
+            when (btn) {
+                "edit profile" -> {
 
-                Navigation.findNavController(it)
-                    .navigate(R.id.action_profilfragment_to_editProfileFragment)
+                    Navigation.findNavController(it)
+                        .navigate(R.id.action_profilfragment_to_editProfileFragment)
 
 
-            } else if (btn == "follow") {
+                }
+                "follow" -> {
 
-                val following = hashMapOf<String, HashMap<String?, Boolean>>()
-                val id = hashMapOf<String?, Boolean>()
-                id[profileid] = true
-                following["following"] = id
+                    val following = hashMapOf<String, HashMap<String?, Boolean>>()
+                    val id = hashMapOf<String?, Boolean>()
+                    id[profileid] = true
+                    following["following"] = id
 
-                val follower = hashMapOf<String, HashMap<String, Boolean>>()
-                val id2 = hashMapOf<String, Boolean>()
-                id2[firbaseUser.uid] = true
-                follower["followers"] = id2
-                firestore.collection("Follow").document(firbaseUser.uid).set(
-                    following,
-                    SetOptions.merge()
+                    val follower = hashMapOf<String, HashMap<String, Boolean>>()
+                    val id2 = hashMapOf<String, Boolean>()
+                    id2[firbaseUser.uid] = true
+                    follower["followers"] = id2
+                    firestore.collection("Follow").document(firbaseUser.uid).set(
+                        following,
+                        SetOptions.merge()
 
-                )
-                firestore.collection("Follow").document(profileid!!)
-                    .set(follower, SetOptions.merge())
+                    )
+                    firestore.collection("Follow").document(profileid!!)
+                        .set(follower, SetOptions.merge())
 
 
                     addNotification()
@@ -159,15 +162,17 @@ class ProfileFragment : Fragment() {
 
 
 
-                binding.editProfil.text = "following"
+                    binding.editProfil.text = "following"
 
-            } else if (btn == "following") {
-                firestore.collection("Follow").document(firbaseUser.uid)
-                    .update("following.${profileid}", FieldValue.delete())
-                firestore.collection("Follow").document(profileid!!)
-                    .update("followers.${firbaseUser.uid}", FieldValue.delete())
-//                deleteNotication()
-                binding.editProfil.text = "follow"
+                }
+                "following" -> {
+                    firestore.collection("Follow").document(firbaseUser.uid)
+                        .update("following.${profileid}", FieldValue.delete())
+                    firestore.collection("Follow").document(profileid!!)
+                        .update("followers.${firbaseUser.uid}", FieldValue.delete())
+        //                deleteNotication()
+                    binding.editProfil.text = "follow"
+                }
             }
 
 

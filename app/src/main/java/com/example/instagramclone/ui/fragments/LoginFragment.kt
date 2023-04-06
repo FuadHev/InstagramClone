@@ -17,10 +17,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.example.instagramclone.HomeActivity
 import com.example.instagramclone.R
-import com.example.instagramclone.data.entity.Comment
-import com.example.instagramclone.data.entity.Posts
-import com.example.instagramclone.data.entity.Story
-import com.example.instagramclone.data.entity.Users
+import com.example.instagramclone.data.entity.*
 import com.example.instagramclone.databinding.FragmentLoginBinding
 import com.example.instagramclone.ui.adapters.MyFotoAdapter
 import com.google.android.material.transition.platform.MaterialContainerTransform.ProgressThresholds
@@ -65,28 +62,24 @@ class LoginFragment : Fragment() {
         return view
     }
 
+    fun getUserChat(){
+        firestore.collection("Chats").addSnapshotListener { value, error ->
+
+            if (value!=null){
+                for (chat in value.documents){
+
+                }
+            }
+        }
+    }
+
+
+
 
     fun singIn(btn: Button, email: String, password: String) {
 
-//        val ref = firestore.collection("Chats")
-//
-//        val hmap= hashMapOf<Any,Any>("username" to "f","senderId" to "a8eq8vA9fldwj53BNz3kl72L9WU2","time" to Timestamp.now(),"image_url" to "dasdadsda")
-//        ref.document("hSpoVThm3mhA4dLuYr7th6nhYJB2a8eq8vA9fldwj53BNz3kl72L9WU2").set(hmap,
-//            SetOptions.merge())
-//
-//        ref.document("hSpoVThm3mhA4dLuYr7th6nhYJB2a8eq8vA9fldwj53BNz3kl72L9WU2").addSnapshotListener { value, error ->
-//
-//            if (error!=null){
-//
-//            }else{
-//                if (value!=null&&value.exists()){
-//                    val userId=value.get("senderId") as String
-//                    val time=value.get("time") as Timestamp
-//                    Log.e("sss","$userId $time")
-//                }
-//            }
-//
-//        }
+
+
 
 
         val progress = ProgressDialog(requireContext())

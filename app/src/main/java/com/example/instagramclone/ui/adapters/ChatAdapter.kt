@@ -30,9 +30,8 @@ class ChatAdapter(private val userClickListener: UserClickListener,var chatUserL
         val chatUser = chatUserList[position]
         val b = holder.view
 
-        Log.e("isseen",chatUser.seen.toString())
+        b.message.text=chatUser.lastMessage
         if (!chatUser.seen){
-
             b.isseen.visibility= View.VISIBLE
             b.username.setTypeface( b.username.typeface, Typeface.BOLD)
             b.message.setTypeface( b.username.typeface, Typeface.BOLD)

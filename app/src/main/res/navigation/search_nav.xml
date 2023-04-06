@@ -20,7 +20,7 @@
             android:id="@+id/action_profilfragment_to_followersFragment"
             app:destination="@id/followersFragment" />
         <action
-            android:id="@+id/action_profileFragment_to_messagesFragment2"
+            android:id="@+id/action_chatsFragment_to_messagesFragment"
             app:destination="@id/messagesFragment2" />
     </fragment>
     <fragment
