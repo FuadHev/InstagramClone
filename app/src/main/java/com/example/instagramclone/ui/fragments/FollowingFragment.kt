@@ -9,16 +9,13 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.instagramclone.FollowFollowing
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Users
 import com.example.instagramclone.databinding.FragmentFollowingBinding
 import com.example.instagramclone.ui.adapters.ClickListener
 import com.example.instagramclone.ui.adapters.UserAdapter
-import com.example.instagramclone.ui.viewmodel.FollowerViewModel
 import com.example.instagramclone.ui.viewmodel.FollowingViewModel
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.auth.User
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 

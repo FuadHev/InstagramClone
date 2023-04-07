@@ -62,25 +62,9 @@ class LoginFragment : Fragment() {
         return view
     }
 
-    fun getUserChat(){
-        firestore.collection("Chats").addSnapshotListener { value, error ->
-
-            if (value!=null){
-                for (chat in value.documents){
-
-                }
-            }
-        }
-    }
-
-
 
 
     fun singIn(btn: Button, email: String, password: String) {
-
-
-
-
 
         val progress = ProgressDialog(requireContext())
         progress.setMessage("Please wait")

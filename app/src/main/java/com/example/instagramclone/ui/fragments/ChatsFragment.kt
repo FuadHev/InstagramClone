@@ -51,25 +51,24 @@ class ChatsFragment : Fragment() {
 
         binding.chatRv.layoutManager = LinearLayoutManager(requireActivity())
 
-//        adapter = ChatAdapter(object : UserClickListener {
-//            override fun chatUserCLickListener(currentUser: String) {
-//
-//                findNavController().navigate(ChatsFragmentDirections.actionChatsFragmentToMessagesFragment3(currentUser))
-//
-//                firestore.collection("Chats").document(auth.currentUser!!.uid + currentUser).update("seen",true)
-//
-//            }
-//
-//        }, emptyList())
-//        binding.chatRv.adapter = adapter
+        adapter = ChatAdapter(object : UserClickListener {
+            override fun chatUserCLickListener(currentUser: String) {
 
-        allUsers()
+                findNavController().navigate(ChatsFragmentDirections.actionChatsFragmentToMessagesFragment3(currentUser))
+
+                firestore.collection("Chats").document(auth.currentUser!!.uid + currentUser).update("seen",true)
+
+            }
+
+        }, emptyList())
+        binding.chatRv.adapter = adapter
+
+//        allUsers()
 //
-//        viewModel.allUser()
-//        viewModel.chatList.observe(viewLifecycleOwner){
-//            viewModel.allUser()
-//            adapter.updateChatList(it)
-//        }
+        viewModel.getUsersId()
+        viewModel.chatList.observe(viewLifecycleOwner){
+            adapter.updateChatList(it)
+        }
 
 
     }

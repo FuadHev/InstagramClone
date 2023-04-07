@@ -1,17 +1,14 @@
 package com.example.instagramclone.ui.fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.instagramclone.FollowFollowing
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Users
 import com.example.instagramclone.databinding.FragmentFollowerBinding

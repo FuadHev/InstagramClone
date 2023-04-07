@@ -2,20 +2,15 @@ package com.example.instagramclone.ui.fragments
 
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.instagramclone.FollowFollowing
 import com.example.instagramclone.R
 import com.example.instagramclone.databinding.FragmentFollowersBinding
-import com.example.instagramclone.ui.viewmodel.FollowerViewModel
-import com.example.instagramclone.ui.viewmodel.HomeViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 
 class FollowersFragment : Fragment() {

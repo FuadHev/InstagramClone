@@ -1,6 +1,5 @@
 package com.example.instagramclone.ui.fragments
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -9,17 +8,13 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.example.instagramclone.FollowFollowing
 import com.example.instagramclone.R
-import com.example.instagramclone.data.entity.Notification
-import com.example.instagramclone.data.entity.Posts
 import com.example.instagramclone.databinding.FragmentProfileBinding
 import com.example.instagramclone.ui.adapters.MyFotoAdapter
 import com.example.instagramclone.ui.viewmodel.ProfileViewModel
@@ -32,13 +27,10 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.onesignal.OneSignal
-import com.squareup.picasso.Picasso
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import kotlin.random.Random
 
 class ProfileFragment : Fragment() {
 

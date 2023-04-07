@@ -4,26 +4,20 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.SearchEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.instagramclone.FollowFollowing
 import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Users
 import com.example.instagramclone.databinding.FragmentSearchBinding
 import com.example.instagramclone.ui.adapters.ClickListener
 import com.example.instagramclone.ui.adapters.UserAdapter
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.auth.User
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import java.util.Objects
 
 
 class SearchFragment : Fragment() {

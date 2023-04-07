@@ -64,7 +64,7 @@ class MessagesFragment : Fragment() {
 
         val senderUid = Firebase.auth.currentUser!!.uid
 
-        userInfo(currentUser,binding.mUsername,binding.chatImage)
+        userInfo(currentUser, binding.mUsername, binding.chatImage)
 
 
 //        Picasso.get().load(currentUser.imageUrl).into(binding.chatImage)
@@ -84,7 +84,7 @@ class MessagesFragment : Fragment() {
 
             val randomkey = UUID.randomUUID().toString()
 
-            val message=binding.editMessage.text.toString()
+            val message = binding.editMessage.text.toString()
             val hkey = hashMapOf<String, Any>()
             val hmessage = hashMapOf<Any, Any>()
             hmessage["messageId"] = randomkey
@@ -100,11 +100,25 @@ class MessagesFragment : Fragment() {
                     firestore.collection("Messages").document(receiverRoom!!)
                         .set(hkey, SetOptions.merge())
                     firestore.collection("Chats").document(receiverRoom!!)
-                        .set(hashMapOf("time" to Timestamp.now(),"seen" to true,"lastmessage" to "","senderId" to receiverUid))
+                        .set(
+                            hashMapOf(
+                                "time" to Timestamp.now(),
+                                "seen" to true,
+                                "lastmessage" to "",
+                                "senderId" to receiverUid
+                            )
+                        )
                     firestore.collection("Chats").document(senderRoom!!)
-                        .set(hashMapOf("time" to Timestamp.now(),"seen" to false,"lastmessage" to message,"senderId" to senderUid))
+                        .set(
+                            hashMapOf(
+                                "time" to Timestamp.now(),
+                                "seen" to false,
+                                "lastmessage" to message,
+                                "senderId" to senderUid
+                            )
+                        )
 
-                    getPlayerIdSendNotification(receiverUid,message)
+                    getPlayerIdSendNotification(receiverUid, message)
                 }
 
             binding.editMessage.setText("")
@@ -112,71 +126,31 @@ class MessagesFragment : Fragment() {
         }
 
 
-
-
     }
 
     override fun onResume() {
         super.onResume()
-        firestore.collection("Chats").document(Firebase.auth.currentUser!!.uid + args.userId).update("seen",true)
+        firestore.collection("Chats").document(Firebase.auth.currentUser!!.uid + args.userId)
+            .update("seen", true)
 
     }
 
 
-    private fun userInfo(profileId:String, userName: TextView, profilImage: CircleImageView) {
+    private fun userInfo(profileId: String, userName: TextView, profilImage: CircleImageView) {
 
-        Firebase.firestore.collection("user").document(profileId).addSnapshotListener { value, error ->
-            if (error != null) {
-                Toast.makeText(requireContext(), error.localizedMessage, Toast.LENGTH_SHORT).show()
-            } else {
-                if (value != null && value.exists()) {
+        Firebase.firestore.collection("user").document(profileId)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    Toast.makeText(requireContext(), error.localizedMessage, Toast.LENGTH_SHORT)
+                        .show()
+                } else {
+                    if (value != null && value.exists()) {
 
-                    val username = value.get("username") as String
-                    val imageurl = value.get("image_url") as String
+                        val username = value.get("username") as String
+                        val imageurl = value.get("image_url") as String
 
-                    Picasso.get().load(imageurl).into(profilImage)
-                    userName.text=username
-
-
-                }
-
-
-            }
-
-        }
-
-
-    }
-
-    private fun readMessages(){
-        firestore.collection("Messages").document(senderRoom!!).addSnapshotListener { value, error ->
-            if (error != null) {
-            } else {
-                if (value != null && value.exists()) {
-                    try {
-                        val doc = value.data as HashMap<*,*>
-
-                        messagesList.clear()
-                        for (i in doc) {
-                            val message = i.value as HashMap<*,*>
-                            val messageId=message["messageId"] as String
-                            val messageTxt=message["messagetxt"] as String
-                            val senderId=message["senderId"] as String
-                            val time=message["time"] as Timestamp
-                            val seen=message["seen"] as Boolean
-
-                            val messages=Message(messageId,messageTxt,senderId,time,seen)
-                            messagesList.add(messages)
-
-                        }
-                        messagesList.sortBy {
-                            it.time
-                        }
-                        messageAdapter.notifyDataSetChanged()
-
-
-
-                    } catch (e: java.lang.NullPointerException) {
+                        Picasso.get().load(imageurl).into(profilImage)
+                        userName.text = username
 
 
                     }
@@ -185,14 +159,55 @@ class MessagesFragment : Fragment() {
                 }
 
             }
-        }
+
+
     }
 
-    private fun getPlayerIdSendNotification(userId: String,message: String) {
+    private fun readMessages() {
+        firestore.collection("Messages").document(senderRoom!!)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                } else {
+                    if (value != null && value.exists()) {
+                        try {
+                            val doc = value.data as HashMap<*, *>
+
+                            messagesList.clear()
+                            for (i in doc) {
+                                val message = i.value as HashMap<*, *>
+                                val messageId = message["messageId"] as String
+                                val messageTxt = message["messagetxt"] as String
+                                val senderId = message["senderId"] as String
+                                val time = message["time"] as Timestamp
+                                val seen = message["seen"] as Boolean
+
+                                val messages = Message(messageId, messageTxt, senderId, time, seen)
+                                messagesList.add(messages)
+
+                            }
+                            messagesList.sortBy {
+                                it.time
+                            }
+                            messageAdapter.notifyDataSetChanged()
+
+
+                        } catch (e: java.lang.NullPointerException) {
+
+
+                        }
+
+
+                    }
+
+                }
+            }
+    }
+
+    private fun getPlayerIdSendNotification(userId: String, message: String) {
 
 
         var username = ""
-        var profilImage=""
+        var profilImage = ""
         Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
             .addSnapshotListener { value, error ->
                 if (error != null) {
@@ -212,7 +227,7 @@ class MessagesFragment : Fragment() {
 
                     val playerId = value.get("playerId") as String?
                     if (playerId != null) {
-                        sentPushNotification(playerId, username,message,profilImage)
+                        sentPushNotification(playerId, username, message, profilImage)
                     }
 
                 }
@@ -221,7 +236,12 @@ class MessagesFragment : Fragment() {
 
     }
 
-    private fun sentPushNotification(playerId: String, username: String,message:String,profileImage:String) {
+    private fun sentPushNotification(
+        playerId: String,
+        username: String,
+        message: String,
+        profileImage: String
+    ) {
         try {
 //
 //            "large_icon": "$profileImage",
@@ -234,14 +254,13 @@ class MessagesFragment : Fragment() {
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
         "contents": {"en": "$message"},
-    
+            "large_icon": "$profileImage",
+           "large_icon_width": 64,
+            "large_icon_height": 64
     }"""
                 ),
                 null
             )
-
-
-
 
 
         } catch (e: JSONException) {

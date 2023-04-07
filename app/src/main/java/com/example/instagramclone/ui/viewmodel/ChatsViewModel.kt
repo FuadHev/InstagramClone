@@ -20,7 +20,25 @@ class ChatsViewModel:ViewModel() {
 
 
 
-    fun allUser(){
+    fun getUsersId(){
+        Firebase.firestore.collection("Chats").addSnapshotListener { value, error ->
+
+            if (value!=null){
+                val idList=ArrayList<String>()
+                for (doc in value.documents){
+
+                    val senderId=doc.get("senderId") as String
+                    if (senderId!=Firebase.auth.currentUser!!.uid){
+                        idList.add(senderId)
+                    }
+
+                }
+
+                allUser(idList)
+            }
+        }
+    }
+    fun allUser(idList:ArrayList<String>){
 
         Firebase.firestore.collection("user").addSnapshotListener { value, error ->
             if (error != null) {
@@ -34,8 +52,11 @@ class ChatsViewModel:ViewModel() {
                         val username = users.get("username") as String
                         val imageurl = users.get("image_url") as String
 
-                        val user = Users(user_id, email, username, "", imageurl, "")
-                        alluser.add(user)
+                        if (idList.contains(user_id)){
+                            val user = Users(user_id, email, username, "", imageurl, "")
+                            alluser.add(user)
+                        }
+
 
                     }
                     getChatUser(alluser)
@@ -50,33 +71,41 @@ class ChatsViewModel:ViewModel() {
     private fun getChatUser(alluser:ArrayList<Users>){
 
         val ref = Firebase.firestore.collection("Chats")
-        val chatlist = ArrayList<ChatUser>()
-        alluser.forEach {
-            val senderRoom = Firebase.auth.currentUser!!.uid + it.user_id
 
 
-            ref.document(senderRoom).addSnapshotListener { value, error ->
+        ref.addSnapshotListener { value, error ->
 
-                if (error != null) {
+            if (error!=null){
 
-                } else {
+            }else{
+                if (value!=null){
+                    val chatlist = ArrayList<ChatUser>()
+                    for ( doc in value.documents){
 
-                    if (value != null && value.exists()) {
-                        val time = value.get("time") as Timestamp
-                        val seen = value.get("seen") as Boolean
-                        val lastMessage=value.get("lastmessage") as String
-                        val chatUser = ChatUser(it.user_id, it.username, it.imageurl,lastMessage ,time,seen)
-                        chatlist.add(chatUser)
+                        val time = doc.get("time") as Timestamp
+                        val seen = doc.get("seen") as Boolean
+                        val senderId=doc.get("senderId") as String
+                        val lastMessage=doc.get("lastmessage") as String
+                        for (user in alluser){
+                            if (user.user_id==senderId){
+                                val chatUser = ChatUser(user.user_id, user.username, user.imageurl,lastMessage ,time,seen)
+                                chatlist.add(chatUser)
 
-                        chatList.value=chatlist
+                            }
+
+                        }
+                        chatlist.sortByDescending { chatItem->
+                            chatItem.time
+                        }
+
 
                     }
+                    Log.e("allchatuser",chatlist.toString())
+                    chatList.value=chatlist
                 }
-
             }
-
-
         }
+
 
     }
 }
