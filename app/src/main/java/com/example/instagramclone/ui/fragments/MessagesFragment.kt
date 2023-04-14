@@ -38,11 +38,15 @@ class MessagesFragment : Fragment() {
     private lateinit var binding: FragmentMessagesBinding
     private val args by navArgs<MessagesFragmentArgs>()
     private lateinit var messagesList: ArrayList<Message>
-    private lateinit var messageAdapter: MessaggeAdapter
+
+    //    private lateinit var messageAdapter: MessaggeAdapter
     var senderRoom: String? = null
     var receiverRoom: String? = null
     private lateinit var firestore: FirebaseFirestore
     private val viewModel by activityViewModels<MessagesViewModel>()
+    private val messageAdapter by lazy {
+        MessaggeAdapter(emptyList())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,7 +63,6 @@ class MessagesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val currentUser = args.userId
         firestore = Firebase.firestore
-
         val receiverUid = currentUser
 
         val senderUid = Firebase.auth.currentUser!!.uid
@@ -67,65 +70,71 @@ class MessagesFragment : Fragment() {
         userInfo(currentUser, binding.mUsername, binding.chatImage)
 
 
-//        Picasso.get().load(currentUser.imageUrl).into(binding.chatImage)
-//        binding.mUsername.text = currentUser.username
-
         senderRoom = receiverUid + senderUid
         receiverRoom = senderUid + receiverUid
 
         messagesList = ArrayList()
-
+        viewModel.readMessages(senderRoom!!)
         binding.messageRv.layoutManager = LinearLayoutManager(requireActivity())
-        messageAdapter = MessaggeAdapter(messagesList)
-        binding.messageRv.adapter = messageAdapter
+        viewModel.messageList.observe(viewLifecycleOwner) {
+            messageAdapter.updateMessages(it)
+            binding.messageRv.adapter = messageAdapter
+        }
 
-        readMessages()
+
+
+
+
         binding.send.setOnClickListener {
 
-            val randomkey = UUID.randomUUID().toString()
-
-            val message = binding.editMessage.text.toString()
-            val hkey = hashMapOf<String, Any>()
-            val hmessage = hashMapOf<Any, Any>()
-            hmessage["messageId"] = randomkey
-            hmessage["messagetxt"] = message
-            hmessage["seen"] = false
-            hmessage["senderId"] = senderUid
-            hmessage["time"] = Timestamp.now()
-
-            hkey[randomkey] = hmessage
-
-            firestore.collection("Messages").document(senderRoom!!).set(hkey, SetOptions.merge())
-                .addOnSuccessListener {
-                    firestore.collection("Messages").document(receiverRoom!!)
-                        .set(hkey, SetOptions.merge())
-                    firestore.collection("Chats").document(receiverRoom!!)
-                        .set(
-                            hashMapOf(
-                                "time" to Timestamp.now(),
-                                "seen" to true,
-                                "lastmessage" to "",
-                                "senderId" to receiverUid
-                            )
-                        )
-                    firestore.collection("Chats").document(senderRoom!!)
-                        .set(
-                            hashMapOf(
-                                "time" to Timestamp.now(),
-                                "seen" to false,
-                                "lastmessage" to message,
-                                "senderId" to senderUid
-                            )
-                        )
-
-                    getPlayerIdSendNotification(receiverUid, message)
-                }
-
-            binding.editMessage.setText("")
+            sendMessage(senderUid, receiverUid)
 
         }
 
 
+    }
+
+    fun sendMessage(senderUid: String, receiverUid: String) {
+        val randomkey = UUID.randomUUID().toString()
+
+        val message = binding.editMessage.text.toString()
+        val hkey = hashMapOf<String, Any>()
+        val hmessage = hashMapOf<Any, Any>()
+        hmessage["messageId"] = randomkey
+        hmessage["messagetxt"] = message
+        hmessage["seen"] = false
+        hmessage["senderId"] = senderUid
+        hmessage["time"] = Timestamp.now()
+
+        hkey[randomkey] = hmessage
+
+        firestore.collection("Messages").document(senderRoom!!).set(hkey, SetOptions.merge())
+            .addOnSuccessListener {
+
+                getPlayerIdSendNotification(receiverUid, message)
+            }
+        firestore.collection("Messages").document(receiverRoom!!)
+            .set(hkey, SetOptions.merge())
+        firestore.collection("Chats").document(receiverRoom!!)
+            .set(
+                hashMapOf(
+                    "time" to Timestamp.now(),
+                    "seen" to true,
+                    "lastmessage" to "",
+                    "senderId" to receiverUid
+                )
+            )
+        firestore.collection("Chats").document(senderRoom!!)
+            .set(
+                hashMapOf(
+                    "time" to Timestamp.now(),
+                    "seen" to false,
+                    "lastmessage" to message,
+                    "senderId" to senderUid
+                )
+            )
+
+        binding.editMessage.setText("")
     }
 
     override fun onResume() {
@@ -163,48 +172,8 @@ class MessagesFragment : Fragment() {
 
     }
 
-    private fun readMessages() {
-        firestore.collection("Messages").document(senderRoom!!)
-            .addSnapshotListener { value, error ->
-                if (error != null) {
-                } else {
-                    if (value != null && value.exists()) {
-                        try {
-                            val doc = value.data as HashMap<*, *>
-
-                            messagesList.clear()
-                            for (i in doc) {
-                                val message = i.value as HashMap<*, *>
-                                val messageId = message["messageId"] as String
-                                val messageTxt = message["messagetxt"] as String
-                                val senderId = message["senderId"] as String
-                                val time = message["time"] as Timestamp
-                                val seen = message["seen"] as Boolean
-
-                                val messages = Message(messageId, messageTxt, senderId, time, seen)
-                                messagesList.add(messages)
-
-                            }
-                            messagesList.sortBy {
-                                it.time
-                            }
-                            messageAdapter.notifyDataSetChanged()
-
-
-                        } catch (e: java.lang.NullPointerException) {
-
-
-                        }
-
-
-                    }
-
-                }
-            }
-    }
 
     private fun getPlayerIdSendNotification(userId: String, message: String) {
-
 
         var username = ""
         var profilImage = ""
@@ -253,10 +222,7 @@ class MessagesFragment : Fragment() {
         "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef", 
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
-        "contents": {"en": "$message"},
-            "large_icon": "$profileImage",
-           "large_icon_width": 64,
-            "large_icon_height": 64
+        "contents": {"en": "$message"}
     }"""
                 ),
                 null

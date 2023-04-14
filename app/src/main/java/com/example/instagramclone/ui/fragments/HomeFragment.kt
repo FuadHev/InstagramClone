@@ -61,8 +61,7 @@ class HomeFragment : Fragment() {
 //        progress.setMessage("Please wait")
 //        progress.show()
         viewModel.checkFollowing()
-        viewModel.readPost()
-        checkFollowing()
+//        checkFollowing()
         binding.postRv.setHasFixedSize(true)
         val linerLayoutManager = LinearLayoutManager(requireActivity())
         binding.storyRv.layoutManager =
@@ -70,7 +69,7 @@ class HomeFragment : Fragment() {
         binding.postRv.layoutManager = linerLayoutManager
 
         adapter = PostsAdapters(requireContext(), viewModel.postList)
-        storyAdapter = StoryAdapter(requireContext(), storyList)
+        storyAdapter = StoryAdapter(requireContext(), viewModel.storyList)
 
         binding.storyRv.adapter = storyAdapter
         binding.postRv.adapter = adapter
@@ -82,8 +81,7 @@ class HomeFragment : Fragment() {
 
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.checkFollowing()
-            viewModel.readPost()
-            checkFollowing()
+//            checkFollowing()
             adapter.updatePosts(viewModel.postList)
             Handler().postDelayed({
                 binding.swipeRefresh.isRefreshing = false

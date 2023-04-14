@@ -1,5 +1,6 @@
 package com.example.instagramclone.ui.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -8,12 +9,14 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.instagramclone.MainActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.databinding.FragmentProfileBinding
 import com.example.instagramclone.ui.adapters.MyFotoAdapter
@@ -36,7 +39,9 @@ class ProfileFragment : Fragment() {
 
     private lateinit var binding: FragmentProfileBinding
     private lateinit var firbaseUser: FirebaseUser
-    private lateinit var adapter: MyFotoAdapter
+    private  val adapter by lazy{
+        MyFotoAdapter(emptyList())
+    }
     private lateinit var firestore: FirebaseFirestore
     private var profileid: String? = null
     private lateinit var viewModel: ProfileViewModel
@@ -64,8 +69,7 @@ class ProfileFragment : Fragment() {
 
         firbaseUser = Firebase.auth.currentUser!!
         firestore = Firebase.firestore
-//        sp = requireActivity().getSharedPreferences("PREFS", Context.MODE_PRIVATE)
-//        profileid = sp.getString("profileid", firbaseUser.uid)
+
 
         val args = arguments
         profileid = args?.getString("profileid") ?: firbaseUser.uid
@@ -75,17 +79,13 @@ class ProfileFragment : Fragment() {
 
         binding.fotosRv.visibility = VISIBLE
         binding.savesRv.visibility = GONE
-
-
         binding.fotosRv.setHasFixedSize(true)
-
         binding.fotosRv.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.savesRv.layoutManager = GridLayoutManager(requireContext(), 3)
-        adapter = MyFotoAdapter(emptyList())
-        binding.fotosRv.adapter = adapter
+
         viewModel.postsList.observe(viewLifecycleOwner) {
             adapter.updateMyPosts(it)
-
+            binding.fotosRv.adapter = adapter
         }
 
         profileid?.let {
@@ -104,7 +104,6 @@ class ProfileFragment : Fragment() {
 
 
         if (profileid == firbaseUser.uid) {
-
             binding.editProfil.text = "edit profile"
             binding.message.visibility=GONE
 
@@ -113,21 +112,41 @@ class ProfileFragment : Fragment() {
             binding.save.visibility = GONE
         }
 
+        binding.options.setOnClickListener {
+
+            val popupMenu=PopupMenu(requireActivity(),binding.options)
+
+            popupMenu.menuInflater.inflate(R.menu.option_menu,popupMenu.menu)
+
+            popupMenu.setOnMenuItemClickListener { item->
+
+            when(item.itemId){
+                R.id.log_out-> {
+                    val intent =Intent(requireActivity(),MainActivity::class.java)
+                    requireActivity().finish()
+                    startActivity(intent)
+                    true
+                }
+                else-> false
+            }
+
+            }
+
+            popupMenu.show()
+
+        }
+
 
         binding.message.setOnClickListener {
             findNavController().navigate(ProfileFragmentDirections.actionChatsFragmentToMessagesFragment(profileid!!))
-
         }
 
         binding.editProfil.setOnClickListener {
             val btn = binding.editProfil.text.toString().lowercase()
             when (btn) {
                 "edit profile" -> {
-
                     Navigation.findNavController(it)
                         .navigate(R.id.action_profilfragment_to_editProfileFragment)
-
-
                 }
                 "follow" -> {
 
@@ -162,7 +181,6 @@ class ProfileFragment : Fragment() {
                         .update("following.${profileid}", FieldValue.delete())
                     firestore.collection("Follow").document(profileid!!)
                         .update("followers.${firbaseUser.uid}", FieldValue.delete())
-        //                deleteNotication()
                     binding.editProfil.text = "follow"
                 }
             }
@@ -235,41 +253,7 @@ class ProfileFragment : Fragment() {
     }
 
 
-    // buglar var deye delete islemi qalir
-    private fun deleteNotication() {
-        var key = ""
-        val ref = firestore.collection("Notification").document(profileid!!)
-        ref.addSnapshotListener { value, error ->
-            if (error != null) {
-            } else {
-                if (value != null) {
-                    try {
-                        val datakeys = value.data as HashMap<*, *>
-                        for (data in datakeys) {
-                            val value1 = data.value as HashMap<*, *>
-                            val userId = value1["userId"] as String
-                            val ntext = value1["nText"] as String
-                            if (ntext == "started following you" && userId == firbaseUser.uid) {
-
-                                key = data.key.toString()
-
-                                ref.update(key, FieldValue.delete())
-                                break
-                            }
-                        }
-                    } catch (e: NullPointerException) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-
-        }
-
-
-    }
-
     fun getPlayerIdSendNotification(userId: String) {
-
 
         var username = ""
         Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
@@ -315,11 +299,6 @@ class ProfileFragment : Fragment() {
             )
 
 
-
-//            OneSignal.postNotification(
-//                JSONObject("{'contents': {'en':'$username : started following you'}, 'include_player_ids': ['$playerId']}"),
-//                null
-//            )
         } catch (e: JSONException) {
             e.printStackTrace()
         }

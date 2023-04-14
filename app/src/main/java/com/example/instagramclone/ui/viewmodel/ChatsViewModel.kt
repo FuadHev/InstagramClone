@@ -18,18 +18,20 @@ class ChatsViewModel:ViewModel() {
 
     val chatList=MutableLiveData<List<ChatUser>>()
 
-
-
     fun getUsersId(){
         Firebase.firestore.collection("Chats").addSnapshotListener { value, error ->
 
-            if (value!=null){
+            if (value!=null&&!value.isEmpty){
                 val idList=ArrayList<String>()
                 for (doc in value.documents){
 
-                    val senderId=doc.get("senderId") as String
+                    val senderId=doc.get("senderId") as? String
                     if (senderId!=Firebase.auth.currentUser!!.uid){
-                        idList.add(senderId)
+                        if (senderId != null) {
+                            idList.add(senderId)
+                        }else{
+
+                        }
                     }
 
                 }
@@ -37,6 +39,8 @@ class ChatsViewModel:ViewModel() {
                 allUser(idList)
             }
         }
+
+
     }
     fun allUser(idList:ArrayList<String>){
 
@@ -81,13 +85,19 @@ class ChatsViewModel:ViewModel() {
                 if (value!=null){
                     val chatlist = ArrayList<ChatUser>()
                     for ( doc in value.documents){
+                        Log.e("data",doc.data.toString())
 
                         val time = doc.get("time") as Timestamp
                         val seen = doc.get("seen") as Boolean
                         val senderId=doc.get("senderId") as String
                         val lastMessage=doc.get("lastmessage") as String
                         for (user in alluser){
-                            if (user.user_id==senderId){
+//                            if (user.user_id==senderId){
+//                                val chatUser = ChatUser(user.user_id, user.username, user.imageurl,lastMessage ,time,seen)
+//                                chatlist.add(chatUser)
+//
+//                            }
+                            if (Firebase.auth.currentUser!!.uid+user.user_id==doc.id){
                                 val chatUser = ChatUser(user.user_id, user.username, user.imageurl,lastMessage ,time,seen)
                                 chatlist.add(chatUser)
 
@@ -101,7 +111,7 @@ class ChatsViewModel:ViewModel() {
 
                     }
                     Log.e("allchatuser",chatlist.toString())
-                    chatList.value=chatlist
+                    chatList.postValue(chatlist)
                 }
             }
         }

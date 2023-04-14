@@ -15,7 +15,7 @@ class HomeViewModel : ViewModel() {
 //    val postsList = MutableLiveData<ArrayList<Posts>>()
 //    val storiesList = MutableLiveData<ArrayList<Story>>()
     val postList = ArrayList<Posts>()
-    val followList = ArrayList<String>()
+
     val storyList = ArrayList<Story>()
     val firestore = Firebase.firestore
     lateinit var auth: FirebaseUser
@@ -33,7 +33,9 @@ class HomeViewModel : ViewModel() {
                 } else {
 
 
+
                     if (documentSnapshot != null && documentSnapshot.exists()) {
+                        val followList = ArrayList<String>()
                         val follow = documentSnapshot.data
 
                         if (follow != null) {
@@ -44,6 +46,11 @@ class HomeViewModel : ViewModel() {
                                 for (i in following) {
                                     followList.add(i.key as String)
                                 }
+
+                                readPost(followList)
+                                readStory(followList)
+
+
 
 
 
@@ -64,7 +71,7 @@ class HomeViewModel : ViewModel() {
     }
 
 
-    fun readPost() {
+    fun readPost(followList:ArrayList<String>) {
 
         firestore.collection("Posts").addSnapshotListener { value, error ->
             if (error != null) {
@@ -87,7 +94,6 @@ class HomeViewModel : ViewModel() {
                                     postList.add(post)
                                 }
                             }
-
                             postList.sortByDescending {
                                 it.time
                             }
@@ -109,7 +115,7 @@ class HomeViewModel : ViewModel() {
         }
 
     }
-    fun readStory() {
+    fun readStory(followList:ArrayList<String>) {
 
         storyList.clear()
         storyList.add(Story("", 0, 0, "", Firebase.auth.currentUser!!.uid))

@@ -59,7 +59,13 @@ class LoginFragment : Fragment() {
 
 
 
+
+
         return view
+    }
+
+    fun forgotPassword(){
+        findNavController().navigate(R.id.action_loginFragment_to_forgotPasswordFragment)
     }
 
 
@@ -70,13 +76,14 @@ class LoginFragment : Fragment() {
         progress.setMessage("Please wait")
 
 
-        if (email == "" || password == "") {
+
+        if (email.trim() == "" || password.trim() == "") {
             Toast.makeText(requireContext(), "Enter Email and Password ", Toast.LENGTH_SHORT).show()
             progress.dismiss()
 
         } else {
             progress.show()
-            auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+            auth.signInWithEmailAndPassword(email.trim(), password.trim()).addOnSuccessListener {
 
                 progress.dismiss()
                 activity?.let {

@@ -12,4 +12,5 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="enter_your_email_and_we_ll_send_you_a_link_to_get_back_into_your_account">Enter your email and we\'ll send you a link to get back into your account</string>
 </resources>

@@ -13,10 +13,18 @@
         <action
             android:id="@+id/goToSingUp"
             app:destination="@id/singupFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
+            app:destination="@id/forgotPasswordFragment" />
     </fragment>
     <fragment
         android:id="@+id/singupFragment"
         android:name="com.example.instagramclone.ui.fragments.SingupFragment"
         android:label="fragment_singup"
         tools:layout="@layout/fragment_singup" />
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.example.instagramclone.ui.fragments.ForgotPasswordFragment"
+        android:label="ForgotPasswordFragment"
+        tools:layout="@layout/fragment_forgot_password"/>
 </navigation>

@@ -11,7 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
-class MessaggeAdapter(private val messageList:ArrayList<Message>):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
+class MessaggeAdapter(private var messageList:List<Message>):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
 
     val ITEM_RECEIVE=1
@@ -53,6 +53,12 @@ class MessaggeAdapter(private val messageList:ArrayList<Message>):RecyclerView.A
 
     }
 
+    fun updateMessages(newMessageList:List<Message>){
+        this.messageList=newMessageList
+        notifyDataSetChanged()
+
+    }
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
         val currentMessage=messageList[position]
@@ -62,10 +68,16 @@ class MessaggeAdapter(private val messageList:ArrayList<Message>):RecyclerView.A
 
             b.txtSendMessage.text=currentMessage.messagetxt
 
+
+
         }else{
             val viewHolder= holder as ReceiveViewHolder
             val b=viewHolder.view
+
+            
             b.txtSendMessage.text=currentMessage.messagetxt
+
+
 
         }
     }
