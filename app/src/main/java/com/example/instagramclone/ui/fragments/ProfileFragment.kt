@@ -18,6 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.instagramclone.MainActivity
 import com.example.instagramclone.R
+import com.example.instagramclone.base.BaseFragment
 import com.example.instagramclone.databinding.FragmentProfileBinding
 import com.example.instagramclone.ui.adapters.MyFotoAdapter
 import com.example.instagramclone.ui.viewmodel.ProfileViewModel
@@ -30,12 +31,13 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.onesignal.OneSignal
+import com.squareup.picasso.Picasso
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
 
-class ProfileFragment : Fragment() {
+class ProfileFragment : BaseFragment() {
 
     private lateinit var binding: FragmentProfileBinding
     private lateinit var firbaseUser: FirebaseUser
@@ -45,8 +47,6 @@ class ProfileFragment : Fragment() {
     private lateinit var firestore: FirebaseFirestore
     private var profileid: String? = null
     private lateinit var viewModel: ProfileViewModel
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val tempViewModel: ProfileViewModel by viewModels()
@@ -54,53 +54,50 @@ class ProfileFragment : Fragment() {
 
     }
 
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_profile, container, false)
 
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         firbaseUser = Firebase.auth.currentUser!!
         firestore = Firebase.firestore
-
-
         val args = arguments
         profileid = args?.getString("profileid") ?: firbaseUser.uid
-
-
         (activity as AppCompatActivity).setSupportActionBar(binding.toolbar2)
-
-        binding.fotosRv.visibility = VISIBLE
-        binding.savesRv.visibility = GONE
         binding.fotosRv.setHasFixedSize(true)
         binding.fotosRv.layoutManager = GridLayoutManager(requireContext(), 3)
-        binding.savesRv.layoutManager = GridLayoutManager(requireContext(), 3)
 
-        viewModel.postsList.observe(viewLifecycleOwner) {
-            adapter.updateMyPosts(it)
-            binding.fotosRv.adapter = adapter
-        }
-
+        binding.fotosRv.adapter = adapter
         profileid?.let {
             viewModel.userInfo(
                 requireContext(),
-                it,
-                binding.username,
-                binding.bio,
-                binding.imageProfile
+                it
             )
         }
+
+//        viewModel.postsList.observe(viewLifecycleOwner) {
+//
+//            adapter.updateMyPosts(it)
+//        }
+//        viewModel.userInfo.observe(viewLifecycleOwner){
+//            binding.username.text=it.username
+//            binding.bio.text=it.bio
+//            Picasso.get().load(it.imageurl).into(binding.imageProfile)
+//        }
+
+
         getFollower()
         getNrPost()
-        profileid?.let { viewModel.myFotos(firestore, it) }
-        viewModel.mySaves(firestore, firbaseUser)
+        profileid?.let { viewModel.myFotos(it) }
+        viewModel.mySaves()
 
 
         if (profileid == firbaseUser.uid) {
@@ -190,25 +187,18 @@ class ProfileFragment : Fragment() {
         binding.save.setOnClickListener {
             viewModel.savesList.observe(viewLifecycleOwner) {
                 adapter.updateMyPosts(it)
-                binding.savesRv.adapter = adapter
             }
-            binding.fotosRv.visibility = GONE
-            binding.savesRv.visibility = VISIBLE
+
         }
         binding.myPhotos.setOnClickListener {
             viewModel.postsList.observe(viewLifecycleOwner) {
                 adapter.updateMyPosts(it)
-                binding.fotosRv.adapter = adapter
             }
-            binding.fotosRv.visibility = VISIBLE
-            binding.savesRv.visibility = GONE
+
         }
 
         binding.following.setOnClickListener {
-
-
             val arg = Bundle()
-
             arg.putString("id", profileid)
             arg.putString("follow", "following")
 
@@ -232,6 +222,8 @@ class ProfileFragment : Fragment() {
 
 
     }
+
+
 
 
     private fun addNotification() {
@@ -431,6 +423,19 @@ class ProfileFragment : Fragment() {
 
 
     }
+
+    override fun addObserves() {
+        viewModel.postsList.observe(viewLifecycleOwner) {
+            adapter.updateMyPosts(it)
+        }
+        viewModel.userInfo.observe(viewLifecycleOwner){
+            binding.username.text=it.username
+            binding.bio.text=it.bio
+            Picasso.get().load(it.imageurl).into(binding.imageProfile)
+        }
+    }
+
+
 
 
 }

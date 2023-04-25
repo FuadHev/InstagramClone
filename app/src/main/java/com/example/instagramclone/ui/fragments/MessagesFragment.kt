@@ -2,6 +2,7 @@ package com.example.instagramclone.ui.fragments
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +10,12 @@ import android.view.ViewGroup
 import android.widget.Adapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
+import com.example.instagramclone.base.BaseFragment
 import com.example.instagramclone.data.entity.Comment
 import com.example.instagramclone.data.entity.Message
 import com.example.instagramclone.databinding.FragmentMessagesBinding
@@ -33,13 +36,10 @@ import org.json.JSONObject
 import java.util.UUID
 
 
-class MessagesFragment : Fragment() {
+class MessagesFragment : BaseFragment() {
 
     private lateinit var binding: FragmentMessagesBinding
     private val args by navArgs<MessagesFragmentArgs>()
-    private lateinit var messagesList: ArrayList<Message>
-
-    //    private lateinit var messageAdapter: MessaggeAdapter
     var senderRoom: String? = null
     var receiverRoom: String? = null
     private lateinit var firestore: FirebaseFirestore
@@ -59,6 +59,7 @@ class MessagesFragment : Fragment() {
         return binding.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val currentUser = args.userId
@@ -73,68 +74,84 @@ class MessagesFragment : Fragment() {
         senderRoom = receiverUid + senderUid
         receiverRoom = senderUid + receiverUid
 
-        messagesList = ArrayList()
         viewModel.readMessages(senderRoom!!)
-        binding.messageRv.layoutManager = LinearLayoutManager(requireActivity())
-        viewModel.messageList.observe(viewLifecycleOwner) {
-            messageAdapter.updateMessages(it)
-            binding.messageRv.adapter = messageAdapter
-        }
+        val layoutManager=LinearLayoutManager(requireActivity())
+        binding.messageRv.layoutManager = layoutManager
+        binding.messageRv.adapter = messageAdapter
 
+        binding.nestedScroll.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
+            // RecyclerView'ın son elemanı ekranda görünürse
+            if (scrollY == binding.nestedScroll.getChildAt(0).measuredHeight - binding.nestedScroll.measuredHeight) {
+                // RecyclerView'ın son elemanına odaklan
+                layoutManager.scrollToPositionWithOffset(messageAdapter.itemCount - 1, 0)
+            }
+        })
+//        viewModel.messageList.observe(viewLifecycleOwner) {
+//            messageAdapter.updateMessages(it)
+//            binding.nestedScroll.post {
+//                binding.nestedScroll.fullScroll(View.FOCUS_DOWN)
+//                binding.editMessage.requestFocus()
+//            }
+//
+//        }
 
-
-
+//        viewModel.messageList.observe(viewLifecycleOwner) {
+//            messageAdapter.updateMessages(it)
+//            binding.nestedScroll.smoothScrollTo(0,binding.messageRv.bottom)
+//        }
 
         binding.send.setOnClickListener {
-
             sendMessage(senderUid, receiverUid)
-
         }
 
 
     }
 
+
     fun sendMessage(senderUid: String, receiverUid: String) {
         val randomkey = UUID.randomUUID().toString()
-
         val message = binding.editMessage.text.toString()
-        val hkey = hashMapOf<String, Any>()
-        val hmessage = hashMapOf<Any, Any>()
-        hmessage["messageId"] = randomkey
-        hmessage["messagetxt"] = message
-        hmessage["seen"] = false
-        hmessage["senderId"] = senderUid
-        hmessage["time"] = Timestamp.now()
 
-        hkey[randomkey] = hmessage
+        if (message.trim()!=""){
+            val hkey = hashMapOf<String, Any>()
+            val hmessage = hashMapOf<Any, Any>()
+            hmessage["messageId"] = randomkey
+            hmessage["messagetxt"] = message
+            hmessage["seen"] = false
+            hmessage["senderId"] = senderUid
+            hmessage["time"] = Timestamp.now()
 
-        firestore.collection("Messages").document(senderRoom!!).set(hkey, SetOptions.merge())
-            .addOnSuccessListener {
+            hkey[randomkey] = hmessage
 
-                getPlayerIdSendNotification(receiverUid, message)
-            }
-        firestore.collection("Messages").document(receiverRoom!!)
-            .set(hkey, SetOptions.merge())
-        firestore.collection("Chats").document(receiverRoom!!)
-            .set(
-                hashMapOf(
-                    "time" to Timestamp.now(),
-                    "seen" to true,
-                    "lastmessage" to "",
-                    "senderId" to receiverUid
+            firestore.collection("Messages").document(senderRoom!!).set(hkey, SetOptions.merge())
+                .addOnSuccessListener {
+
+                    getPlayerIdSendNotification(receiverUid, message)
+                }
+            firestore.collection("Messages").document(receiverRoom!!)
+                .set(hkey, SetOptions.merge())
+            firestore.collection("Chats").document(receiverRoom!!)
+                .set(
+                    hashMapOf(
+                        "time" to Timestamp.now(),
+                        "seen" to true,
+                        "lastmessage" to "",
+                        "senderId" to receiverUid
+                    )
                 )
-            )
-        firestore.collection("Chats").document(senderRoom!!)
-            .set(
-                hashMapOf(
-                    "time" to Timestamp.now(),
-                    "seen" to false,
-                    "lastmessage" to message,
-                    "senderId" to senderUid
+            firestore.collection("Chats").document(senderRoom!!)
+                .set(
+                    hashMapOf(
+                        "time" to Timestamp.now(),
+                        "seen" to false,
+                        "lastmessage" to message,
+                        "senderId" to senderUid
+                    )
                 )
-            )
 
-        binding.editMessage.setText("")
+            binding.editMessage.setText("")
+        }
+
     }
 
     override fun onResume() {
@@ -233,6 +250,16 @@ class MessagesFragment : Fragment() {
             e.printStackTrace()
         }
 
+    }
+    override fun addObserves() {
+        viewModel.messageList.observe(viewLifecycleOwner) {
+            messageAdapter.updateMessages(it)
+            binding.nestedScroll.post {
+                binding.nestedScroll.fullScroll(View.FOCUS_DOWN)
+                binding.editMessage.requestFocus()
+            }
+
+        }
     }
 
 

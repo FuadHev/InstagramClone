@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.databinding.FragmentEditProfileBinding
 import com.google.android.material.snackbar.Snackbar
@@ -70,6 +71,9 @@ class EditProfileFragment : Fragment() {
         }
         binding.save.setOnClickListener {
             upload(it)
+        }
+        binding.close.setOnClickListener {
+            findNavController().navigate(EditProfileFragmentDirections.actionEditProfileFragmentToProfileFragment())
         }
 
 

@@ -8,8 +8,10 @@ import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.instagramclone.data.entity.Posts
+import com.example.instagramclone.data.entity.Users
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -19,14 +21,15 @@ import de.hdodenhof.circleimageview.CircleImageView
 class ProfileViewModel:ViewModel() {
     val postsList= MutableLiveData<ArrayList<Posts>>()
     val savesList=MutableLiveData<ArrayList<Posts>>()
+    val userInfo=MutableLiveData<Users>()
 
 
 
 
-    fun mySaves(firestore: FirebaseFirestore,firebaseUser: FirebaseUser){
+    fun mySaves(){
 
        val mySaves=ArrayList<String>()
-        firestore.collection("Saves").document(firebaseUser.uid).addSnapshotListener { value, error ->
+        Firebase.firestore.collection("Saves").document(Firebase.auth.currentUser!!.uid).addSnapshotListener { value, error ->
             if (error!=null){
 
             }else{
@@ -36,7 +39,7 @@ class ProfileViewModel:ViewModel() {
                         for (savekeys in data){
                             mySaves.add(savekeys.key as String)
                         }
-                        readSaves(firestore,mySaves)
+                        readSaves(mySaves)
 
                     }
                 }catch (e:Exception){
@@ -50,11 +53,11 @@ class ProfileViewModel:ViewModel() {
 
 
     }
-    fun readSaves(firestore: FirebaseFirestore,mySaves:ArrayList<String>){
+    fun readSaves(mySaves:ArrayList<String>){
         val save_postList=ArrayList<Posts>()
-        firestore.collection("Posts").addSnapshotListener { value, error ->
+        Firebase.firestore.collection("Posts").addSnapshotListener { value, error ->
             if (error!=null){
-
+                error.localizedMessage?.let { Log.e("posts", it) }
             }else{
                 if (value!=null){
                     for (document in value.documents){
@@ -90,7 +93,7 @@ class ProfileViewModel:ViewModel() {
 
 
 
-    fun userInfo(context: Context, profileId:String, userName:TextView, bioinfo:TextView, profilImage:CircleImageView) {
+    fun userInfo(context: Context, profileId:String) {
 
         Firebase.firestore.collection("user").document(profileId).addSnapshotListener { value, error ->
             if (error != null) {
@@ -101,9 +104,11 @@ class ProfileViewModel:ViewModel() {
                     val username = value.get("username") as String
                     val imageurl = value.get("image_url") as String
                     val bio = value.get("bio") as String
-                    Picasso.get().load(imageurl).into(profilImage)
-                    userName.text=username
-                    bioinfo.text=bio
+//                    Picasso.get().load(imageurl).into(profilImage)
+//                    userName.text=username
+//                    bioinfo.text=bio
+                    val user=Users(profileId,"",username,"",imageurl,bio)
+                    userInfo.value=user
 
                 }
 
@@ -118,9 +123,9 @@ class ProfileViewModel:ViewModel() {
 
 
 
-    fun  myFotos(firestore:FirebaseFirestore,profileid:String){
+    fun  myFotos(profileid:String){
 
-        firestore.collection("Posts").addSnapshotListener { value, error ->
+        Firebase.firestore.collection("Posts").addSnapshotListener { value, error ->
             if (error != null) {
                 error.localizedMessage?.let { Log.e("", it) }
             } else {
@@ -153,7 +158,7 @@ class ProfileViewModel:ViewModel() {
                     postList.sortByDescending {
                         it.time
                     }
-                    postsList.value=postList
+                    postsList.postValue(postList)
 
                 }
 

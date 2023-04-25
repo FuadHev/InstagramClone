@@ -61,7 +61,6 @@ class HomeFragment : Fragment() {
 //        progress.setMessage("Please wait")
 //        progress.show()
         viewModel.checkFollowing()
-//        checkFollowing()
         binding.postRv.setHasFixedSize(true)
         val linerLayoutManager = LinearLayoutManager(requireActivity())
         binding.storyRv.layoutManager =

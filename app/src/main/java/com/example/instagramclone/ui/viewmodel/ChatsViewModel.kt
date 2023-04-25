@@ -29,8 +29,6 @@ class ChatsViewModel:ViewModel() {
                     if (senderId!=Firebase.auth.currentUser!!.uid){
                         if (senderId != null) {
                             idList.add(senderId)
-                        }else{
-
                         }
                     }
 
@@ -39,6 +37,9 @@ class ChatsViewModel:ViewModel() {
                 allUser(idList)
             }
         }
+
+
+ // preference fragment ayarlar fragmenti ucun  //
 
 
     }

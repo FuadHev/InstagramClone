@@ -19,10 +19,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="1dp"
         android:fillViewport="true"
+        android:focusableInTouchMode="true"
+        android:fitsSystemWindows="true"
         app:layout_constraintBottom_toTopOf="@+id/edit_message"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.857"
@@ -40,7 +43,7 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center"
-                android:src="@drawable/faceicon" />
+                android:src="@drawable/defaultimage" />
 
             <TextView
                 android:id="@+id/m_username"
