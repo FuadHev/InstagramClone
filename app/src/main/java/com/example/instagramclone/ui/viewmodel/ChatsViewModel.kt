@@ -93,11 +93,6 @@ class ChatsViewModel:ViewModel() {
                         val senderId=doc.get("senderId") as String
                         val lastMessage=doc.get("lastmessage") as String
                         for (user in alluser){
-//                            if (user.user_id==senderId){
-//                                val chatUser = ChatUser(user.user_id, user.username, user.imageurl,lastMessage ,time,seen)
-//                                chatlist.add(chatUser)
-//
-//                            }
                             if (Firebase.auth.currentUser!!.uid+user.user_id==doc.id){
                                 val chatUser = ChatUser(user.user_id, user.username, user.imageurl,lastMessage ,time,seen)
                                 chatlist.add(chatUser)
@@ -111,7 +106,6 @@ class ChatsViewModel:ViewModel() {
 
 
                     }
-                    Log.e("allchatuser",chatlist.toString())
                     chatList.postValue(chatlist)
                 }
             }

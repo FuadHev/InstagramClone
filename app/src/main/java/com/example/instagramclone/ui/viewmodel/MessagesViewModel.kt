@@ -1,16 +1,50 @@
 package com.example.instagramclone.ui.viewmodel
 
-import androidx.lifecycle.LiveData
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.instagramclone.data.entity.Message
+import com.example.instagramclone.data.entity.Users
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class MessagesViewModel : ViewModel() {
     val messageList = MutableLiveData<List<Message>>()
+    val userInfo=MutableLiveData<Users>()
+    val checkSession=MutableLiveData<String>()
 
+
+    fun checkSession(profileId:String){
+        Firebase.firestore.collection("user").document(profileId).addSnapshotListener { value, error ->
+            if (error!=null){
+                error.localizedMessage?.let { Log.e("user_Error", it) }
+                return@addSnapshotListener
+            }
+            if (value!=null&&value.exists()){
+
+                val username = value.get("username") as String
+                val imageurl = value.get("image_url") as String
+                val online = value.get("online") as Boolean
+
+                val user=Users(username,imageurl)
+
+                Log.e("checksession",online.toString())
+                if (online){
+                    checkSession.postValue("online")
+                }else{
+
+                    checkSession.postValue("offline")
+                }
+
+                userInfo.postValue(user)
+
+
+
+            }
+
+        }
+    }
 
     fun readMessages(senderRoom: String) {
         Firebase.firestore.collection("Messages").document(senderRoom)

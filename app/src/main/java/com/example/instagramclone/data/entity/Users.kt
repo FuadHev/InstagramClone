@@ -1,9 +1,8 @@
 package com.example.instagramclone.data.entity
 
-import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-@Parcelize
+
 data class Users(
     val user_id: String,
     val email: String,
@@ -11,4 +10,7 @@ data class Users(
     val password: String,
     val imageurl:String,
     val bio:String
-):Parcelable
+):java.io.Serializable{
+
+    constructor(username: String, imageurl: String) : this(user_id="",email="",username=username,password="",imageurl=imageurl,bio="")
+}

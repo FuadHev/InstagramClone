@@ -3,6 +3,7 @@ package com.example.instagramclone.ui.fragments
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -68,14 +69,15 @@ class MessagesFragment : BaseFragment() {
 
         val senderUid = Firebase.auth.currentUser!!.uid
 
-        userInfo(currentUser, binding.mUsername, binding.chatImage)
+//        userInfo(currentUser, binding.mUsername, binding.chatImage)
+
 
 
         senderRoom = receiverUid + senderUid
         receiverRoom = senderUid + receiverUid
-
+        viewModel.checkSession(currentUser)
         viewModel.readMessages(senderRoom!!)
-        val layoutManager=LinearLayoutManager(requireActivity())
+        val layoutManager = LinearLayoutManager(requireActivity())
         binding.messageRv.layoutManager = layoutManager
         binding.messageRv.adapter = messageAdapter
 
@@ -99,7 +101,7 @@ class MessagesFragment : BaseFragment() {
         val randomkey = UUID.randomUUID().toString()
         val message = binding.editMessage.text.toString()
 
-        if (message.trim()!=""){
+        if (message.trim() != "") {
             val hkey = hashMapOf<String, Any>()
             val hmessage = hashMapOf<Any, Any>()
             hmessage["messageId"] = randomkey
@@ -149,32 +151,33 @@ class MessagesFragment : BaseFragment() {
     }
 
 
-    private fun userInfo(profileId: String, userName: TextView, profilImage: CircleImageView) {
-
-        Firebase.firestore.collection("user").document(profileId)
-            .addSnapshotListener { value, error ->
-                if (error != null) {
-                    Toast.makeText(requireContext(), error.localizedMessage, Toast.LENGTH_SHORT)
-                        .show()
-                } else {
-                    if (value != null && value.exists()) {
-
-                        val username = value.get("username") as String
-                        val imageurl = value.get("image_url") as String
-
-                        Picasso.get().load(imageurl).into(profilImage)
-                        userName.text = username
-
-
-                    }
-
-
-                }
-
-            }
-
-
-    }
+//    private fun userInfo(profileId: String, userName: TextView, profilImage: CircleImageView) {
+//
+//        Firebase.firestore.collection("user").document(profileId)
+//            .addSnapshotListener { value, error ->
+//                if (error != null) {
+//                    Toast.makeText(requireContext(), error.localizedMessage, Toast.LENGTH_SHORT)
+//                        .show()
+//                } else {
+//                    if (value != null && value.exists()) {
+//
+//                        val username = value.get("username") as String
+//                        val imageurl = value.get("image_url") as String
+//                        val online=value.get("online") as? Boolean
+//
+//                        Picasso.get().load(imageurl).into(profilImage)
+//                        userName.text = username
+//
+//
+//                    }
+//
+//
+//                }
+//
+//            }
+//
+//
+//    }
 
 
     private fun getPlayerIdSendNotification(userId: String, message: String) {
@@ -184,27 +187,29 @@ class MessagesFragment : BaseFragment() {
         Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
             .addSnapshotListener { value, error ->
                 if (error != null) {
-
-                } else {
-                    if (value != null) {
-                        username = value.get("username") as String
-                        profilImage = value.get("image_url") as String
-                    }
+                    error.localizedMessage?.let { Log.e("user_error", it) }
+                    return@addSnapshotListener
                 }
+                if (value != null) {
+                    username = value.get("username") as String
+                    profilImage = value.get("image_url") as String
+                }
+
             }
         Firebase.firestore.collection("user").document(userId).addSnapshotListener { value, error ->
             if (error != null) {
-
-            } else {
-                if (value != null) {
-
-                    val playerId = value.get("playerId") as String?
-                    if (playerId != null) {
-                        sentPushNotification(playerId, username, message, profilImage)
-                    }
-
-                }
+                error.localizedMessage?.let { Log.e("user_error", it) }
+                return@addSnapshotListener
             }
+            if (value != null) {
+
+                val playerId = value.get("playerId") as String?
+                if (playerId != null) {
+                    sentPushNotification(playerId, username, message, profilImage)
+                }
+
+            }
+
         }
 
     }
@@ -240,6 +245,7 @@ class MessagesFragment : BaseFragment() {
         }
 
     }
+
     override fun addObserves() {
         viewModel.messageList.observe(viewLifecycleOwner) {
             messageAdapter.updateMessages(it)
@@ -247,6 +253,21 @@ class MessagesFragment : BaseFragment() {
                 binding.nestedScroll.fullScroll(View.FOCUS_DOWN)
                 binding.editMessage.requestFocus()
             }
+
+        }
+
+        viewModel.userInfo.observe(viewLifecycleOwner){
+            binding.mUsername.text=it.username
+            binding.toolbarUsername.text=it.username
+            Picasso.get().load(it.imageurl).into(binding.chatImage)
+            Picasso.get().load(it.imageurl).into(binding.tlbPImage)
+        }
+        viewModel.checkSession.observe(viewLifecycleOwner){
+
+                binding.session.text=it
+
+
+
 
         }
     }
