@@ -14,11 +14,10 @@
 
         <ImageView
             android:id="@+id/postImage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
             android:layout_margin="1dp"
-            />
+            android:adjustViewBounds="true" />
 
     </androidx.cardview.widget.CardView>
 

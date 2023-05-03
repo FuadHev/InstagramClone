@@ -37,7 +37,8 @@ class MyFotoAdapter(private var postList:List<Posts>):RecyclerView.Adapter<MyFot
         val post=postList[position]
         val b=holder.view
 
-        Picasso.get().load(post.postImage).resize(1980,1720).centerCrop().into(b.postImage)
+//        Picasso.get().load(post.postImage).resize(1980,1720).centerCrop().into(b.postImage)
+        Picasso.get().load(post.postImage).resize(1280,1070).centerCrop().into(b.postImage)
 
 
         b.postImage.setOnClickListener {

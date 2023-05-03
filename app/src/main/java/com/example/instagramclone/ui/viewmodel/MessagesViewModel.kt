@@ -8,19 +8,19 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-class MessagesViewModel:ViewModel(){
-    val messageList=MutableLiveData<List<Message>>()
+class MessagesViewModel : ViewModel() {
+    val messageList = MutableLiveData<List<Message>>()
 
 
-     fun readMessages(senderRoom:String) {
+    fun readMessages(senderRoom: String) {
         Firebase.firestore.collection("Messages").document(senderRoom)
             .addSnapshotListener { value, error ->
                 if (error != null) {
                 } else {
                     if (value != null && value.exists()) {
                         try {
-                            val doc = value.data as HashMap<*,*>
-                            val messagesList=ArrayList<Message>()
+                            val doc = value.data as HashMap<*, *>
+                            val messagesList = ArrayList<Message>()
                             for (i in doc) {
                                 val message = i.value as HashMap<*, *>
                                 val messageId = message["messageId"] as String
@@ -37,7 +37,6 @@ class MessagesViewModel:ViewModel(){
                                 it.time
                             }
                             messageList.postValue(messagesList)
-
 
 
                         } catch (e: java.lang.NullPointerException) {

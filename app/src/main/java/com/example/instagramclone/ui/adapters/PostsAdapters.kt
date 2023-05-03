@@ -187,7 +187,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
 
     }
 
-    fun likeAnimation(likeImage: ImageView) {
+     private fun likeAnimation(likeImage: ImageView) {
         likeImage.visibility = VISIBLE
         val scaleanimX = ObjectAnimator.ofFloat(likeImage, "scaleX", 1.0f, 1.5f)
         val scaleanimY = ObjectAnimator.ofFloat(likeImage, "scaleY", 1.0f, 1.5f)

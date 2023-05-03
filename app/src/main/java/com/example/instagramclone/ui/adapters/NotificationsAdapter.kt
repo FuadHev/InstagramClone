@@ -18,7 +18,7 @@ import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 
-class NotificationsAdapter(private val notificationList: List<Notification>) :
+class NotificationsAdapter(private var notificationList: List<Notification>) :
     RecyclerView.Adapter<NotificationsAdapter.ViewHolder>() {
 
 
@@ -36,15 +36,16 @@ class NotificationsAdapter(private val notificationList: List<Notification>) :
         return notificationList.size
     }
 
+    fun updateList(newList:List<Notification>){
+        this.notificationList=newList
+        notifyDataSetChanged()
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val notification = notificationList[position]
         val b = holder.view
 
         getUserInfo(b.profilImage,b.username,notification.userId)
-
-
-
-
 
         val maxLength = 30 // Metnin maksimum uzunluğu
         if (notification.ntext.length> maxLength) {
@@ -68,12 +69,12 @@ class NotificationsAdapter(private val notificationList: List<Notification>) :
     }
 
 
-    fun getUserInfo(profilImage: CircleImageView, username: TextView, userId: String) {
+     private fun getUserInfo(profilImage: CircleImageView, username: TextView, userId: String) {
 
         Firebase.firestore.collection("user").document(userId).addSnapshotListener { value, error ->
 
             if (error != null) {
-
+                error.localizedMessage?.let { Log.e("userError", it) }
             }else{
                 try {
                     if (value!=null){
@@ -93,7 +94,7 @@ class NotificationsAdapter(private val notificationList: List<Notification>) :
 
     }
 
-    fun getPostImage(postId:String,postImageView:ImageView){
+    private fun getPostImage(postId:String,postImageView:ImageView){
         Firebase.firestore.collection("Posts").document(postId).addSnapshotListener { value, error ->
             if (error != null) {
 

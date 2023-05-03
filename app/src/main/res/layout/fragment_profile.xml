@@ -135,6 +135,7 @@
             android:id="@+id/image_profile"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            app:strokeColor="@null"
             android:src="@drawable/defaultimage"
             app:layout_constraintBottom_toBottomOf="@+id/linearLayout4"
             app:layout_constraintEnd_toEndOf="parent"
@@ -208,22 +209,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/bio">
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/my_photos"
-                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="30dp"
                 android:layout_weight="1"
-                app:srcCompat="@drawable/my_photos"
+                android:src="@drawable/my_photos"
                 app:strokeColor="@null" />
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/save"
-                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="30dp"
                 android:layout_weight="1"
-                app:srcCompat="@drawable/bookmark"
+                android:src="@drawable/bookmark"
                 app:strokeColor="@null" />
         </LinearLayout>
 

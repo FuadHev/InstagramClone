@@ -3,6 +3,7 @@ package com.example.instagramclone.ui.fragments
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
+import android.opengl.Visibility
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -36,12 +37,10 @@ class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var adapter: PostsAdapters
-    private lateinit var postList: ArrayList<Posts>
-    private lateinit var followList: ArrayList<String>
+    private lateinit var storyAdapter: StoryAdapter
     private val viewModel by activityViewModels<HomeViewModel>()
 
-    private lateinit var storyAdapter: StoryAdapter
-    private var storyList = ArrayList<Story>()
+
 
 
     override fun onCreateView(
@@ -50,38 +49,60 @@ class HomeFragment : Fragment() {
     ): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
 
-        postList = ArrayList()
-        followList = ArrayList()
+
         auth = Firebase.auth
-
         firestore = Firebase.firestore
-        viewModel.auth = auth.currentUser!!
-
-//        val progress = ProgressDialog(requireContext())
-//        progress.setMessage("Please wait")
-//        progress.show()
-        viewModel.checkFollowing()
         binding.postRv.setHasFixedSize(true)
         val linerLayoutManager = LinearLayoutManager(requireActivity())
         binding.storyRv.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.postRv.layoutManager = linerLayoutManager
+//        val progress = ProgressDialog(requireContext())
+//        progress.setMessage("Please wait loading post")
+//        progress.show()
 
-        adapter = PostsAdapters(requireContext(), viewModel.postList)
-        storyAdapter = StoryAdapter(requireContext(), viewModel.storyList)
 
-        binding.storyRv.adapter = storyAdapter
-        binding.postRv.adapter = adapter
+//        viewModel.checkFollowing()
+//        viewModel.readStory()
+//        viewModel.readPost()
 
+
+        binding.shimmer.visibility=View.VISIBLE
+        binding.shimmer.startShimmer()
+        binding.shimmerstory.startShimmer()
+
+        Handler().postDelayed({
+            adapter = PostsAdapters(requireContext(),viewModel.postList)
+            storyAdapter = StoryAdapter(requireContext(),viewModel.storyList)
+
+            binding.storyRv.adapter = storyAdapter
+            binding.postRv.adapter = adapter
+//            progress.dismiss()
+
+            binding.shimmer.stopShimmer()
+            binding.shimmerstory.stopShimmer()
+            binding.shimmerstory.visibility=View.GONE
+            binding.shimmer.visibility=View.GONE
+            binding.postRv.visibility=View.VISIBLE
+            binding.storyRv.visibility=View.VISIBLE
+        },1300)
+        
+        viewModel.checkMessageLiveData.observe(viewLifecycleOwner){
+            if (it){
+               binding.checkMessage.visibility=View.GONE
+            }else{
+                binding.checkMessage.visibility=View.VISIBLE
+            }
+        }
         binding.chat.setOnClickListener {
             val intent=Intent(requireActivity(),ChatActivity::class.java)
             requireActivity().startActivity(intent)
         }
-
         binding.swipeRefresh.setOnRefreshListener {
-            viewModel.checkFollowing()
-//            checkFollowing()
+            viewModel.readStory()
+            viewModel.readPost()
             adapter.updatePosts(viewModel.postList)
+            storyAdapter.updateStory(viewModel.storyList)
             Handler().postDelayed({
                 binding.swipeRefresh.isRefreshing = false
             }, 1200)
@@ -90,144 +111,7 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
-    private fun readStory() {
 
-        storyList.clear()
-        storyList.add(Story("", 0, 0, "", Firebase.auth.currentUser!!.uid))
-        for (id in followList) {
-            var countStory = 0
-            firestore.collection("Story").document(id).addSnapshotListener { value, error ->
-                if (error != null) {
-                    error.localizedMessage?.let { Log.e("error", it) }
-                } else {
-                    if (value != null && value.exists()) {
-                        val doc = value.data as HashMap<*, *>
-                        try {
-
-                            var ustory: Story? = null
-                            val timecurrent = System.currentTimeMillis()
-                            for (i in doc) {
-                                val story = i.value as HashMap<*, *>
-                                val timestart = story["timeStart"] as Long
-                                val timeend = story["timeEnd"] as Long
-                                val imageurl = story["imageurl"] as String
-                                val storyId = story["storyId"] as String
-                                val userId = story["userId"] as String
-                                if (timecurrent > timestart && timecurrent < timeend) {
-                                    countStory++
-                                }
-                                ustory = Story(imageurl, timestart, timeend, storyId, userId)
-
-                            }
-                            if (countStory > 0) {
-                                if (ustory != null) {
-                                    storyList.add(ustory)
-                                }
-                            }
-
-                            adapter.notifyDataSetChanged()
-
-
-                        } catch (e: java.lang.NullPointerException) {
-
-
-                        }
-
-
-                    }
-
-                }
-
-            }
-        }
-
-
-    }
-
-    private fun checkFollowing() {
-
-        firestore.collection("Follow").document(auth.currentUser!!.uid)
-            .addSnapshotListener { documentSnapshot, error ->
-                if (error != null) {
-                    error.localizedMessage?.let {
-                        Log.e("", it)
-                        return@addSnapshotListener
-                    }
-                } else {
-
-
-                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                        followList.clear()
-                        val follow = documentSnapshot.data
-
-                        if (follow != null) {
-                            try {
-
-                                val following = follow["following"] as HashMap<*, *>
-                                followList.clear()
-                                for (i in following) {
-                                    followList.add(i.key as String)
-
-                                }
-
-                                readStory()
-
-                            } catch (_: java.lang.NullPointerException) {
-
-                            }
-                        }
-
-                    } else {
-                        Log.e("", "")
-                    }
-                }
-            }
-
-
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    fun readPost() {
-
-        firestore.collection("Posts").addSnapshotListener { value, error ->
-            if (error != null) {
-                error.localizedMessage?.let { Log.e("", it) }
-            } else {
-
-                if (value != null) {
-                    for (document in value.documents) {
-                        try {
-                            val post_id = document.get("postId") as String
-                            val postImage = document.get("postImage") as String
-                            val description = document.get("description") as String
-                            val publisher = document.get("publisher") as String
-                            val time = document.get("time") as Timestamp
-                            val post = Posts(post_id, postImage, description, publisher, time)
-
-
-                            for (id in followList) {
-                                if (publisher == id) {
-                                    postList.add(post)
-                                }
-                            }
-
-                        } catch (_: java.lang.NullPointerException) {
-
-
-                        }
-
-
-                    }
-                    adapter.notifyDataSetChanged()
-
-                }
-
-
-            }
-
-        }
-
-    }
 
 
 }

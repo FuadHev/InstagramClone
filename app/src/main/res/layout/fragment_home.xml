@@ -16,7 +16,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context=".ui.fragments.HomeFragment" >
+            tools:context=".ui.fragments.HomeFragment">
 
 
             <androidx.core.widget.NestedScrollView
@@ -33,19 +33,45 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/shimmerstory"
+                        android:orientation="horizontal">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            >
+                            <include layout="@layout/story_item_shimmer"/>
+                        </LinearLayout>
+                    </com.facebook.shimmer.ShimmerFrameLayout>
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/story_rv"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
+                        android:layout_height="wrap_content"
+                        android:visibility="gone">
                     </androidx.recyclerview.widget.RecyclerView>
 
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/shimmer"
+                        android:orientation="vertical">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+                            <include layout="@layout/post_item_shimmer"/>
+                            <include layout="@layout/post_item_shimmer"/>
+                        </LinearLayout>
+                    </com.facebook.shimmer.ShimmerFrameLayout>
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/post_rv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
+                        android:visibility="gone"
                         tools:listitem="@layout/posts_card_view" />
 
                 </LinearLayout>
@@ -81,16 +107,29 @@
                         app:layout_constraintVertical_bias="0.0"
                         app:srcCompat="@drawable/instagram" />
 
+
                     <ImageView
                         android:id="@+id/chat"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.884"
                         app:layout_constraintStart_toEndOf="@+id/imageView4"
                         app:layout_constraintTop_toTopOf="parent"
                         app:srcCompat="@drawable/send" />
+
+                    <ImageView
+                        android:id="@+id/checkMessage"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:layout_marginEnd="-8dp"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toTopOf="@+id/chat"
+                        app:layout_constraintEnd_toEndOf="@+id/chat"
+                        app:layout_constraintTop_toTopOf="@+id/chat"
+                        app:layout_constraintVertical_bias="0.666"
+                        app:srcCompat="@drawable/checkmessage_icon" />
 
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

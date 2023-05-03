@@ -87,7 +87,6 @@ class UserAdapter(
         }
         v.follow.setOnClickListener {
 
-
             val following = hashMapOf<String, HashMap<String, Boolean>>()
             val id = hashMapOf<String, Boolean>()
             id[user.user_id] = true
@@ -128,7 +127,7 @@ class UserAdapter(
 
     }
 
-    fun getPlayerIdSendNotification(userId: String) {
+    private fun getPlayerIdSendNotification(userId: String) {
 
 
         var username = ""
@@ -144,6 +143,7 @@ class UserAdapter(
             }
         Firebase.firestore.collection("user").document(userId).addSnapshotListener { value, error ->
             if (error != null) {
+                error.localizedMessage?.let { Log.e("userError", it) }
 
             } else {
                 if (value != null) {

@@ -46,7 +46,7 @@
                     android:id="@+id/email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Email" />
+                    android:hint="Email.." />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -60,8 +60,7 @@
                     android:id="@+id/password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
-                    android:hint="Password" />
+                    android:hint="Password.." />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -106,19 +105,19 @@
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="36dp"
             android:text="or"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.501"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+            app:layout_constraintTop_toBottomOf="@+id/textView2"
+            app:layout_constraintVertical_bias="0.087" />
 
         <TextView
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="72dp"
-            android:layout_marginTop="36dp"
+            android:layout_marginTop="16dp"
             android:text="Dont havean account?"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
@@ -129,7 +128,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="@{()-> loginFragment.singUp(singUp)}"
-            android:text="  Sing up"
+            android:text="Sing up"
             android:textColor="#3797EF"
             app:layout_constraintBottom_toBottomOf="@+id/textView4"
             app:layout_constraintEnd_toEndOf="parent"
@@ -143,7 +142,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="@{()-> loginFragment.singIn(button,email.getText().toString(),password.getText().toString())}"
-            android:text="Sing in"
+            android:text="@string/sing_in"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout" />

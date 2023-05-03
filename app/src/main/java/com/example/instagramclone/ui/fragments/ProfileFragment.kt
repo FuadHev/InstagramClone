@@ -6,13 +6,14 @@ import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.view.View.*
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -46,13 +47,11 @@ class ProfileFragment : BaseFragment() {
     }
     private lateinit var firestore: FirebaseFirestore
     private var profileid: String? = null
-    private lateinit var viewModel: ProfileViewModel
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val tempViewModel: ProfileViewModel by viewModels()
-        viewModel = tempViewModel
-
+    private val viewModel by activityViewModels<ProfileViewModel>{
+        ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
     }
+
+
 
 
 
@@ -60,8 +59,7 @@ class ProfileFragment : BaseFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_profile, container, false)
-
+        binding = DataBindingUtil.inflate(inflater,R.layout.fragment_profile, container, false)
         return binding.root
     }
 
@@ -74,40 +72,37 @@ class ProfileFragment : BaseFragment() {
         (activity as AppCompatActivity).setSupportActionBar(binding.toolbar2)
         binding.fotosRv.setHasFixedSize(true)
         binding.fotosRv.layoutManager = GridLayoutManager(requireContext(), 3)
-
         binding.fotosRv.adapter = adapter
+
+
         profileid?.let {
             viewModel.userInfo(
-                requireContext(),
                 it
             )
         }
-
-//        viewModel.postsList.observe(viewLifecycleOwner) {
-//
-//            adapter.updateMyPosts(it)
-//        }
-//        viewModel.userInfo.observe(viewLifecycleOwner){
-//            binding.username.text=it.username
-//            binding.bio.text=it.bio
-//            Picasso.get().load(it.imageurl).into(binding.imageProfile)
-//        }
-
-
-        getFollower()
-        getNrPost()
-        profileid?.let { viewModel.myFotos(it) }
-        viewModel.mySaves()
 
 
         if (profileid == firbaseUser.uid) {
             binding.editProfil.text = "edit profile"
             binding.message.visibility=GONE
+            binding.options.visibility= VISIBLE
 
         } else {
             checkFollow()
             binding.save.visibility = GONE
+            binding.options.visibility= INVISIBLE
+
         }
+
+        viewModel.getFollower(profileid!!)
+        viewModel.getNrPost(profileid!!)
+//
+//        getFollower()
+//        getNrPost()
+        profileid?.let { viewModel.myFotos(it) }
+        viewModel.mySaves()
+
+
 
         binding.options.setOnClickListener {
 
@@ -122,6 +117,10 @@ class ProfileFragment : BaseFragment() {
                     val intent =Intent(requireActivity(),MainActivity::class.java)
                     requireActivity().finish()
                     startActivity(intent)
+                    true
+                }
+                R.id.settings->{
+
                     true
                 }
                 else-> false
@@ -202,7 +201,7 @@ class ProfileFragment : BaseFragment() {
             arg.putString("id", profileid)
             arg.putString("follow", "following")
 
-            Navigation.findNavController(it)
+           findNavController()
                 .navigate(R.id.action_profilfragment_to_followersFragment, arg)
 
         }
@@ -213,8 +212,6 @@ class ProfileFragment : BaseFragment() {
 
             arg.putString("id", profileid)
             arg.putString("follow", "followers")
-
-
             Navigation.findNavController(it)
                 .navigate(R.id.action_profilfragment_to_followersFragment, arg)
 
@@ -222,12 +219,7 @@ class ProfileFragment : BaseFragment() {
 
 
     }
-
-
-
-
     private fun addNotification() {
-
         val ref = Firebase.firestore.collection("Notification").document(profileid!!)
         val nKey = UUID.randomUUID()
         val notification = hashMapOf<String, Any>()
@@ -238,14 +230,13 @@ class ProfileFragment : BaseFragment() {
         notifi["isPost"] = false
         notifi["notificationId"]=nKey.toString()
         notifi["time"] = Timestamp.now()
-
         notification[nKey.toString()] = notifi
 
         ref.set(notification, SetOptions.merge())
     }
 
 
-    fun getPlayerIdSendNotification(userId: String) {
+    private fun getPlayerIdSendNotification(userId: String) {
 
         var username = ""
         Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
@@ -300,7 +291,6 @@ class ProfileFragment : BaseFragment() {
 
     private fun checkFollow() {
         binding.editProfil.text = "follow"
-
         firestore.collection("Follow").document(firbaseUser.uid)
             .addSnapshotListener { documentSnapshot, error ->
                 if (error != null) {
@@ -315,7 +305,7 @@ class ProfileFragment : BaseFragment() {
                         if (follow != null) {
 
                             try {
-                                val following = follow["following"] as HashMap<*, *>
+                                val following = follow["following"] as HashMap<*,*>
                                 if (following.containsKey(profileid)) {
                                     binding.editProfil.text = "following"
                                 } else {
@@ -335,94 +325,94 @@ class ProfileFragment : BaseFragment() {
 
 
     }
-
-    private fun getFollower() {
-
-        firestore.collection("Follow").document(profileid!!)
-            .addSnapshotListener { documentSnapshot, error ->
-                if (error != null) {
-                    error.localizedMessage?.let {
-                        Log.e("", it)
-                        return@addSnapshotListener
-                    }
-                } else {
-                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                        val follow = documentSnapshot.data
-
-                        if (follow != null) {
-
-                            try {
-                                val followers = follow["followers"] as HashMap<*, *>
-                                binding.followers.text = followers.keys.count().toString()
-
-                            } catch (_: java.lang.NullPointerException) {
-
-                            }
-
-                        }
-
-                    } else {
-                        Log.e("", "")
-                    }
-                }
-            }
-
-
-
-        firestore.collection("Follow").document(profileid!!)
-            .addSnapshotListener { documentSnapshot, error ->
-                if (error != null) {
-                    error.localizedMessage?.let {
-                        Log.e("", it)
-                        return@addSnapshotListener
-                    }
-                } else {
-                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                        val follow = documentSnapshot.data
-
-                        if (follow != null) {
-
-                            try {
-                                val following = follow["following"] as HashMap<*, *>
-                                binding.following.text = following.keys.count().toString()
-
-                            } catch (_: java.lang.NullPointerException) {
-
-                            }
-
-                        }
-
-                    } else {
-                        Log.e("", "")
-                    }
-                }
-            }
-
-    }
-
-    private fun getNrPost() {
-        firestore.collection("Posts").addSnapshotListener { value, error ->
-            if (error != null) {
-                error.localizedMessage?.let {
-                    Log.e("", it)
-                    return@addSnapshotListener
-                }
-            } else {
-                if (value != null) {
-                    var i = 0
-                    for (doc in value.documents) {
-                        if (profileid == doc.get("publisher").toString()) {
-                            i++
-                        }
-                    }
-                    binding.post.text = "$i"
-                }
-            }
-
-        }
-
-
-    }
+//
+//    private fun getFollower() {
+//
+//        firestore.collection("Follow").document(profileid!!)
+//            .addSnapshotListener { documentSnapshot, error ->
+//                if (error != null) {
+//                    error.localizedMessage?.let {
+//                        Log.e("", it)
+//                        return@addSnapshotListener
+//                    }
+//                } else {
+//                    if (documentSnapshot != null && documentSnapshot.exists()) {
+//                        val follow = documentSnapshot.data
+//
+//                        if (follow != null) {
+//
+//                            try {
+//                                val followers = follow["followers"] as HashMap<*, *>
+//                                binding.followers.text = followers.keys.count().toString()
+//
+//                            } catch (_: java.lang.NullPointerException) {
+//
+//                            }
+//
+//                        }
+//
+//                    } else {
+//                        Log.e("", "")
+//                    }
+//                }
+//            }
+//
+//
+//
+//        firestore.collection("Follow").document(profileid!!)
+//            .addSnapshotListener { documentSnapshot, error ->
+//                if (error != null) {
+//                    error.localizedMessage?.let {
+//                        Log.e("", it)
+//                        return@addSnapshotListener
+//                    }
+//                } else {
+//                    if (documentSnapshot != null && documentSnapshot.exists()) {
+//                        val follow = documentSnapshot.data
+//
+//                        if (follow != null) {
+//
+//                            try {
+//                                val following = follow["following"] as HashMap<*, *>
+//                                binding.following.text = following.keys.count().toString()
+//
+//                            } catch (_: java.lang.NullPointerException) {
+//
+//                            }
+//
+//                        }
+//
+//                    } else {
+//                        Log.e("", "")
+//                    }
+//                }
+//            }
+//
+//    }
+//
+//    private fun getNrPost() {
+//        firestore.collection("Posts").addSnapshotListener { value, error ->
+//            if (error != null) {
+//                error.localizedMessage?.let {
+//                    Log.e("", it)
+//                    return@addSnapshotListener
+//                }
+//            } else {
+//                if (value != null) {
+//                    var i = 0
+//                    for (doc in value.documents) {
+//                        if (profileid == doc.get("publisher").toString()) {
+//                            i++
+//                        }
+//                    }
+//                    binding.post.text = "$i"
+//                }
+//            }
+//
+//        }
+//
+//
+//    }
 
     override fun addObserves() {
         viewModel.postsList.observe(viewLifecycleOwner) {
@@ -432,6 +422,19 @@ class ProfileFragment : BaseFragment() {
             binding.username.text=it.username
             binding.bio.text=it.bio
             Picasso.get().load(it.imageurl).into(binding.imageProfile)
+        }
+
+        viewModel.followCount.observe(viewLifecycleOwner){
+
+            binding.following.text=it.toString()
+        }
+        viewModel.followerCount.observe(viewLifecycleOwner){
+
+            binding.followers.text=it.toString()
+        }
+        viewModel.postCount.observe(viewLifecycleOwner){
+            binding.post.text=it.toString()
+
         }
     }
 

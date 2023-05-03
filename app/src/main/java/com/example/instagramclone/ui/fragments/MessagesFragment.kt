@@ -86,19 +86,6 @@ class MessagesFragment : BaseFragment() {
                 layoutManager.scrollToPositionWithOffset(messageAdapter.itemCount - 1, 0)
             }
         })
-//        viewModel.messageList.observe(viewLifecycleOwner) {
-//            messageAdapter.updateMessages(it)
-//            binding.nestedScroll.post {
-//                binding.nestedScroll.fullScroll(View.FOCUS_DOWN)
-//                binding.editMessage.requestFocus()
-//            }
-//
-//        }
-
-//        viewModel.messageList.observe(viewLifecycleOwner) {
-//            messageAdapter.updateMessages(it)
-//            binding.nestedScroll.smoothScrollTo(0,binding.messageRv.bottom)
-//        }
 
         binding.send.setOnClickListener {
             sendMessage(senderUid, receiverUid)
@@ -229,6 +216,8 @@ class MessagesFragment : BaseFragment() {
         profileImage: String
     ) {
         try {
+
+            // profil fotosu elave etmeliyem
 //
 //            "large_icon": "$profileImage",
 //            "large_icon_width": 64,

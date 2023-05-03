@@ -50,13 +50,14 @@ class ProfileDetailFragment : Fragment() {
         val layoutManager = LinearLayoutManager(requireContext())
 
         binding.postsRv.layoutManager = layoutManager
-
-        layoutManager.scrollToPosition(position)
-
         adapter = postlist?.let { PostsAdapters(requireContext(), it) }!!
-
-
         binding.postsRv.adapter = adapter
+
+        Handler().postDelayed({
+            layoutManager.scrollToPositionWithOffset(position, 0)
+        },200)
+
+
 
 
     }

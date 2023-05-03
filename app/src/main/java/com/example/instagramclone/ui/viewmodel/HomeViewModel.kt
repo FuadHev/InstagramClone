@@ -1,7 +1,9 @@
 package com.example.instagramclone.ui.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.instagramclone.data.entity.Posts
 import com.example.instagramclone.data.entity.Story
 import com.google.firebase.Timestamp
@@ -9,21 +11,61 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
 
-//    val postsList = MutableLiveData<ArrayList<Posts>>()
+    //    val postsList = MutableLiveData<ArrayList<Posts>>()
 //    val storiesList = MutableLiveData<ArrayList<Story>>()
+    val followList = ArrayList<String>()
     val postList = ArrayList<Posts>()
-
     val storyList = ArrayList<Story>()
     val firestore = Firebase.firestore
-    lateinit var auth: FirebaseUser
+    val checkMessageLiveData = MutableLiveData(false)
+
+    init {
+        checkFollowing()
+        viewModelScope.launch {
+            readStory()
+
+        }
+        viewModelScope.launch {
+            readPost()
+        }
+        checkMessage()
+    }
+
+
+    private fun checkMessage() {
+        Firebase.firestore.collection("Chats").addSnapshotListener { value, error ->
+
+            if (value != null && !value.isEmpty) {
+
+                for (doc in value.documents) {
+
+                    val senderId = doc.get("senderId") as? String
+                    if (senderId != Firebase.auth.currentUser!!.uid && Firebase.auth.currentUser!!.uid + senderId == doc.id) {
+                        val seen = doc.get("seen") as Boolean
+                        if (senderId != null && seen) {
+                           checkMessageLiveData.postValue(seen)
+                        }else{
+                            checkMessageLiveData.postValue(seen)
+                        }
+                    }
+
+                }
+
+
+            }
+        }
+
+
+    }
 
 
     fun checkFollowing() {
 
-        firestore.collection("Follow").document(auth.uid)
+        firestore.collection("Follow").document(Firebase.auth.currentUser!!.uid)
             .addSnapshotListener { documentSnapshot, error ->
                 if (error != null) {
                     error.localizedMessage?.let {
@@ -33,9 +75,7 @@ class HomeViewModel : ViewModel() {
                 } else {
 
 
-
                     if (documentSnapshot != null && documentSnapshot.exists()) {
-                        val followList = ArrayList<String>()
                         val follow = documentSnapshot.data
 
                         if (follow != null) {
@@ -46,9 +86,6 @@ class HomeViewModel : ViewModel() {
                                 for (i in following) {
                                     followList.add(i.key as String)
                                 }
-
-                                readPost(followList)
-                                readStory(followList)
 
 
 
@@ -71,7 +108,7 @@ class HomeViewModel : ViewModel() {
     }
 
 
-    fun readPost(followList:ArrayList<String>) {
+    fun readPost() {
 
         firestore.collection("Posts").addSnapshotListener { value, error ->
             if (error != null) {
@@ -115,7 +152,8 @@ class HomeViewModel : ViewModel() {
         }
 
     }
-    fun readStory(followList:ArrayList<String>) {
+
+    fun readStory() {
 
         storyList.clear()
         storyList.add(Story("", 0, 0, "", Firebase.auth.currentUser!!.uid))
@@ -149,8 +187,6 @@ class HomeViewModel : ViewModel() {
                                     storyList.add(ustory)
                                 }
                             }
-
-
 
 
                         } catch (e: java.lang.NullPointerException) {

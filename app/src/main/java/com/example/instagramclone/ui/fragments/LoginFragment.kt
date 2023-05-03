@@ -30,6 +30,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.onesignal.OneSignal
 import com.squareup.picasso.Picasso
 import java.util.*
 import kotlin.collections.ArrayList
@@ -43,6 +44,7 @@ class LoginFragment : Fragment() {
     private lateinit var binding: FragmentLoginBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
+    private val ONESIGNAL_APP_ID = "9b3b9701-9264-41ef-b08c-1c69f1fabfef"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,14 +59,21 @@ class LoginFragment : Fragment() {
 
         binding.loginFragment = this
 
+        OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE)
 
+        // OneSignal Initialization
+        OneSignal.initWithContext(requireContext())
+        OneSignal.setAppId(ONESIGNAL_APP_ID)
+        // promptForPushNotifications will show the native Android notification permission prompt.
+        // We recommend removing the following code and instead using an In-App Message to prompt for notification permission (See step 7)
+        OneSignal.promptForPushNotifications();
 
 
 
         return view
     }
 
-    fun forgotPassword(){
+    fun forgotPassword() {
         findNavController().navigate(R.id.action_loginFragment_to_forgotPasswordFragment)
     }
 

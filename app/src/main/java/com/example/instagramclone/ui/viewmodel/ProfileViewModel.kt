@@ -1,10 +1,12 @@
 package com.example.instagramclone.ui.viewmodel
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.instagramclone.data.entity.Posts
@@ -18,12 +20,102 @@ import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 
-class ProfileViewModel:ViewModel() {
+class ProfileViewModel(application: Application):AndroidViewModel(application) {
     val postsList= MutableLiveData<ArrayList<Posts>>()
     val savesList=MutableLiveData<ArrayList<Posts>>()
     val userInfo=MutableLiveData<Users>()
+    val followCount=MutableLiveData<Int>(0)
+    val followerCount=MutableLiveData<Int>(0)
+    val postCount=MutableLiveData<Int>(0)
 
 
+
+
+
+     fun getFollower(profileid:String) {
+
+        Firebase.firestore.collection("Follow").document(profileid)
+            .addSnapshotListener { documentSnapshot, error ->
+                if (error != null) {
+                    error.localizedMessage?.let {
+                        Log.e("", it)
+                        return@addSnapshotListener
+                    }
+                } else {
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                        val follow = documentSnapshot.data
+
+                        if (follow != null) {
+
+                            try {
+                                val followers = follow["followers"] as HashMap<*, *>
+                                followerCount.postValue(followers.keys.count())
+
+                            } catch (_: java.lang.NullPointerException) {
+
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+        Firebase.firestore.collection("Follow").document(profileid)
+            .addSnapshotListener { documentSnapshot, error ->
+                if (error != null) {
+                    error.localizedMessage?.let {
+                        Log.e("", it)
+                        return@addSnapshotListener
+                    }
+                } else {
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                        val follow = documentSnapshot.data
+
+                        if (follow != null) {
+
+                            try {
+                                val following = follow["following"] as HashMap<*, *>
+                                followCount.postValue(following.keys.count())
+
+                            } catch (_: java.lang.NullPointerException) {
+
+                            }
+
+                        }
+
+                    } else {
+                        Log.e("", "")
+                    }
+                }
+            }
+
+    }
+
+     fun getNrPost(profileid:String) {
+        Firebase.firestore.collection("Posts").addSnapshotListener { value, error ->
+            if (error != null) {
+                error.localizedMessage?.let {
+                    Log.e("", it)
+                    return@addSnapshotListener
+                }
+            } else {
+                if (value != null) {
+                    var i = 0
+                    for (doc in value.documents) {
+                        if (profileid == doc.get("publisher").toString()) {
+                            i++
+                        }
+                    }
+
+                    postCount.postValue(i)
+                }
+            }
+
+        }
+
+
+    }
 
 
     fun mySaves(){
@@ -93,11 +185,11 @@ class ProfileViewModel:ViewModel() {
 
 
 
-    fun userInfo(context: Context, profileId:String) {
+    fun userInfo(profileId:String) {
 
         Firebase.firestore.collection("user").document(profileId).addSnapshotListener { value, error ->
             if (error != null) {
-                Toast.makeText(context, error.localizedMessage, Toast.LENGTH_SHORT).show()
+                Toast.makeText((getApplication() as Application).applicationContext, error.localizedMessage, Toast.LENGTH_SHORT).show()
             } else {
                 if (value != null && value.exists()) {
 

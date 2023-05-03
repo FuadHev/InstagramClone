@@ -204,20 +204,29 @@ class StoryAdapter(val mContext: Context, private var storyList: ArrayList<Story
         val ref=Firebase.firestore.collection("Story").document(userId)
 
         ref.addSnapshotListener { value, error ->
-            var i=0
+
             if (error != null) {
             } else {
                 if (value != null && value.exists()) {
-                    val stories = value.data as HashMap<*, *>
+                    val stories = value.data as HashMap<*,*>
                     try {
+                        var i=true
                         for (storykey in stories) {
-                            val story = storykey.value as HashMap<*, *>
+                            val story = storykey.value as HashMap<*,*>
+                            val timeend = story["timeEnd"] as Long
                             val views=story["views"] as HashMap<*,*>
-                            if (views.containsKey(Firebase.auth.currentUser!!.uid)){
-                                ++i
+
+
+                            Log.e("contain",(!views.containsKey(Firebase.auth.currentUser!!.uid) && System.currentTimeMillis()<timeend).toString())
+                            Log.e("contain",(!views.containsKey(Firebase.auth.currentUser!!.uid)).toString())
+
+                            if (views.containsKey(Firebase.auth.currentUser!!.uid) && System.currentTimeMillis()<timeend){
+                               i=true
+                            }else if (System.currentTimeMillis()<timeend){
+                                i=false
                             }
                         }
-                        if (i>0){
+                        if (i){
                             profilImage.borderWidth=0
                         }else{
                             profilImage.borderWidth=6

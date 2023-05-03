@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:padding="5dp">
+    android:orientation="vertical">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -25,14 +23,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <de.hdodenhof.circleimageview.CircleImageView
+                <androidx.cardview.widget.CardView
                     android:id="@+id/profile_image"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
+                    app:cardCornerRadius="30dp"
                     android:layout_marginStart="4dp"
-                    android:src="@drawable/defaultimage"
-                    app:civ_border_color="#FF000000"
-                    app:civ_border_width="1dp" />
+                    android:backgroundTint="#BFBFBF"
+                    app:civ_border_width="2dp" />
 
                 <TextView
                     android:id="@+id/userName"
@@ -40,20 +38,21 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginStart="10dp"
-                    android:text="" />
+                    android:text=""
+                    android:background="#989898"/>
             </LinearLayout>
 
             <ImageView
                 android:id="@+id/postImage"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="400dp"
                 android:layout_marginTop="15dp"
                 android:adjustViewBounds="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-
+                android:background="#BFBFBF"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
-                app:srcCompat="@drawable/ic_launcher_background" />
+                 />
 
             <RelativeLayout
                 android:id="@+id/relativeLayout2"
@@ -72,8 +71,7 @@
                     android:layout_height="30dp"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
-
-                    app:srcCompat="@drawable/heart_noselected" />
+                    android:background="@drawable/heart_noselected" />
 
                 <ImageView
                     android:id="@+id/comment"
@@ -82,16 +80,15 @@
                     android:layout_alignParentTop="true"
                     android:layout_marginStart="10dp"
                     android:layout_toEndOf="@+id/like"
-                    app:srcCompat="@drawable/comment" />
+                    android:background="@drawable/comment" />
 
                 <ImageView
                     android:id="@+id/save"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
-                    app:srcCompat="@drawable/bookmark" />
+                    android:background="@drawable/bookmark" />
             </RelativeLayout>
 
             <TextView
@@ -99,7 +96,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="0 likes"
+                android:text=""
+                android:background="#989898"
                 android:textSize="17sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -113,6 +111,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text=""
+                android:background="#989898"
                 android:textSize="17sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -126,6 +125,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text=""
+                android:background="#989898"
                 android:textSize="17sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -138,24 +138,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="9dp"
-                android:text="View all 0 comments"
+                android:text=""
+                android:background="#989898"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/description" />
 
-            <ImageView
-                android:id="@+id/like_anim"
-                android:layout_width="90dp"
-                android:layout_height="90dp"
-                android:alpha="0"
-                app:layout_constraintBottom_toBottomOf="@+id/postImage"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/postImage"
-                app:srcCompat="@drawable/like" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
+
 </LinearLayout>
