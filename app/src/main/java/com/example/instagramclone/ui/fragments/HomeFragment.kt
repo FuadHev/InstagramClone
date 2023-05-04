@@ -14,12 +14,15 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.ChatActivity
 import com.example.instagramclone.R
+import com.example.instagramclone.base.BaseFragment
 import com.example.instagramclone.data.entity.Posts
 import com.example.instagramclone.data.entity.Story
 import com.example.instagramclone.databinding.FragmentHomeBinding
+import com.example.instagramclone.ui.adapters.PostClickListener
 import com.example.instagramclone.ui.adapters.PostsAdapters
 import com.example.instagramclone.ui.adapters.StoryAdapter
 import com.example.instagramclone.ui.viewmodel.HomeViewModel
@@ -30,17 +33,30 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-class HomeFragment : Fragment() {
+class HomeFragment : BaseFragment() {
 
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var binding: FragmentHomeBinding
     private lateinit var auth: FirebaseAuth
-    private lateinit var adapter: PostsAdapters
-    private lateinit var storyAdapter: StoryAdapter
+    private val adapter by lazy {
+        PostsAdapters(object : PostClickListener {
+            override fun pImage_uNameClickListener(bundle: Bundle) {
+                if (findNavController().currentDestination?.id == R.id.homeFragment) {
+                    findNavController().navigate(R.id.action_homeFragment_to_search_nav, bundle)
+                } else if (findNavController().currentDestination?.id == R.id.profileDetailFragment) {
+                    findNavController().navigate(
+                        R.id.action_profileDetailFragment_to_profileFragment,
+                        bundle
+                    )
+                }
+            }
+        }, requireContext(), emptyList())
+    }
+    private val storyAdapter by lazy {
+        StoryAdapter(requireContext(), emptyList())
+    }
     private val viewModel by activityViewModels<HomeViewModel>()
-
-
 
 
     override fun onCreateView(
@@ -49,7 +65,11 @@ class HomeFragment : Fragment() {
     ): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
 
+        return binding.root
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         auth = Firebase.auth
         firestore = Firebase.firestore
         binding.postRv.setHasFixedSize(true)
@@ -57,61 +77,64 @@ class HomeFragment : Fragment() {
         binding.storyRv.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.postRv.layoutManager = linerLayoutManager
-//        val progress = ProgressDialog(requireContext())
-//        progress.setMessage("Please wait loading post")
-//        progress.show()
 
 
-//        viewModel.checkFollowing()
-//        viewModel.readStory()
-//        viewModel.readPost()
+
+        adapter.updatePosts(viewModel.postList)
+        storyAdapter.updateStory(viewModel.storyList)
+        binding.storyRv.adapter = storyAdapter
+        binding.postRv.adapter = adapter
 
 
-        binding.shimmer.visibility=View.VISIBLE
-        binding.shimmer.startShimmer()
-        binding.shimmerstory.startShimmer()
-
-        Handler().postDelayed({
-            adapter = PostsAdapters(requireContext(),viewModel.postList)
-            storyAdapter = StoryAdapter(requireContext(),viewModel.storyList)
-
-            binding.storyRv.adapter = storyAdapter
-            binding.postRv.adapter = adapter
-//            progress.dismiss()
-
-            binding.shimmer.stopShimmer()
-            binding.shimmerstory.stopShimmer()
-            binding.shimmerstory.visibility=View.GONE
-            binding.shimmer.visibility=View.GONE
-            binding.postRv.visibility=View.VISIBLE
-            binding.storyRv.visibility=View.VISIBLE
-        },1300)
-        
-        viewModel.checkMessageLiveData.observe(viewLifecycleOwner){
-            if (it){
-               binding.checkMessage.visibility=View.GONE
-            }else{
-                binding.checkMessage.visibility=View.VISIBLE
-            }
-        }
         binding.chat.setOnClickListener {
-            val intent=Intent(requireActivity(),ChatActivity::class.java)
+            val intent = Intent(requireActivity(), ChatActivity::class.java)
             requireActivity().startActivity(intent)
         }
         binding.swipeRefresh.setOnRefreshListener {
-            viewModel.readStory()
-            viewModel.readPost()
+            viewModel.checkFollowing()
             adapter.updatePosts(viewModel.postList)
             storyAdapter.updateStory(viewModel.storyList)
             Handler().postDelayed({
                 binding.swipeRefresh.isRefreshing = false
-            }, 1200)
+            }, 1000)
 
         }
-        return binding.root
+
     }
 
 
+    override fun addObserves() {
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            if (it) {
+                binding.followLottie.visibility = View.GONE
+                binding.shimmer.visibility = View.VISIBLE
+                binding.shimmerstory.visibility = View.VISIBLE
+                binding.postRv.visibility = View.GONE
+                binding.storyRv.visibility = View.GONE
+
+                Handler().postDelayed({
+                    binding.shimmerstory.visibility = View.GONE
+                    binding.shimmer.visibility = View.GONE
+                    binding.shimmerstory.stopShimmer()
+                    binding.shimmer.stopShimmer()
+                    binding.postRv.visibility = View.VISIBLE
+                    binding.storyRv.visibility = View.VISIBLE
+                },1000)
+            } else {
+                binding.followLottie.visibility = View.VISIBLE
+                binding.shimmer.visibility = View.GONE
+                binding.shimmerstory.visibility = View.GONE
+            }
+
+        }
+        viewModel.checkMessageLiveData.observe(viewLifecycleOwner) {
+            if (it) {
+                binding.checkMessage.visibility = View.GONE
+            } else {
+                binding.checkMessage.visibility = View.VISIBLE
+            }
+        }
+    }
 
 
 }

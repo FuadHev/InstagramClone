@@ -9,7 +9,11 @@
         android:id="@+id/homeFragment"
         android:name="com.example.instagramclone.ui.fragments.HomeFragment"
         android:label="HomeFragment"
-        tools:layout="@layout/fragment_home"/>
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_search_nav"
+            app:destination="@id/search_nav" />
+    </fragment>
     <fragment
         android:id="@+id/searctoFragment"
         android:name="com.example.instagramclone.ui.fragments.SearchFragment"
@@ -60,6 +64,9 @@
             android:name="postPosition"
             app:argType="integer"
             android:defaultValue="0" />
+        <action
+            android:id="@+id/action_profileDetailFragment_to_profileFragment"
+            app:destination="@id/profilefragment" />
     </fragment>
     <fragment
         android:id="@+id/editProfileFragment"

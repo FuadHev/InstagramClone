@@ -18,8 +18,40 @@
             android:layout_height="match_parent"
             tools:context=".ui.fragments.HomeFragment">
 
+            <LinearLayout
+                android:id="@+id/follow_lottie"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/nestedScrollView"
+                app:layout_constraintVertical_bias="0.45">
+
+                <TextView
+                    android:id="@+id/txtfol"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="10dp"
+                    android:text="Follow other users and see what they post"
+                    android:textSize="25sp" />
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/cF_lottie"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    app:lottie_rawRes="@raw/followothers_mobile_phone" />
+            </LinearLayout>
+
 
             <androidx.core.widget.NestedScrollView
+                android:id="@+id/nestedScrollView"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:fillViewport="true"
@@ -34,38 +66,45 @@
                     android:orientation="vertical">
 
                     <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/shimmerstory"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/shimmerstory"
+                        app:shimmer_auto_start="true"
                         android:orientation="horizontal">
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            >
-                            <include layout="@layout/story_item_shimmer"/>
+                            android:orientation="horizontal">
+
+                            <include layout="@layout/story_item_shimmer" />
                         </LinearLayout>
                     </com.facebook.shimmer.ShimmerFrameLayout>
+
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/story_rv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:visibility="gone">
-                    </androidx.recyclerview.widget.RecyclerView>
+                        android:visibility="gone" />
 
                     <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/shimmer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/shimmer"
+                        app:shimmer_auto_start="true"
                         android:orientation="vertical">
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
-                            <include layout="@layout/post_item_shimmer"/>
-                            <include layout="@layout/post_item_shimmer"/>
+
+                            <include layout="@layout/post_item_shimmer" />
+
+                            <include layout="@layout/post_item_shimmer" />
                         </LinearLayout>
                     </com.facebook.shimmer.ShimmerFrameLayout>
+
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/post_rv"
                         android:layout_width="match_parent"
@@ -129,7 +168,7 @@
                         app:layout_constraintEnd_toEndOf="@+id/chat"
                         app:layout_constraintTop_toTopOf="@+id/chat"
                         app:layout_constraintVertical_bias="0.666"
-                        app:srcCompat="@drawable/checkmessage_icon" />
+                        app:srcCompat="@drawable/checkmessage_red_icon" />
 
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

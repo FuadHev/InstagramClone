@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +16,7 @@ import com.example.instagramclone.R
 import com.example.instagramclone.data.entity.Posts
 import com.example.instagramclone.databinding.FragmentProfileDetailBinding
 import com.example.instagramclone.databinding.PostsCardViewBinding
+import com.example.instagramclone.ui.adapters.PostClickListener
 import com.example.instagramclone.ui.adapters.PostsAdapters
 
 class ProfileDetailFragment : Fragment() {
@@ -50,7 +52,15 @@ class ProfileDetailFragment : Fragment() {
         val layoutManager = LinearLayoutManager(requireContext())
 
         binding.postsRv.layoutManager = layoutManager
-        adapter = postlist?.let { PostsAdapters(requireContext(), it) }!!
+        adapter = postlist?.let { PostsAdapters(object : PostClickListener {
+            override fun pImage_uNameClickListener(bundle: Bundle) {
+                if ( findNavController().currentDestination?.id==R.id.homeFragment){
+                    findNavController().navigate(R.id.action_homeFragment_to_search_nav,bundle)
+                }else if ( findNavController().currentDestination?.id==R.id.profileDetailFragment){
+                    findNavController().navigate(R.id.action_profileDetailFragment_to_profileFragment,bundle)
+                }
+            }
+        },requireActivity(), it) }!!
         binding.postsRv.adapter = adapter
 
         Handler().postDelayed({

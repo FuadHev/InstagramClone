@@ -66,6 +66,9 @@ class AddPostFragment : Fragment() {
 
         }
 
+        binding.imageViewLottie.setOnClickListener {
+            selectImage(it)
+        }
 
         binding.sharePost.setOnClickListener {
 
@@ -191,6 +194,8 @@ class AddPostFragment : Fragment() {
                         selectPicture = intentFromResult.data
                         selectPicture?.let {
                             binding.imageView.setImageURI(it)
+                            binding.imageView.visibility=View.VISIBLE
+                            binding.imageViewLottie.visibility=View.GONE
                         }
                     }
                 }

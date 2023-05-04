@@ -23,7 +23,7 @@ import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.NonDisposableHandle.parent
 
-class StoryAdapter(val mContext: Context, private var storyList: ArrayList<Story>) :
+class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
     RecyclerView.Adapter<StoryAdapter.ViewHolder>() {
 
     inner class ViewHolder(val view: StoryItemBinding) :

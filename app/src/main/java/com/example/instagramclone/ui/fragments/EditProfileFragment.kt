@@ -18,10 +18,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.example.instagramclone.R
+import com.example.instagramclone.base.BaseFragment
 import com.example.instagramclone.databinding.FragmentEditProfileBinding
+import com.example.instagramclone.ui.viewmodel.EditProfileViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -35,13 +38,14 @@ import com.google.firebase.storage.ktx.storage
 import com.squareup.picasso.Picasso
 import java.util.*
 
-class EditProfileFragment : Fragment() {
+class EditProfileFragment : BaseFragment() {
 
 
     private lateinit var binding: FragmentEditProfileBinding
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     private lateinit var permissionResultLauncher: ActivityResultLauncher<String>
     private lateinit var auth: FirebaseAuth
+    private val viewModel by activityViewModels<EditProfileViewModel>()
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
     var selectPicture: Uri? = null
@@ -49,19 +53,29 @@ class EditProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding=DataBindingUtil.inflate(inflater,R.layout.fragment_edit_profile, container,false)
+        binding =
+            DataBindingUtil.inflate(inflater, R.layout.fragment_edit_profile, container, false)
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    override fun addObserves() {
+        viewModel.userInfo.observe(viewLifecycleOwner) {
+            Picasso.get().load(it.imageurl).into(binding.profilImage)
+            binding.bio.setText(it.bio)
+            binding.profilName.text = it.username
+            binding.username.setText(it.username)
+        }
     }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        auth = Firebase.auth
-        firestore = Firebase.firestore
+//
+//        auth = Firebase.auth
+//        firestore = Firebase.firestore
         storage = Firebase.storage
-        getUserInfo()
+//        getUserInfo()
 
 
         registerLauncher()
@@ -77,32 +91,29 @@ class EditProfileFragment : Fragment() {
         }
 
 
-
     }
 
-    fun getUserInfo(){
-        firestore.collection("user").document(auth.currentUser!!.uid).addSnapshotListener { value, error ->
-            if (error!=null){
-
-            }else{
-                val bio=value?.get("bio") as String
-                val username= value.get("username") as String
-                val image_url=value.get("image_url") as String
-
-                Picasso.get().load(image_url).into(binding.profilImage)
-                binding.bio.setText(bio)
-                binding.username.setText(username)
-                binding.profilName.text=username
-            }
-        }
-    }
-
-
+//    fun getUserInfo(){
+//        firestore.collection("user").document(auth.currentUser!!.uid).addSnapshotListener { value, error ->
+//            if (error!=null){
+//
+//            }else{
+//                val bio=value?.get("bio") as String
+//                val username= value.get("username") as String
+//                val image_url=value.get("image_url") as String
+//
+//                Picasso.get().load(image_url).into(binding.profilImage)
+//                binding.bio.setText(bio)
+//                binding.username.setText(username)
+//                binding.profilName.text=username
+//            }
+//        }
+//    }
 
 
     fun upload(view: View) {
 
-        val progress= ProgressDialog(requireContext())
+        val progress = ProgressDialog(requireContext())
         progress.setMessage("Please wait updating profile")
         progress.show()
 
@@ -117,12 +128,12 @@ class EditProfileFragment : Fragment() {
                 val uploadPictureReference = storage.reference.child("profilImage").child(imageName)
                 uploadPictureReference.downloadUrl.addOnSuccessListener {
                     val downloadUrl = it.toString()
-                    val ref=firestore.collection("user").document(auth.currentUser!!.uid)
+                    val ref = firestore.collection("user").document(auth.currentUser!!.uid)
 
 
-                    ref.update("bio",binding.bio.text.toString())
-                    ref.update("image_url",downloadUrl)
-                    ref.update("username",binding.username.text.toString()).addOnSuccessListener {
+                    ref.update("bio", binding.bio.text.toString())
+                    ref.update("image_url", downloadUrl)
+                    ref.update("username", binding.username.text.toString()).addOnSuccessListener {
                         progress.dismiss()
                     }
 
@@ -132,11 +143,11 @@ class EditProfileFragment : Fragment() {
             }.addOnFailureListener {
                 Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
             }
-        }else{
-            val ref=firestore.collection("user").document(auth.currentUser!!.uid)
+        } else {
+            val ref = firestore.collection("user").document(auth.currentUser!!.uid)
 //
-            ref.update("bio",binding.bio.text.toString())
-            ref.update("username",binding.username.text.toString()).addOnSuccessListener {
+            ref.update("bio", binding.bio.text.toString())
+            ref.update("username", binding.username.text.toString()).addOnSuccessListener {
                 progress.dismiss()
             }
 
@@ -216,8 +227,6 @@ class EditProfileFragment : Fragment() {
 
 
     }
-
-
 
 
 }

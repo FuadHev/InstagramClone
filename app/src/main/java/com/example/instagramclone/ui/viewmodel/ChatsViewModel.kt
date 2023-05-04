@@ -24,22 +24,21 @@ class ChatsViewModel:ViewModel() {
             if (value!=null&&!value.isEmpty){
                 val idList=ArrayList<String>()
                 for (doc in value.documents){
-
                     val senderId=doc.get("senderId") as? String
-                    if (senderId!=Firebase.auth.currentUser!!.uid){
+                    if (senderId!=Firebase.auth.currentUser!!.uid&&Firebase.auth.currentUser!!.uid+senderId==doc.id){
                         if (senderId != null) {
                             idList.add(senderId)
                         }
                     }
 
                 }
+                if (idList.isNotEmpty()){
+                    allUser(idList)
+                }
 
-                allUser(idList)
             }
         }
 
-
- // preference fragment ayarlar fragmenti ucun  //
 
 
     }

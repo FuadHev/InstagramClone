@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
@@ -33,7 +34,7 @@ import org.json.JSONObject
 import java.util.UUID
 import java.util.logging.Handler
 
-class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
+class PostsAdapters(private val postclickListener: PostClickListener,val mContext: Context, var postsList: List<Posts>) :
     RecyclerView.Adapter<PostsAdapters.CardViewHolder>() {
 
     val firebaseUser = Firebase.auth.currentUser
@@ -59,9 +60,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
         val b = holder.view
         b.like.setImageResource(R.drawable.heart_noselected)
         b.comments.text = "View all 0 comments"
-
         b.like.tag = "like"
-
         Picasso.get().load(post.postImage).into(b.postImage)
 
         if (post.description == "") {
@@ -70,7 +69,6 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
         } else {
             b.description.visibility = VISIBLE
             b.description.text = post.description
-
         }
         publisherInfo(b.profileImage, b.userName, b.publisher, post.publisher)
         isLiked(post.post_id, b.like)
@@ -78,32 +76,40 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
         getComments(post.post_id, b.comments)
         isSaved(post.post_id, b.save)
 
+        b.userName.setOnClickListener {
+
+
+            val bundle = Bundle()
+
+            bundle.putString("profileid", post.publisher)
+
+            postclickListener.pImage_uNameClickListener(bundle)
+        }
+        b.profileImage.setOnClickListener {
+            val bundle = Bundle()
+
+            bundle.putString("profileid", post.publisher)
+
+            postclickListener.pImage_uNameClickListener(bundle)
+        }
+
         var i = 0
         b.postImage.setOnClickListener {
             ++i
-
             android.os.Handler(Looper.getMainLooper()).postDelayed({
                 if (i == 2) {
                     likePost(b.like, post.post_id, post.publisher, b.likeCount, b.likeAnim,post.postImage)
                 }
-
                 i = 0
             }, 500)
 
 
         }
-
-
-
-
         b.like.setOnClickListener {
-
             likePost(b.like, post.post_id, post.publisher, b.likeCount, b.likeAnim,post.postImage)
-
         }
 
         b.comments.setOnClickListener {
-
             val intent = Intent(mContext, CommentsActivity::class.java)
             intent.putExtra("postId", post.post_id)
             intent.putExtra("publisherId", post.publisher)
@@ -154,7 +160,6 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
             map[firebaseUser!!.uid] = true
             firestore.collection("Likes").document(postId).set(map, SetOptions.merge())
                 .addOnSuccessListener {
-
 
                     likeAnimation(likeImage)
                     nrLike(likeCount, postId)
@@ -470,4 +475,7 @@ class PostsAdapters(val mContext: Context, var postsList: List<Posts>) :
         holder.adapterPosition
     }
 
+}
+interface PostClickListener{
+   fun pImage_uNameClickListener(bundle: Bundle)
 }

@@ -50,6 +50,7 @@ apply plugin: "androidx.navigation.safeargs.kotlin"
 apply plugin: "kotlin-kapt"
 
 dependencies {
+    def lottieVersion = "3.4.0"
 
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -69,6 +70,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
 
+    implementation "com.airbnb.android:lottie:$lottieVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel:2.6.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1"
 

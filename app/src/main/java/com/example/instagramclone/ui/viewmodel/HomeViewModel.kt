@@ -15,23 +15,18 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
 
-    //    val postsList = MutableLiveData<ArrayList<Posts>>()
-//    val storiesList = MutableLiveData<ArrayList<Story>>()
+
+    val checkFollowLiveData = MutableLiveData<Boolean>(false)
     val followList = ArrayList<String>()
     val postList = ArrayList<Posts>()
     val storyList = ArrayList<Story>()
     val firestore = Firebase.firestore
     val checkMessageLiveData = MutableLiveData(false)
+    val isLoading = MutableLiveData(false)
+
 
     init {
         checkFollowing()
-        viewModelScope.launch {
-            readStory()
-
-        }
-        viewModelScope.launch {
-            readPost()
-        }
         checkMessage()
     }
 
@@ -39,6 +34,10 @@ class HomeViewModel : ViewModel() {
     private fun checkMessage() {
         Firebase.firestore.collection("Chats").addSnapshotListener { value, error ->
 
+            if (error != null) {
+                error.localizedMessage?.let { Log.e("Chat_Error", it) }
+                return@addSnapshotListener
+            }
             if (value != null && !value.isEmpty) {
 
                 for (doc in value.documents) {
@@ -47,15 +46,13 @@ class HomeViewModel : ViewModel() {
                     if (senderId != Firebase.auth.currentUser!!.uid && Firebase.auth.currentUser!!.uid + senderId == doc.id) {
                         val seen = doc.get("seen") as Boolean
                         if (senderId != null && seen) {
-                           checkMessageLiveData.postValue(seen)
-                        }else{
+                            checkMessageLiveData.postValue(seen)
+                        } else {
                             checkMessageLiveData.postValue(seen)
                         }
                     }
 
                 }
-
-
             }
         }
 
@@ -88,7 +85,18 @@ class HomeViewModel : ViewModel() {
                                 }
 
 
+                                if (followList.isNotEmpty()){
+                                    checkFollowLiveData.postValue(true)
 
+                                }else{
+                                    checkFollowLiveData.postValue(false)
+                                }
+                                viewModelScope.launch {
+                                    readStory()
+                                }
+                                viewModelScope.launch {
+                                    readPost()
+                                }
 
 
                             } catch (e: java.lang.NullPointerException) {
@@ -133,6 +141,11 @@ class HomeViewModel : ViewModel() {
                             }
                             postList.sortByDescending {
                                 it.time
+                            }
+                            if (postList.isNotEmpty()) {
+                                isLoading.postValue(true)
+                            } else {
+                                isLoading.postValue(false)
                             }
 
 

@@ -51,9 +51,12 @@ class AddStoryActivity : AppCompatActivity() {
 
         binding.imageView.setOnClickListener {
             selectImage(it)
-
         }
 
+
+        binding.imageViewLottie.setOnClickListener {
+            selectImage(it)
+        }
 
         binding.sharePost.setOnClickListener {
 
@@ -158,6 +161,8 @@ class AddStoryActivity : AppCompatActivity() {
                         selectPicture = intentFromResult.data
                         selectPicture?.let {
                             binding.imageView.setImageURI(it)
+                            binding.imageView.visibility=View.VISIBLE
+                            binding.imageViewLottie.visibility=View.GONE
                         }
                     }
                 }

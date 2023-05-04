@@ -204,8 +204,9 @@ class MessagesFragment : BaseFragment() {
             if (value != null) {
 
                 val playerId = value.get("playerId") as String?
-                if (playerId != null) {
+                if (playerId != null&&playerId!="") {
                     sentPushNotification(playerId, username, message, profilImage)
+                    return@addSnapshotListener
                 }
 
             }
@@ -227,17 +228,31 @@ class MessagesFragment : BaseFragment() {
 //            "large_icon": "$profileImage",
 //            "large_icon_width": 64,
 //            "large_icon_height": 64
-            OneSignal.postNotification(
-                JSONObject(
-                    """{
+
+            val notificationContent = JSONObject(
+                """{
         "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef", 
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
-        "contents": {"en": "$message"}
+        "contents": {"en": "$message"},
+        "large_icon": "$profileImage"
     }"""
-                ),
-                null
             )
+            OneSignal.postNotification(notificationContent, null)
+
+
+//
+//            OneSignal.postNotification(
+//                JSONObject(
+//                    """{
+//        "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef",
+//        "include_player_ids": ["$playerId"],
+//        "headings": {"en": "$username"},
+//        "contents": {"en": "$message"}
+//    }"""
+//                ),
+//                null
+//            )
 
 
         } catch (e: JSONException) {
