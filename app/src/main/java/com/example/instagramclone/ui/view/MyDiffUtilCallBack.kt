@@ -1,9 +1,9 @@
-package com.example.instagramclone
+package com.example.instagramclone.ui.view
 
 import androidx.recyclerview.widget.DiffUtil
-import com.example.instagramclone.data.entity.Comment
+import com.example.instagramclone.model.Comment
 
-class MyDiffUtilCallBack(val oldElements:List<Comment>,val newElements:List<Comment>):DiffUtil.Callback() {
+class MyDiffUtilCallBack(val oldElements:List<Comment>, val newElements:List<Comment>):DiffUtil.Callback() {
     override fun getOldListSize(): Int=oldElements.size
     override fun getNewListSize():Int=newElements.size
 

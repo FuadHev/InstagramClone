@@ -1,28 +1,26 @@
 package com.example.instagramclone.ui.fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.instagramclone.data.entity.ChatUser
-import com.example.instagramclone.data.entity.Users
 import com.example.instagramclone.databinding.FragmentChatsBinding
 import com.example.instagramclone.ui.adapters.ChatAdapter
 import com.example.instagramclone.ui.adapters.UserClickListener
 import com.example.instagramclone.ui.viewmodel.ChatsViewModel
-import com.google.firebase.Timestamp
+import com.example.instagramclone.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import java.net.UnknownServiceException
 
 
 class ChatsFragment : Fragment() {
@@ -65,8 +63,26 @@ class ChatsFragment : Fragment() {
         binding.chatRv.adapter = adapter
 
         viewModel.getUsersId()
-        viewModel.chatList.observe(viewLifecycleOwner) {
-            adapter.updateChatList(it)
+        viewModel.chatLiveData.observe(viewLifecycleOwner) {
+
+            when(it){
+                is Resource.Loading->{
+                    binding.messageLottie.visibility=VISIBLE
+                    binding.chatRv.visibility= GONE
+                }
+                is Resource.Success->{
+                    binding.messageLottie.visibility= GONE
+                    binding.chatRv.visibility= VISIBLE
+                    it.data?.let { list -> adapter.updateChatList(list) }?:adapter.updateChatList(
+                        emptyList()
+                    )
+
+                }
+                is Resource.Error->{
+                    Toast.makeText(requireContext(), it.data.toString(), Toast.LENGTH_SHORT).show()
+                }
+            }
+
         }
 
 

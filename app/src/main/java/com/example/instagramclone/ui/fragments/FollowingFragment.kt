@@ -10,7 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
-import com.example.instagramclone.data.entity.Users
+import com.example.instagramclone.model.Users
 import com.example.instagramclone.databinding.FragmentFollowingBinding
 import com.example.instagramclone.ui.adapters.ClickListener
 import com.example.instagramclone.ui.adapters.UserAdapter

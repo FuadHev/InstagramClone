@@ -1,6 +1,4 @@
-package com.example.instagramclone.data.entity
-
-import kotlinx.parcelize.Parcelize
+package com.example.instagramclone.model
 
 
 data class Users(

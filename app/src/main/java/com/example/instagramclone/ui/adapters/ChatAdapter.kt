@@ -1,14 +1,12 @@
 package com.example.instagramclone.ui.adapters
 
 import android.graphics.Typeface
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.instagramclone.data.entity.ChatUser
+import com.example.instagramclone.model.ChatUser
 import com.example.instagramclone.databinding.ChatItemBinding
-import com.example.instagramclone.databinding.NotificationItemBinding
 import com.squareup.picasso.Picasso
 
 class ChatAdapter(private val userClickListener: UserClickListener,var chatUserList: List<ChatUser>) :

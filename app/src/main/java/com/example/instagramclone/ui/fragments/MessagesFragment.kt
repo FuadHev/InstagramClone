@@ -1,37 +1,34 @@
 package com.example.instagramclone.ui.fragments
 
-import android.content.Context
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Adapter
-import android.widget.TextView
-import android.widget.Toast
 import androidx.core.widget.NestedScrollView
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
 import com.example.instagramclone.base.BaseFragment
-import com.example.instagramclone.data.entity.Comment
-import com.example.instagramclone.data.entity.Message
+import com.example.instagramclone.databinding.DeleteMessageDialogBinding
 import com.example.instagramclone.databinding.FragmentMessagesBinding
+import com.example.instagramclone.ui.adapters.MessageClickListener
 import com.example.instagramclone.ui.adapters.MessaggeAdapter
-import com.example.instagramclone.ui.viewmodel.ChatsViewModel
 import com.example.instagramclone.ui.viewmodel.MessagesViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.onesignal.OneSignal
 import com.squareup.picasso.Picasso
-import de.hdodenhof.circleimageview.CircleImageView
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.UUID
@@ -46,16 +43,18 @@ class MessagesFragment : BaseFragment() {
     private lateinit var firestore: FirebaseFirestore
     private val viewModel by activityViewModels<MessagesViewModel>()
     private val messageAdapter by lazy {
-        MessaggeAdapter(emptyList())
+        MessaggeAdapter(object : MessageClickListener {
+            override fun messageClickListener(senderId: String, messageId: String) {
+                showDeleteMessageDialog(senderId,messageId)
+            }
+        }, emptyList())
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentMessagesBinding.inflate(inflater, container, false)
-        // Inflate the layout for this fragment
-
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_messages, container, false)
 
         return binding.root
     }
@@ -63,19 +62,14 @@ class MessagesFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val currentUser = args.userId
         firestore = Firebase.firestore
-        val receiverUid = currentUser
+        val receiverUid = args.userId
 
         val senderUid = Firebase.auth.currentUser!!.uid
 
-//        userInfo(currentUser, binding.mUsername, binding.chatImage)
-
-
-
         senderRoom = receiverUid + senderUid
         receiverRoom = senderUid + receiverUid
-        viewModel.checkSession(currentUser)
+        viewModel.checkSession(receiverUid)
         viewModel.readMessages(senderRoom!!)
         val layoutManager = LinearLayoutManager(requireActivity())
         binding.messageRv.layoutManager = layoutManager
@@ -95,8 +89,6 @@ class MessagesFragment : BaseFragment() {
 
 
     }
-
-
     fun sendMessage(senderUid: String, receiverUid: String) {
         val randomkey = UUID.randomUUID().toString()
         val message = binding.editMessage.text.toString()
@@ -114,7 +106,6 @@ class MessagesFragment : BaseFragment() {
 
             firestore.collection("Messages").document(senderRoom!!).set(hkey, SetOptions.merge())
                 .addOnSuccessListener {
-
                     getPlayerIdSendNotification(receiverUid, message)
                 }
             firestore.collection("Messages").document(receiverRoom!!)
@@ -149,37 +140,6 @@ class MessagesFragment : BaseFragment() {
             .update("seen", true)
 
     }
-
-
-//    private fun userInfo(profileId: String, userName: TextView, profilImage: CircleImageView) {
-//
-//        Firebase.firestore.collection("user").document(profileId)
-//            .addSnapshotListener { value, error ->
-//                if (error != null) {
-//                    Toast.makeText(requireContext(), error.localizedMessage, Toast.LENGTH_SHORT)
-//                        .show()
-//                } else {
-//                    if (value != null && value.exists()) {
-//
-//                        val username = value.get("username") as String
-//                        val imageurl = value.get("image_url") as String
-//                        val online=value.get("online") as? Boolean
-//
-//                        Picasso.get().load(imageurl).into(profilImage)
-//                        userName.text = username
-//
-//
-//                    }
-//
-//
-//                }
-//
-//            }
-//
-//
-//    }
-
-
     private fun getPlayerIdSendNotification(userId: String, message: String) {
 
         var username = ""
@@ -204,7 +164,7 @@ class MessagesFragment : BaseFragment() {
             if (value != null) {
 
                 val playerId = value.get("playerId") as String?
-                if (playerId != null&&playerId!="") {
+                if (playerId != null && playerId != "") {
                     sentPushNotification(playerId, username, message, profilImage)
                     return@addSnapshotListener
                 }
@@ -212,6 +172,39 @@ class MessagesFragment : BaseFragment() {
             }
 
         }
+
+    }
+
+    private fun showDeleteMessageDialog(senderId: String, messageId: String){
+        val dialogBinding=DeleteMessageDialogBinding.inflate(layoutInflater)
+        val mDialog=Dialog(requireContext())
+        mDialog.setContentView(dialogBinding.root)
+        mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        dialogBinding.yes.setOnClickListener {
+            if (senderId==Firebase.auth.currentUser!!.uid){
+                Firebase.firestore.collection("Messages").document(senderRoom!!).update(messageId,FieldValue.delete())
+                Firebase.firestore.collection("Messages").document(receiverRoom!!).update(messageId,FieldValue.delete())
+//                Firebase.firestore.collection("Chats").document(senderRoom!!).update("lastmessage","")
+            }else{
+                Firebase.firestore.collection("Messages").document(senderRoom!!).update(messageId,FieldValue.delete())
+            }
+            mDialog.dismiss()
+        }
+
+
+        dialogBinding.no.setOnClickListener {
+
+            mDialog.dismiss()
+        }
+
+        mDialog.create()
+        mDialog.show()
+
+
+
+
+
 
     }
 
@@ -271,17 +264,15 @@ class MessagesFragment : BaseFragment() {
 
         }
 
-        viewModel.userInfo.observe(viewLifecycleOwner){
-            binding.mUsername.text=it.username
-            binding.toolbarUsername.text=it.username
+        viewModel.userInfo.observe(viewLifecycleOwner) {
+            binding.mUsername.text = it.username
+            binding.toolbarUsername.text = it.username
             Picasso.get().load(it.imageurl).into(binding.chatImage)
             Picasso.get().load(it.imageurl).into(binding.tlbPImage)
         }
-        viewModel.checkSession.observe(viewLifecycleOwner){
+        viewModel.checkSession.observe(viewLifecycleOwner) {
 
-                binding.session.text=it
-
-
+            binding.session.text = it
 
 
         }

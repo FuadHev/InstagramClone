@@ -1,24 +1,16 @@
 package com.example.instagramclone.ui.viewmodel
 
 import android.app.Application
-import android.content.Context
 import android.util.Log
-import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.example.instagramclone.data.entity.Posts
-import com.example.instagramclone.data.entity.Users
+import com.example.instagramclone.model.Posts
+import com.example.instagramclone.model.Users
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.squareup.picasso.Picasso
-import de.hdodenhof.circleimageview.CircleImageView
 
 class ProfileViewModel(application: Application):AndroidViewModel(application) {
     val postsList= MutableLiveData<ArrayList<Posts>>()
@@ -199,7 +191,7 @@ class ProfileViewModel(application: Application):AndroidViewModel(application) {
 //                    Picasso.get().load(imageurl).into(profilImage)
 //                    userName.text=username
 //                    bioinfo.text=bio
-                    val user=Users(profileId,"",username,"",imageurl,bio)
+                    val user= Users(profileId,"",username,"",imageurl,bio)
                     userInfo.value=user
 
                 }

@@ -3,7 +3,6 @@ package com.example.instagramclone.ui.fragments
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.*
@@ -12,17 +11,18 @@ import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.example.instagramclone.MainActivity
+import com.example.instagramclone.ui.view.activity.MainActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.base.BaseFragment
 import com.example.instagramclone.databinding.FragmentProfileBinding
 import com.example.instagramclone.ui.adapters.MyFotoAdapter
 import com.example.instagramclone.ui.viewmodel.ProfileViewModel
+import com.example.instagramclone.utils.PreferenceHelper
+import com.example.instagramclone.utils.PreferenceHelper.set
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -114,7 +114,11 @@ class ProfileFragment : BaseFragment() {
 
             when(item.itemId){
                 R.id.log_out-> {
-                    val intent =Intent(requireActivity(),MainActivity::class.java)
+                    val sharedPreferences=PreferenceHelper.getDefault(requireActivity())
+                    val intent =Intent(requireActivity(), MainActivity::class.java)
+
+                    sharedPreferences["email"] = null
+                    sharedPreferences["password"] = null
                     requireActivity().finish()
                     startActivity(intent)
                     true

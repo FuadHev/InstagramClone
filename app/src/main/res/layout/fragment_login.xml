@@ -88,7 +88,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.561"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button" />
+            app:layout_constraintTop_toBottomOf="@+id/singIn" />
 
         <ImageView
             android:id="@+id/imageView2"
@@ -128,7 +128,7 @@
             android:id="@+id/singUp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{()-> loginFragment.singUp(singUp)}"
+            android:onClick="@{()-> loginFragment.singUp()}"
             android:text="Sing up"
             android:textColor="#3797EF"
             app:layout_constraintBottom_toBottomOf="@+id/textView4"
@@ -139,10 +139,10 @@
             app:layout_constraintVertical_bias="0.0" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/singIn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{()-> loginFragment.singIn(button,email.getText().toString(),password.getText().toString())}"
+            android:onClick="@{()-> loginFragment.singIn(email.getText().toString(),password.getText().toString())}"
             android:text="@string/sing_in"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

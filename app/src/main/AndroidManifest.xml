@@ -20,24 +20,24 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".ChatActivity"
+            android:name=".ui.view.activity.ChatActivity"
             android:exported="false"
             android:label="@string/title_activity_chat"
             android:theme="@style/Theme.InstagramClone.NoActionBar" />
         <activity
-            android:name=".StoryActivity"
+            android:name=".ui.view.activity.StoryActivity"
             android:exported="false" />
         <activity
-            android:name=".AddStoryActivity"
+            android:name=".ui.view.activity.AddStoryActivity"
             android:exported="false" />
         <activity
-            android:name=".CommentsActivity"
+            android:name=".ui.view.activity.CommentsActivity"
             android:exported="false" />
         <activity
-            android:name=".HomeActivity"
+            android:name=".ui.view.activity.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.view.activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

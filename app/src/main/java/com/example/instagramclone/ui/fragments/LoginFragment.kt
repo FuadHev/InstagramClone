@@ -1,13 +1,13 @@
 package com.example.instagramclone.ui.fragments
 
 import android.app.ProgressDialog
-import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
@@ -15,28 +15,18 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
-import com.example.instagramclone.HomeActivity
+import com.example.instagramclone.ui.view.activity.HomeActivity
 import com.example.instagramclone.R
-import com.example.instagramclone.data.entity.*
 import com.example.instagramclone.databinding.FragmentLoginBinding
-import com.example.instagramclone.ui.adapters.MyFotoAdapter
-import com.google.android.material.transition.platform.MaterialContainerTransform.ProgressThresholds
-import com.google.firebase.Timestamp
+import com.example.instagramclone.utils.PreferenceHelper
+import com.example.instagramclone.utils.PreferenceHelper.get
+import com.example.instagramclone.utils.PreferenceHelper.set
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.onesignal.OneSignal
-import com.squareup.picasso.Picasso
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.math.log
-import kotlin.random.Random
 
 
 class LoginFragment : Fragment() {
@@ -44,6 +34,7 @@ class LoginFragment : Fragment() {
     private lateinit var binding: FragmentLoginBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
+    private lateinit var sharedPreferences:SharedPreferences
     private val ONESIGNAL_APP_ID = "9b3b9701-9264-41ef-b08c-1c69f1fabfef"
 
     override fun onCreateView(
@@ -54,10 +45,10 @@ class LoginFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = binding.root
         auth = Firebase.auth
-
+        binding.loginFragment = this
         firestore = Firebase.firestore
 
-        binding.loginFragment = this
+        sharedPreferences=PreferenceHelper.getDefault(requireActivity())
 
         OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE)
 
@@ -69,7 +60,6 @@ class LoginFragment : Fragment() {
         OneSignal.promptForPushNotifications();
 
 
-
         return view
     }
 
@@ -77,15 +67,10 @@ class LoginFragment : Fragment() {
         findNavController().navigate(R.id.action_loginFragment_to_forgotPasswordFragment)
     }
 
-
-
-    fun singIn(btn: Button, email: String, password: String) {
+    fun singIn(email: String, password: String) {
 
         val progress = ProgressDialog(requireContext())
         progress.setMessage("Please wait")
-
-
-
         if (email.trim() == "" || password.trim() == "") {
             Toast.makeText(requireContext(), "Enter Email and Password ", Toast.LENGTH_SHORT).show()
             progress.dismiss()
@@ -94,10 +79,14 @@ class LoginFragment : Fragment() {
             progress.show()
             auth.signInWithEmailAndPassword(email.trim(), password.trim()).addOnSuccessListener {
 
+                sharedPreferences["email"] = email
+                sharedPreferences["password"] = password
                 progress.dismiss()
                 activity?.let {
                     val intent = Intent(it, HomeActivity::class.java)
+                    it.finish()
                     it.startActivity(intent)
+
                 }
 
             }.addOnFailureListener {
@@ -112,8 +101,8 @@ class LoginFragment : Fragment() {
 
     }
 
-    fun singUp(sing: TextView) {
-        Navigation.findNavController(sing).navigate(R.id.goToSingUp)
+    fun singUp() {
+       findNavController().navigate(LoginFragmentDirections.goToSingUp())
     }
 
 

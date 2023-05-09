@@ -3,7 +3,7 @@ package com.example.instagramclone.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.instagramclone.data.entity.Notification
+import com.example.instagramclone.model.Notification
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore

@@ -2,46 +2,35 @@ package com.example.instagramclone.ui.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
-import com.example.instagramclone.data.entity.Users
+import com.example.instagramclone.model.Users
 import com.example.instagramclone.databinding.UsersItemBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.auth.User
 import com.google.firebase.firestore.ktx.firestore
 
 import com.google.firebase.ktx.Firebase
-import com.onesignal.OSNotification
 import com.onesignal.OneSignal
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.NonDisposableHandle.parent
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.ByteArrayOutputStream
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import android.util.Base64
 
 
 class UserAdapter(
     var mContext: Context,
     private val clickListener: ClickListener,
-    var usersList: ArrayList<Users>
+    var usersList:List<Users>
 ) :
     RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
@@ -68,20 +57,13 @@ class UserAdapter(
 
         isFollowing(user.user_id, v.follow)
 
-
-
-
         v.username.text = user.username
         val url = user.imageurl
         Picasso.get().load(url).into(v.profileImage)
 
         v.cardView.setOnClickListener {
-
-
             val bundle = Bundle()
-
             bundle.putString("profileid", user.user_id)
-
             clickListener.userClickListener(bundle)
 
         }
@@ -104,7 +86,6 @@ class UserAdapter(
                 if(user.user_id!=Firebase.auth.currentUser!!.uid){
                     addNotification(user.user_id)
                 }
-
                 v.follow.text = "following"
 
                 getPlayerIdSendNotification(user.user_id)
@@ -161,20 +142,6 @@ class UserAdapter(
 
     private fun sentPushNotification(playerId: String, username: String) {
         try {
-
-// foto gondermeye calisirdim olmadi helelik
-// OneSignal API ile push bildirimi oluşturun.
-//            val notification = JSONObject()
-//            notification.put("contents", JSONObject()
-//                .put("en", "Bildirim İçeriği")) // Bildirim içeriği
-//            notification.put("headings", JSONObject()
-//                .put("en", "Bildirim Başlığı")) // Bildirim başlığı
-//            notification.put("include_player_ids", JSONArray()
-//                .put(playerId)) // Hedef kullanıcının OneSignal ID'si
-//            notification.put("big_picture", photoUrl)
-//
-//            OneSignal.postNotification(notification,null)
-
             if(username!=Firebase.auth.currentUser!!.uid){
                 OneSignal.postNotification(
                     JSONObject(
@@ -187,10 +154,6 @@ class UserAdapter(
                     ),
                     null
                 )
-//            OneSignal.postNotification(
-//                JSONObject("{'contents': {'en':'$username : started following you'},{'headings': {'en': Notification Title'}, 'include_player_ids': ['$playerId']}"),
-//                null
-//            )
             }
 
 

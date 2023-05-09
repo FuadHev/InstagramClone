@@ -4,24 +4,20 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.instagramclone.AddStoryActivity
-import com.example.instagramclone.StoryActivity
-import com.example.instagramclone.data.entity.Story
-import com.example.instagramclone.databinding.PostsCardViewBinding
+import com.example.instagramclone.ui.view.activity.AddStoryActivity
+import com.example.instagramclone.ui.view.activity.StoryActivity
+import com.example.instagramclone.model.Story
 import com.example.instagramclone.databinding.StoryItemBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlinx.coroutines.NonDisposableHandle.parent
 
 class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
     RecyclerView.Adapter<StoryAdapter.ViewHolder>() {
@@ -54,18 +50,16 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
 
         if (position == 0) {
             b.addStory.visibility = View.VISIBLE
-            myStory(b.username, b.profilImage, false)
+            myStory(b.username, false)
         } else {
             b.addStory.visibility = View.GONE
-
         }
         b.profilImage.setOnClickListener {
             if (position == 0) {
-                myStory(b.username, b.profilImage, true)
-                Log.e("", position.toString())
+                myStory(b.username, true)
             } else {
                 // go to Story
-                val intent=Intent(mContext,StoryActivity::class.java)
+                val intent=Intent(mContext, StoryActivity::class.java)
                 intent.putExtra("userId",story.userId)
                 mContext.startActivity(intent)
             }
@@ -75,7 +69,7 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateStory(newStories:ArrayList<Story>){
+    fun updateStory(newStories:List<Story>){
         this.storyList=newStories
         notifyDataSetChanged()
     }
@@ -107,7 +101,7 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
 
     }
 
-    private fun myStory(textView: TextView, imageView: CircleImageView, click: Boolean) {
+    private fun myStory(textView: TextView, click: Boolean) {
         Firebase.firestore.collection("Story").document(Firebase.auth.currentUser!!.uid)
             .addSnapshotListener { value, error ->
                 if (error != null) {
@@ -116,9 +110,7 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
                     var count = 0
                     if (value != null) {
                         try {
-
                             val stories = value.data as HashMap<*, *>
-
                             for (story in stories) {
                                 val storyinfo = story.value as HashMap<*, *>
                                 val timecurrent = System.currentTimeMillis()
@@ -128,8 +120,7 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
                                     ++count
                                 }
                             }
-
-                        } catch (e: NullPointerException) {
+                        } catch (_: NullPointerException) {
 
                         }
 
@@ -138,15 +129,19 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
                             if (count > 0) {
                                 val alert = AlertDialog.Builder(mContext)
                                 alert.setNegativeButton("view story") { d, i ->
-                                    val intent=Intent(mContext,StoryActivity::class.java)
+
+                                    val intent=Intent(mContext, StoryActivity::class.java)
                                     intent.putExtra("userId",Firebase.auth.currentUser!!.uid)
                                     mContext.startActivity(intent)
+                                    d.cancel()
 
                                 }
                                 alert.setPositiveButton("add story") { d, i ->
                                     val intent = Intent(mContext, AddStoryActivity::class.java)
                                     mContext.startActivity(intent)
+                                    d.cancel()
                                 }
+                                alert.setCancelable(true)
                                 alert.create().show()
 
                             } else {
@@ -169,31 +164,6 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
 
 
             }
-//        if (click) {
-//            Log.e("count",count.toString())
-//            if (count>0){
-//                val alert=AlertDialog.Builder(mContext)
-//                alert.setNegativeButton("view story"){d,i->
-//                }
-//                alert.setPositiveButton("add story"){d,i->
-//                    val intent=Intent(mContext,AddStoryActivity::class.java)
-//                    mContext.startActivity(intent)
-//                }
-//                alert.create().show()
-//
-//            }else{
-//                val intent=Intent(mContext,AddStoryActivity::class.java)
-//                mContext.startActivity(intent)
-//            }
-//
-//
-//        } else {
-//            if (count > 0) {
-//                textView.text = "My story"
-//            } else {
-//                textView.text = "Add story"
-//            }
-//        }
 
 
     }
@@ -215,11 +185,6 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
                             val story = storykey.value as HashMap<*,*>
                             val timeend = story["timeEnd"] as Long
                             val views=story["views"] as HashMap<*,*>
-
-
-                            Log.e("contain",(!views.containsKey(Firebase.auth.currentUser!!.uid) && System.currentTimeMillis()<timeend).toString())
-                            Log.e("contain",(!views.containsKey(Firebase.auth.currentUser!!.uid)).toString())
-
                             if (views.containsKey(Firebase.auth.currentUser!!.uid) && System.currentTimeMillis()<timeend){
                                i=true
                             }else if (System.currentTimeMillis()<timeend){

@@ -3,8 +3,8 @@ package com.example.instagramclone.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.instagramclone.data.entity.Message
-import com.example.instagramclone.data.entity.Users
+import com.example.instagramclone.model.Message
+import com.example.instagramclone.model.Users
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -27,7 +27,7 @@ class MessagesViewModel : ViewModel() {
                 val imageurl = value.get("image_url") as String
                 val online = value.get("online") as Boolean
 
-                val user=Users(username,imageurl)
+                val user= Users(username,imageurl)
 
                 Log.e("checksession",online.toString())
                 if (online){

@@ -1,4 +1,4 @@
-package com.example.instagramclone
+package com.example.instagramclone.ui.view.activity
 
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
@@ -6,9 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.instagramclone.data.entity.Comment
-import com.example.instagramclone.data.entity.Users
+import com.example.instagramclone.R
 import com.example.instagramclone.databinding.ActivityCommentsBinding
 import com.example.instagramclone.ui.adapters.CommentAdapter
 import com.example.instagramclone.ui.viewmodel.CommentsViewModel
@@ -24,7 +24,6 @@ import com.squareup.picasso.Picasso
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.random.Random
 
@@ -35,61 +34,61 @@ class CommentsActivity : AppCompatActivity() {
     private lateinit var publisherId: String
     private lateinit var firebaseUser: FirebaseUser
     private lateinit var firestore: FirebaseFirestore
-    private lateinit var alluser: ArrayList<Users>
-    private lateinit var adapter: CommentAdapter
-    private lateinit var viewModel: CommentsViewModel
+    private val viewModel by viewModels<CommentsViewModel>()
+    private val adapter by lazy {
+        CommentAdapter(this, emptyList(), emptyList())
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCommentsBinding.inflate(layoutInflater)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_comments)
         setContentView(binding.root)
-        val tempViewModel: CommentsViewModel by viewModels()
-        viewModel = tempViewModel
-        firebaseUser = Firebase.auth.currentUser!!
 
-        alluser = ArrayList()
+        firebaseUser = Firebase.auth.currentUser!!
+        binding.commentActivity=this
         binding.toolbar.title = "Comments"
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setTitleTextColor(Color.BLACK)
         firestore = Firebase.firestore
-        allUsers()
 
 
         postId = intent.getStringExtra("postId") as String
         publisherId = intent.getStringExtra("publisherId") as String
 
-        viewModel.firestore = firestore
-        viewModel.postId = postId
-
-
-
         binding.commentsRv.setHasFixedSize(true)
         binding.commentsRv.layoutManager = LinearLayoutManager(this)
-        adapter = CommentAdapter(this, emptyList(), alluser)
         binding.commentsRv.adapter = adapter
 
         viewModel.commentsList.observe(this) {
             adapter.updateElements(it)
         }
 
-        binding.post.setOnClickListener {
-
-            if (binding.addToComment.text.trim().toString() == "") {
-                Toast.makeText(this, "Please add the comment", Toast.LENGTH_SHORT).show()
-            } else {
-                addComment()
-            }
-            binding.addToComment.text.clear()
-
+        viewModel.publisherInfoLiveData.observe(this){
+            adapter.updatePublisher(it)
         }
-
+//        binding.post.setOnClickListener {
+//            sendComment()
+//        }
 
         getImage()
-        readComment()
+        viewModel.readComment(postId)
 
 
     }
 
-    private fun getPlayerIdSendNotification(postPublisher: String,comment: String) {
+     fun sendComment(){
+        val comment = binding.addToComment
+        if (comment.text.trim().toString() == "") {
+            Toast.makeText(this, "Please add the comment", Toast.LENGTH_SHORT).show()
+            comment.text.clear()
+
+        } else {
+            addComment()
+        }
+        comment.text.clear()
+
+    }
+
+    private fun getPlayerIdSendNotification(postPublisher: String, comment: String) {
 
         var username = ""
         firestore.collection("user").document(firebaseUser.uid)
@@ -102,25 +101,23 @@ class CommentsActivity : AppCompatActivity() {
                     }
                 }
             }
+        firestore.collection("user").document(postPublisher).get().addOnSuccessListener { value ->
 
-        firestore.collection("user").document(postPublisher).addSnapshotListener { value, error ->
-            if (error != null) {
-
-            } else {
-                if (value != null) {
-                    val playerId = value.get("playerId") as String?
-
-                    if (playerId!=null&&postPublisher!=firebaseUser.uid){
-                        sentPushNotification(playerId,username,comment)
-                    }
-
+            if (value != null) {
+                val playerId = value.get("playerId") as String?
+                if (playerId != null && postPublisher != firebaseUser.uid) {
+                    sentPushNotification(playerId, username, comment)
                 }
+
             }
+
+        }.addOnFailureListener {
+            it.localizedMessage?.let { it1 -> Log.e("User_Notification", it1) }
         }
 
     }
 
-    private fun sentPushNotification(playerId: String, username: String,comment:String) {
+    private fun sentPushNotification(playerId: String, username: String, comment: String) {
         try {
 
             OneSignal.postNotification(
@@ -130,23 +127,17 @@ class CommentsActivity : AppCompatActivity() {
           "include_player_ids": ["$playerId"],
           "headings": {"en": "$username"}
                  }
-        """.trimIndent()),null)
-//            OneSignal.postNotification(
-//                JSONObject(
-//                    "{'contents': {'en':' $username \n" +
-//                            " Commented on your post: $comment'}, 'include_player_ids': ['$playerId']}"
-//                ),
-//                null
-//            )
+        """.trimIndent()
+                ), null
+            )
         } catch (e: JSONException) {
             e.printStackTrace()
         }
-
     }
 
     private fun addNotification() {
 
-        if (publisherId!=firebaseUser.uid){
+        if (publisherId != firebaseUser.uid) {
             val ref = firestore.collection("Notification").document(publisherId)
             val nKey = UUID.randomUUID()
             val notification = hashMapOf<String, Any>()
@@ -155,7 +146,7 @@ class CommentsActivity : AppCompatActivity() {
             notifi["nText"] = "Commented ${binding.addToComment.text}"
             notifi["postId"] = postId
             notifi["isPost"] = true
-            notifi["notificationId"]=nKey.toString()
+            notifi["notificationId"] = nKey.toString()
             notifi["time"] = Timestamp.now()
 
             notification[nKey.toString()] = notifi
@@ -164,14 +155,13 @@ class CommentsActivity : AppCompatActivity() {
         }
 
 
-
-
     }
 
     private fun addComment() {
 
         val randomValue = (20..28).random()
-        val commentId = randomAlphaNumericString(randomValue)
+        val commentId =
+            randomAlphaNumericString(randomValue)//UUID.randomUUID().toString() ile evez ede bilerem baxacam axirda.
         val time = Timestamp.now()
         val reference = firestore.collection("Comments").document(postId)
         val hmapkey = HashMap<String, Any>()
@@ -182,7 +172,7 @@ class CommentsActivity : AppCompatActivity() {
         hmapkey[commentId] = hmap
         reference.set(hmapkey, SetOptions.merge())
         addNotification()
-        getPlayerIdSendNotification(publisherId,binding.addToComment.text.toString())
+        getPlayerIdSendNotification(publisherId, binding.addToComment.text.toString())
 
 
     }
@@ -210,33 +200,6 @@ class CommentsActivity : AppCompatActivity() {
             .joinToString("")
     }
 
-    private fun readComment() {
-        viewModel.readComment()
-    }
-
-
-    fun allUsers() {
-        firestore.collection("user").addSnapshotListener { value, error ->
-            if (error != null) {
-                error.localizedMessage?.let { Log.e("error", it) }
-            } else {
-                if (value != null) {
-                    for (users in value.documents) {
-                        val user_id = users.get("user_id") as String
-                        val email = users.get("email") as String
-                        val username = users.get("username") as String
-                        val password = users.get("password") as String
-                        val imageurl = users.get("image_url") as String
-                        val bio = users.get("bio") as String
-                        val user = Users(user_id, email, username, password, imageurl, bio)
-                        alluser.add(user)
-
-                    }
-                }
-            }
-        }
-
-    }
 
 
 

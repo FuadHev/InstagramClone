@@ -1,4 +1,4 @@
-package com.example.instagramclone
+package com.example.instagramclone.ui.view.activity
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -6,13 +6,13 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.widget.Toast
-import com.example.instagramclone.data.entity.Comment
+import com.example.instagramclone.model.Story
 import com.example.instagramclone.databinding.ActivityStoryBinding
-import com.google.firebase.Timestamp
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.ktx.app
 import com.squareup.picasso.Picasso
 import jp.shts.android.storiesprogressview.StoriesProgressView
 
@@ -21,6 +21,7 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
     private var counter = 0
     private var prestime: Long = 0L
     private var limit: Long = 500
+    val storyList=ArrayList<Story>()
     private lateinit var imageList: ArrayList<String>
     private lateinit var storyIds: ArrayList<String>
     private lateinit var userId: String
@@ -35,6 +36,11 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
         storyIds= ArrayList()
 
         userId = intent.getStringExtra("userId") as String
+        binding.storyDelete.visibility=View.GONE
+
+        if(userId == Firebase.auth.currentUser!!.uid){
+            binding.storyDelete.visibility=View.VISIBLE
+        }
 
         getStories(userId)
         getUserInfo(userId)
@@ -43,6 +49,13 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
         }
         binding.reverse.setOnClickListener {
             binding.stories.reverse()
+        }
+        binding.storyDelete.setOnClickListener {
+            Snackbar.make(it, "Delete this story?", Snackbar.LENGTH_INDEFINITE)
+                .setAction("Yes") {
+                    Firebase.firestore.collection("Story").document(userId).update(storyList[counter].storyId,FieldValue.delete())
+                    finish()
+                }.show()
         }
         binding.skip.setOnTouchListener(onTouchListener)
         binding.reverse.setOnTouchListener(onTouchListener)
@@ -58,21 +71,14 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
                 Toast.makeText(this, error.localizedMessage, Toast.LENGTH_SHORT).show()
             } else {
                 if (value != null && value.exists()) {
-
                     val username = value.get("username") as String
                     val imageurl = value.get("image_url") as String
                     Picasso.get().load(imageurl).into(binding.storyPhoto)
                     binding.storyUsername.text=username
                 }
-
-
             }
 
         }
-
-
-
-
     }
 
     private fun addView(storyId:String){
@@ -82,17 +88,16 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
     private fun getStories(userId:String){
 
         val ref=Firebase.firestore.collection("Story").document(userId)
-
-
         ref.addSnapshotListener { value, error ->
             if (error != null) {
             } else {
                 if (value != null && value.exists()) {
-                    imageList.clear()
-                    storyIds.clear()
-                    val doc = value.data as HashMap<*, *>
-                    try {
+//                    imageList.clear()
+//                    storyIds.clear()
 
+                    storyList.clear()
+                    val doc = value.data as HashMap<*,*>
+                    try {
                         val timecurrent=System.currentTimeMillis()
                         for (i in doc) {
                             val story = i.value as HashMap<*, *>
@@ -101,22 +106,29 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
                             val imageurl= story["imageurl"] as String
                             val storyId= story["storyId"] as String
 
-                            if (timecurrent>timestart&&timecurrent<timeend){
-                                imageList.add(imageurl)
-                                storyIds.add(storyId)
+                            if (timecurrent in (timestart + 1) until timeend){
+
+                                val storyi= Story(imageurl,timestart,storyId)
+                                storyList.add(storyi)
                             }
                         }
-                        imageList.reverse()
-                        storyIds.reverse()
 
-                        storiesProgressView.setStoriesCount(imageList.size)
-                        storiesProgressView.setStoryDuration(5000L)
-                        storiesProgressView.setStoriesListener(this)
-                        storiesProgressView.startStories(counter)
+                        storyList.sortBy {
+                            it.timestart
+                        }
+                        val checkStory=storyList
 
-                        Picasso.get().load(imageList[counter]).into(binding.image)
 
-                        addView(storyIds[counter])
+
+                        if (storyList.isNotEmpty()&&counter<storyList.size){
+                            storiesProgressView.setStoriesCount(storyList.size)
+                            storiesProgressView.setStoryDuration(5000L)
+                            storiesProgressView.setStoriesListener(this@StoryActivity)
+                            storiesProgressView.startStories(counter)
+                            Picasso.get().load(storyList[counter].imageurl).into(binding.image)
+
+                            addView(storyList[counter].storyId)
+                        }
 
 
 
@@ -162,13 +174,17 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
 
 
     override fun onNext() {
-        Picasso.get().load(imageList[++counter]).into(binding.image)
-        addView(storyIds[counter])
+//        Picasso.get().load(imageList[++counter]).into(binding.image)
+//        addView(storyIds[counter])
+
+        Picasso.get().load(storyList[++counter].imageurl).into(binding.image)
+        addView(storyList[counter].storyId)
     }
 
     override fun onPrev() {
         if (counter-1<0) return
-        Picasso.get().load(imageList[--counter]).into(binding.image)
+//        Picasso.get().load(imageList[--counter]).into(binding.image)
+        Picasso.get().load(storyList[--counter].imageurl).into(binding.image)
     }
 
     override fun onComplete() {

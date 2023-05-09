@@ -46,7 +46,7 @@ class EditProfileFragment : BaseFragment() {
     private lateinit var permissionResultLauncher: ActivityResultLauncher<String>
     private lateinit var auth: FirebaseAuth
     private val viewModel by activityViewModels<EditProfileViewModel>()
-    private lateinit var firestore: FirebaseFirestore
+    private  val firestore=Firebase.firestore
     private lateinit var storage: FirebaseStorage
     var selectPicture: Uri? = null
     override fun onCreateView(
@@ -72,7 +72,7 @@ class EditProfileFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 //
-//        auth = Firebase.auth
+        auth = Firebase.auth
 //        firestore = Firebase.firestore
         storage = Firebase.storage
 //        getUserInfo()
@@ -86,9 +86,7 @@ class EditProfileFragment : BaseFragment() {
         binding.save.setOnClickListener {
             upload(it)
         }
-        binding.close.setOnClickListener {
-            findNavController().navigate(EditProfileFragmentDirections.actionEditProfileFragmentToProfileFragment())
-        }
+
 
 
     }

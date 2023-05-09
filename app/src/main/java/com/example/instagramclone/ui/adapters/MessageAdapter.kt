@@ -3,15 +3,13 @@ package com.example.instagramclone.ui.adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.instagramclone.data.entity.Message
-import com.example.instagramclone.databinding.ChatItemBinding
+import com.example.instagramclone.model.Message
 import com.example.instagramclone.databinding.MessageRecieverItemBinding
 import com.example.instagramclone.databinding.MessageSendItemBinding
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
-class MessaggeAdapter(private var messageList:List<Message>):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
+class MessaggeAdapter(private val messageClickListener: MessageClickListener,private var messageList:List<Message>):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
 
     val ITEM_RECEIVE=1
@@ -21,9 +19,6 @@ class MessaggeAdapter(private var messageList:List<Message>):RecyclerView.Adapte
     inner class SentViewHolder(val view:MessageSendItemBinding):RecyclerView.ViewHolder(view.root)
 
     inner class ReceiveViewHolder(val view:MessageRecieverItemBinding):RecyclerView.ViewHolder(view.root)
-
-
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType==1){
@@ -69,12 +64,25 @@ class MessaggeAdapter(private var messageList:List<Message>):RecyclerView.Adapte
             b.txtSendMessage.text=currentMessage.messagetxt
 
 
+            b.messageLayout.setOnLongClickListener {
+                messageClickListener.messageClickListener(currentMessage.senderId,currentMessage.messageId)
+                true
+            }
+
+
 
         }else{
             val viewHolder= holder as ReceiveViewHolder
             val b=viewHolder.view
 
-            
+
+            // alert dialog qoymaliyam mesaji silinmesini tesdiqlemek ucun
+
+            b.messageLayout.setOnLongClickListener {
+                messageClickListener.messageClickListener(currentMessage.senderId,currentMessage.messageId)
+                true
+            }
+
             b.txtSendMessage.text=currentMessage.messagetxt
 
 
@@ -83,4 +91,7 @@ class MessaggeAdapter(private var messageList:List<Message>):RecyclerView.Adapte
     }
 
 
+}
+interface MessageClickListener{
+    fun messageClickListener(senderId:String,messageId:String)
 }

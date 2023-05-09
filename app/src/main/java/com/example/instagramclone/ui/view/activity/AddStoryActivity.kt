@@ -1,4 +1,4 @@
-package com.example.instagramclone
+package com.example.instagramclone.ui.view.activity
 
 import android.app.ProgressDialog
 import android.content.Intent
@@ -13,13 +13,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.navigation.Navigation
 import com.example.instagramclone.databinding.ActivityAddStoryBinding
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.ServerValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -60,14 +57,14 @@ class AddStoryActivity : AppCompatActivity() {
 
         binding.sharePost.setOnClickListener {
 
-            upload(it)
+            upload()
 
         }
 
     }
 
 
-    fun upload(view: View) {
+    fun upload() {
 
         val progress = ProgressDialog(this)
         progress.setMessage("Please wait adding the post")
@@ -99,8 +96,10 @@ class AddStoryActivity : AppCompatActivity() {
 
                     hmapkey[ramdonkey]=hmap
 
-                    ref.set(hmapkey, SetOptions.merge())
-                    progress.dismiss()
+                    ref.set(hmapkey, SetOptions.merge()).addOnSuccessListener {
+                        progress.dismiss()
+                        Toast.makeText(this, "Story successfully shared", Toast.LENGTH_SHORT).show()
+                    }
 
                 }
 
@@ -183,10 +182,15 @@ class AddStoryActivity : AppCompatActivity() {
                     Toast.makeText(this, "Permission needed", Toast.LENGTH_SHORT).show()
 
                 }
-
-
             }
 
 
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        val intent=Intent(this@AddStoryActivity, HomeActivity::class.java)
+        finish()
+        startActivity(intent)
     }
 }

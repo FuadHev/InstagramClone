@@ -4,6 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <variable
+            name="editProfileFragment"
+            type="com.example.instagramclone.ui.fragments.EditProfileFragment" />
 
     </data>
 
@@ -33,26 +36,16 @@
                 app:layout_constraintStart_toStartOf="parent"
                 tools:layout_editor_absoluteY="11dp">
 
-                <ImageView
-                    android:id="@+id/close"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/close"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
                 <TextView
                     android:id="@+id/profilName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
                     android:text=""
                     android:textColor="@color/black"
                     android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/close"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:layout_editor_absoluteX="44dp" />
 
                 <TextView
                     android:id="@+id/save"
@@ -104,7 +97,11 @@
             android:layout_marginTop="16dp"
             android:ems="10"
             android:hint="Bio"
-            android:inputType="textPersonName"
+            android:imeOptions="actionNext"
+            android:inputType="textMultiLine"
+            android:maxLength="100"
+            android:scrollbars="vertical"
+            android:scrollHorizontally="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.502"
             app:layout_constraintStart_toStartOf="parent"

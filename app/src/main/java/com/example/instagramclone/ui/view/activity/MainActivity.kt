@@ -1,4 +1,4 @@
-package com.example.instagramclone
+package com.example.instagramclone.ui.view.activity
 
 import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity

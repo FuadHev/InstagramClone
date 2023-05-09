@@ -1,22 +1,18 @@
-package com.example.instagramclone
+package com.example.instagramclone.ui.view.activity
 
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
+import com.example.instagramclone.R
 import com.example.instagramclone.databinding.ActivityHomeBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.onesignal.OneSignal
-import org.json.JSONException
-import org.json.JSONObject
 
 
 class HomeActivity : AppCompatActivity() {
@@ -47,11 +43,12 @@ class HomeActivity : AppCompatActivity() {
 
         navHostFragment.navController.addOnDestinationChangedListener { _, destination, _ ->
             if (destination.id == R.id.heartFragment) {
-                val badge=binding.bottomNav.getBadge(R.id.heartFragment)
+                val badge = binding.bottomNav.getBadge(R.id.heartFragment)
                 badge?.isVisible = false
-                if (badge?.number !=null && badge.number >0 ){
+                if (badge?.number != null && badge.number > 0) {
                     Firebase.firestore.collection("NotificationCount")
-                        .document(Firebase.auth.currentUser!!.uid).update("isawnotification",
+                        .document(Firebase.auth.currentUser!!.uid).update(
+                            "isawnotification",
                             FieldValue.increment(badge.number.toLong())
                         )
                 }
@@ -59,17 +56,15 @@ class HomeActivity : AppCompatActivity() {
             }
 
         }
-
-
         // get PlayerId
         val deviceState = OneSignal.getDeviceState()
         val userId = deviceState?.userId
 
-        if(userId!=null){
+        if (userId != null) {
             Firebase.firestore.collection("user").document(firebaseUser!!.uid)
                 .update("playerId", userId)
         }
-        Firebase.firestore.collection("user").document(firebaseUser!!.uid).update("online",true)
+        Firebase.firestore.collection("user").document(firebaseUser!!.uid).update("online", true)
 
 
 
@@ -78,7 +73,8 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid).update("online",false)
+        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
+            .update("online", false)
     }
 
     fun notifiCount() {
@@ -98,14 +94,11 @@ class HomeActivity : AppCompatActivity() {
                         val count = data["isawnotification"] as Long
                         nshow = count.toInt()
                     }
-                } catch (_: NullPointerException) {
+                } catch (e: NullPointerException) {
+                    e.localizedMessage?.let { Log.e("IsawNotifi", it) }
 
                 }
-
-
             }
-
-
         }
 
         Firebase.firestore.collection("Notification").document(Firebase.auth.currentUser!!.uid)
@@ -120,21 +113,16 @@ class HomeActivity : AppCompatActivity() {
                             val count = allcomments.count()
                             val ncount = count - nshow
 
-                            if(ncount!=0){
+                            if (ncount != 0) {
                                 val badge = binding.bottomNav.getOrCreateBadge(R.id.heartFragment)
                                 badge.isVisible = true
                                 badge.number = ncount
                             }
-
                         }
                     } catch (_: NullPointerException) {
 
                     }
-
-
                 }
-
-
             }
     }
 }

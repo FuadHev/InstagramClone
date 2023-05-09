@@ -11,7 +11,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
-import com.example.instagramclone.data.entity.Users
+import com.example.instagramclone.model.Users
 import com.example.instagramclone.databinding.FragmentSearchBinding
 import com.example.instagramclone.ui.adapters.ClickListener
 import com.example.instagramclone.ui.adapters.UserAdapter
@@ -44,10 +44,11 @@ class SearchFragment : Fragment() {
 
         adapter = UserAdapter(requireContext(),object : ClickListener {
             override fun userClickListener(bundle: Bundle) {
-                if ( findNavController().currentDestination?.id==R.id.searctoFragment){
-                    findNavController().navigate(R.id.action_searctoFragment_to_search_nav,bundle)
-                }else if ( findNavController().currentDestination?.id==R.id.followersFragment){
-                    findNavController().navigate(R.id.action_followersFragment_to_profileFragment,bundle)
+                val fNav=findNavController()
+                if ( fNav.currentDestination?.id==R.id.searctoFragment){
+                    fNav.navigate(R.id.action_searctoFragment_to_search_nav,bundle)
+                }else if ( fNav.currentDestination?.id==R.id.followersFragment){
+                    fNav.navigate(R.id.action_followersFragment_to_profileFragment,bundle)
                 }
             }
 

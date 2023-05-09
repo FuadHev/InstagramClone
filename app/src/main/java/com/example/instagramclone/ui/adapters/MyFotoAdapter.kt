@@ -4,13 +4,11 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import com.example.instagramclone.R
-import com.example.instagramclone.data.entity.Posts
+import com.example.instagramclone.model.Posts
 import com.example.instagramclone.databinding.FotosItemBinding
-import com.example.instagramclone.ui.fragments.ProfileFragmentDirections
 import com.squareup.picasso.Picasso
 
 class MyFotoAdapter(private var postList:List<Posts>):RecyclerView.Adapter<MyFotoAdapter.CardViewHolder>() {
@@ -46,9 +44,6 @@ class MyFotoAdapter(private var postList:List<Posts>):RecyclerView.Adapter<MyFot
             val bundle=Bundle()
             bundle.putParcelableArrayList("posts",postList as java.util.ArrayList<out Parcelable>)
             bundle.putInt("position",position)
-
-
-
             Navigation.findNavController(it).navigate(R.id.action_profilfragment_to_profileDetailFragment,bundle)
 
 

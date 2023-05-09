@@ -1,32 +1,26 @@
 package com.example.instagramclone.ui.fragments
 
-import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.content.Intent
-import android.opengl.Visibility
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
-import androidx.fragment.app.Fragment
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.instagramclone.ChatActivity
+import com.example.instagramclone.ui.view.activity.ChatActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.base.BaseFragment
-import com.example.instagramclone.data.entity.Posts
-import com.example.instagramclone.data.entity.Story
 import com.example.instagramclone.databinding.FragmentHomeBinding
 import com.example.instagramclone.ui.adapters.PostClickListener
 import com.example.instagramclone.ui.adapters.PostsAdapters
 import com.example.instagramclone.ui.adapters.StoryAdapter
 import com.example.instagramclone.ui.viewmodel.HomeViewModel
-import com.google.firebase.Timestamp
+import com.example.instagramclone.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -80,8 +74,7 @@ class HomeFragment : BaseFragment() {
 
 
 
-        adapter.updatePosts(viewModel.postList)
-        storyAdapter.updateStory(viewModel.storyList)
+
         binding.storyRv.adapter = storyAdapter
         binding.postRv.adapter = adapter
 
@@ -92,9 +85,7 @@ class HomeFragment : BaseFragment() {
         }
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.checkFollowing()
-            adapter.updatePosts(viewModel.postList)
-            storyAdapter.updateStory(viewModel.storyList)
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 binding.swipeRefresh.isRefreshing = false
             }, 1000)
 
@@ -104,29 +95,59 @@ class HomeFragment : BaseFragment() {
 
 
     override fun addObserves() {
-        viewModel.isLoading.observe(viewLifecycleOwner) {
-            if (it) {
-                binding.followLottie.visibility = View.GONE
-                binding.shimmer.visibility = View.VISIBLE
-                binding.shimmerstory.visibility = View.VISIBLE
-                binding.postRv.visibility = View.GONE
-                binding.storyRv.visibility = View.GONE
 
-                Handler().postDelayed({
+
+        viewModel.storyMutableLiveData.observe(viewLifecycleOwner){
+            when (it) {
+                is Resource.Loading -> {
+                    binding.shimmerstory.visibility = View.VISIBLE
+                    binding.storyRv.visibility = View.GONE
+                }
+                is Resource.Success -> {
+                    binding.shimmerstory.visibility = View.GONE
+                    binding.shimmerstory.stopShimmer()
+                    storyAdapter.updateStory(it.data ?: emptyList())
+                    binding.storyRv.visibility = View.VISIBLE
+                }
+                is Resource.Error -> {
+                    binding.storyRv.visibility = View.GONE
+                    binding.shimmerstory.visibility = View.GONE
+                    Toast.makeText(requireContext(), it.data.toString(), Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
+            }
+        }
+
+        viewModel.postMutableLiveData.observe(viewLifecycleOwner) {
+            when (it) {
+                is Resource.Loading -> {
+                    binding.shimmer.visibility = View.VISIBLE
+                    binding.postRv.visibility = View.GONE
+                    binding.storyRv.visibility = View.GONE
+                }
+                is Resource.Success -> {
+                    binding.shimmer.visibility = View.GONE
+                    binding.shimmer.stopShimmer()
+                    adapter.updatePosts(it.data ?: emptyList())
+                    it.data?.let {list->
+                        if (list.isEmpty()){
+                            binding.followLottieLinear.visibility=View.VISIBLE
+                        }
+                    }
+                    binding.postRv.visibility = View.VISIBLE
+                }
+                is Resource.Error -> {
+                    binding.postRv.visibility = View.GONE
+                    binding.storyRv.visibility = View.GONE
                     binding.shimmerstory.visibility = View.GONE
                     binding.shimmer.visibility = View.GONE
-                    binding.shimmerstory.stopShimmer()
-                    binding.shimmer.stopShimmer()
-                    binding.postRv.visibility = View.VISIBLE
-                    binding.storyRv.visibility = View.VISIBLE
-                },1000)
-            } else {
-                binding.followLottie.visibility = View.VISIBLE
-                binding.shimmer.visibility = View.GONE
-                binding.shimmerstory.visibility = View.GONE
+                    Toast.makeText(requireContext(), it.data.toString(), Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
             }
-
         }
+
+
         viewModel.checkMessageLiveData.observe(viewLifecycleOwner) {
             if (it) {
                 binding.checkMessage.visibility = View.GONE

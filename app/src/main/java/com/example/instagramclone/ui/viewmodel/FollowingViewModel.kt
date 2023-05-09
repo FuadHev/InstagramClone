@@ -2,7 +2,7 @@ package com.example.instagramclone.ui.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.instagramclone.data.entity.Users
+import com.example.instagramclone.model.Users
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 

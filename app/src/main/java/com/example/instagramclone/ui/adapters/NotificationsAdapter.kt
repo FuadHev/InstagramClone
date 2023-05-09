@@ -1,17 +1,14 @@
 package com.example.instagramclone.ui.adapters
 
-import android.opengl.Visibility
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.recyclerview.widget.RecyclerView
-import com.example.instagramclone.data.entity.Notification
+import com.example.instagramclone.model.Notification
 import com.example.instagramclone.databinding.NotificationItemBinding
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase

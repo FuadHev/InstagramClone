@@ -1,6 +1,5 @@
 package com.example.instagramclone.ui.adapters
 
-import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
@@ -18,9 +17,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.example.instagramclone.CommentsActivity
+import com.example.instagramclone.ui.view.activity.CommentsActivity
 import com.example.instagramclone.R
-import com.example.instagramclone.data.entity.Posts
+import com.example.instagramclone.model.Posts
 import com.example.instagramclone.databinding.PostsCardViewBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -32,7 +31,6 @@ import com.squareup.picasso.Picasso
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.UUID
-import java.util.logging.Handler
 
 class PostsAdapters(private val postclickListener: PostClickListener,val mContext: Context, var postsList: List<Posts>) :
     RecyclerView.Adapter<PostsAdapters.CardViewHolder>() {
@@ -206,14 +204,14 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
         animation.start()
         android.os.Handler().postDelayed({
             likeImage.visibility = View.INVISIBLE
-        }, 2000)
+        }, 1800)
 
 
 
     }
 
 
-    fun updatePosts(newPostsList: ArrayList<Posts>) {
+    fun updatePosts(newPostsList: List<Posts>) {
         this.postsList = newPostsList
         notifyDataSetChanged()
     }
@@ -240,20 +238,13 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
 
 
         var username = ""
-        firestore.collection("user").document(firebaseUser!!.uid)
-            .addSnapshotListener { value, error ->
-                if (error != null) {
-
-                } else {
-                    if (value != null) {
-                        username = value.get("username") as String
-                    }
-                }
+        firestore.collection("user").document(firebaseUser!!.uid).get().addOnSuccessListener {value->
+            if (value != null) {
+                username = value.get("username") as String
             }
-        firestore.collection("user").document(postPublisher).addSnapshotListener { value, error ->
-            if (error != null) {
 
-            } else {
+        }
+        firestore.collection("user").document(postPublisher).get().addOnSuccessListener { value ->
                 if (value != null) {
                     val playerId = value.get("playerId") as String?
 
@@ -262,26 +253,13 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
                     }
 
                 }
-            }
+
         }
 
     }
 
     private fun sentPushNotification(playerId: String, username: String, imageUrl: String) {
         try {
-//            OneSignal.postNotification(
-//                JSONObject(
-//                    """{
-//          "contents": {"en": "Liked Your Post"},
-//          "include_player_ids": ["$playerId"],
-//          "headings": {"en": "$username"},
-//        "image_url": "https://firebasestorage.googleapis.com/v0/b/instagramclone-9f5ee.appspot.com/o/images%2F0756c3f1-5545-4716-b4e4-174e564031c7.jpg?alt=media&token=9674c6a4-76b2-41a2-ac18-8dcec6e5a3ac"
-//                  }
-//        """.trimIndent()
-//                ),
-//                null
-//            )
-
             /*paylasmadan  qabaq appId deyismelidi*/
             OneSignal.postNotification(
                 JSONObject(
@@ -297,10 +275,6 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
             )
 
 
-//            OneSignal.postNotification(
-//                JSONObject("{'contents': {'en':'$username : Liked Your Post'}, 'include_player_ids': ['$playerId']}"),
-//                null
-//            )
         } catch (e: JSONException) {
             e.printStackTrace()
         }

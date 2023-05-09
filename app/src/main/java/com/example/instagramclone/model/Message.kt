@@ -1,4 +1,4 @@
-package com.example.instagramclone.data.entity
+package com.example.instagramclone.model
 
 import com.google.firebase.Timestamp
 

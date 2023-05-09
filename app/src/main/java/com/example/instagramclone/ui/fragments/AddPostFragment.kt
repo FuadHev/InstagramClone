@@ -20,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.example.instagramclone.R
 
 import com.example.instagramclone.databinding.FragmentAddPostBinding
@@ -72,7 +73,7 @@ class AddPostFragment : Fragment() {
 
         binding.sharePost.setOnClickListener {
 
-            upload(it)
+            upload()
 
         }
 
@@ -93,7 +94,7 @@ class AddPostFragment : Fragment() {
     }
 
 
-    fun upload(view: View) {
+    fun upload() {
 
         val progress= ProgressDialog(requireContext())
         progress.setMessage("Please wait adding the post")
@@ -128,9 +129,7 @@ class AddPostFragment : Fragment() {
                     ref.set(hmap, SetOptions.merge()).addOnSuccessListener {
                         progress.dismiss()
                         Toast.makeText(context, "Photo shared", Toast.LENGTH_SHORT).show()
-
-
-//                       Navigation.findNavController(view).navigate(R.id.action_addPostFragment_to_homeFragment)
+                      findNavController().navigate(R.id.action_addPostFragment_to_homeFragment)
                     }.addOnFailureListener {
                         Toast.makeText(context, it.localizedMessage, Toast.LENGTH_SHORT).show()
                     }

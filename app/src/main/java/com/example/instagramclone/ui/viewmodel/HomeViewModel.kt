@@ -4,10 +4,10 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.instagramclone.data.entity.Posts
-import com.example.instagramclone.data.entity.Story
+import com.example.instagramclone.model.Posts
+import com.example.instagramclone.model.Story
+import com.example.instagramclone.utils.Resource
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -16,13 +16,13 @@ import kotlinx.coroutines.launch
 class HomeViewModel : ViewModel() {
 
 
-    val checkFollowLiveData = MutableLiveData<Boolean>(false)
-    val followList = ArrayList<String>()
-    val postList = ArrayList<Posts>()
-    val storyList = ArrayList<Story>()
+    val postMutableLiveData = MutableLiveData<Resource<List<Posts>>>()
+    val storyMutableLiveData = MutableLiveData<Resource<List<Story>>>()
+    val followList =
+        ArrayList<String>()// belke funksiyanin icine yazib burdan silesi oldum.(checkFollow funksiyasi)
+
     val firestore = Firebase.firestore
-    val checkMessageLiveData = MutableLiveData(false)
-    val isLoading = MutableLiveData(false)
+    val checkMessageLiveData = MutableLiveData(true)
 
 
     init {
@@ -30,9 +30,8 @@ class HomeViewModel : ViewModel() {
         checkMessage()
     }
 
-
     private fun checkMessage() {
-        Firebase.firestore.collection("Chats").addSnapshotListener { value, error ->
+        firestore.collection("Chats").addSnapshotListener { value, error ->
 
             if (error != null) {
                 error.localizedMessage?.let { Log.e("Chat_Error", it) }
@@ -66,48 +65,33 @@ class HomeViewModel : ViewModel() {
             .addSnapshotListener { documentSnapshot, error ->
                 if (error != null) {
                     error.localizedMessage?.let {
-                        Log.e("", it)
                         return@addSnapshotListener
                     }
-                } else {
+                }
+                if (documentSnapshot != null && documentSnapshot.exists()) {
+                    val follow = documentSnapshot.data
 
+                    if (follow != null) {
+                        try {
 
-                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                        val follow = documentSnapshot.data
-
-                        if (follow != null) {
-                            try {
-
-                                val following = follow["following"] as HashMap<*, *>
-                                followList.clear()
-                                for (i in following) {
-                                    followList.add(i.key as String)
-                                }
-
-
-                                if (followList.isNotEmpty()){
-                                    checkFollowLiveData.postValue(true)
-
-                                }else{
-                                    checkFollowLiveData.postValue(false)
-                                }
-                                viewModelScope.launch {
-                                    readStory()
-                                }
-                                viewModelScope.launch {
-                                    readPost()
-                                }
-
-
-                            } catch (e: java.lang.NullPointerException) {
-
-                                e.printStackTrace()
-
+                            val following = follow["following"] as HashMap<*, *>
+                            followList.clear()
+                            for (i in following) {
+                                followList.add(i.key as String)
                             }
-                        }
+                            viewModelScope.launch {
+                                readStory()
+                            }
+                            viewModelScope.launch {
+                                readPost()
+                            }
 
-                    } else {
-                        Log.e("", "")
+
+                        } catch (e: java.lang.NullPointerException) {
+
+                            e.printStackTrace()
+
+                        }
                     }
                 }
             }
@@ -116,14 +100,13 @@ class HomeViewModel : ViewModel() {
     }
 
 
-    fun readPost() {
+    private fun readPost() {
 
-        firestore.collection("Posts").addSnapshotListener { value, error ->
-            if (error != null) {
-                error.localizedMessage?.let { Log.e("", it) }
-            } else {
+        firestore.collection("Posts").get()
+            .addOnSuccessListener { value ->
                 if (value != null) {
-                    postList.clear()
+                    val postList = ArrayList<Posts>()
+                    postMutableLiveData.postValue(Resource.Loading())
                     for (document in value.documents) {
                         try {
                             val post_id = document.get("postId") as String
@@ -133,144 +116,78 @@ class HomeViewModel : ViewModel() {
                             val time = document.get("time") as Timestamp
                             val post = Posts(post_id, postImage, description, publisher, time)
 
-
-                            for (id in followList) {
-                                if (publisher == id) {
-                                    postList.add(post)
-                                }
+                            if (followList.contains(publisher)) {
+                                postList.add(post)
                             }
                             postList.sortByDescending {
                                 it.time
                             }
-                            if (postList.isNotEmpty()) {
-                                isLoading.postValue(true)
-                            } else {
-                                isLoading.postValue(false)
-                            }
 
+                            postMutableLiveData.postValue(Resource.Success(postList))
 
-                        } catch (_: java.lang.NullPointerException) {
-
+                        } catch (exception: java.lang.NullPointerException) {
+                            postMutableLiveData.postValue(exception.localizedMessage?.let { Resource.Error(it)
+                            })
 
                         }
-
-
                     }
-
                 }
 
-
+            }.addOnFailureListener { exception ->
+                postMutableLiveData.postValue(exception.localizedMessage?.let { Resource.Error(it) })
             }
-
-        }
-
     }
 
-    fun readStory() {
+    private fun readStory() {
+        firestore.collection("Story").get().addOnSuccessListener { value ->
 
-        storyList.clear()
-        storyList.add(Story("", 0, 0, "", Firebase.auth.currentUser!!.uid))
-        for (id in followList) {
-            var countStory = 0
-            firestore.collection("Story").document(id).addSnapshotListener { value, error ->
-                if (error != null) {
-                } else {
-                    if (value != null && value.exists()) {
-                        val doc = value.data as HashMap<*, *>
-                        try {
+            if (value != null) {
+                storyMutableLiveData.postValue(Resource.Loading())
+                val storyList = ArrayList<Story>()
+                var ustory: Story? = null
+                val timecurrent = System.currentTimeMillis()
+                for (document in value.documents) {
+                    var countStory = 0
+                    if (followList.contains(document.id)) {
+                        val stories = document.data as HashMap<*, *>
 
-                            var ustory: Story? = null
-                            val timecurrent = System.currentTimeMillis()
-                            for (i in doc) {
-                                val story = i.value as HashMap<*, *>
+                        for (storyIds in stories) {
+                            val story = storyIds.value as? HashMap<*, *>
+                            if (story != null) {
+                                val storyId = story["storyId"] as String
                                 val timestart = story["timeStart"] as Long
                                 val timeend = story["timeEnd"] as Long
                                 val imageurl = story["imageurl"] as String
-                                val storyId = story["storyId"] as String
                                 val userId = story["userId"] as String
                                 if (timecurrent in (timestart + 1) until timeend) {
                                     ++countStory
-                                    break
                                 }
                                 ustory = Story(imageurl, timestart, timeend, storyId, userId)
-
                             }
-                            if (countStory > 0) {
-                                if (ustory != null) {
-                                    storyList.add(ustory)
-                                }
-                            }
-
-
-                        } catch (e: java.lang.NullPointerException) {
-
-
                         }
 
+                        if (countStory > 0) {
+                            if (ustory != null) {
+                                storyList.add(ustory)
+                            }
+                        }
 
                     }
-
                 }
+                storyList.sortedByDescending {
+                    it.timestart
+                }
+                storyList.add(0, Story("", 0, 0, "", Firebase.auth.currentUser!!.uid))
+
+                storyMutableLiveData.postValue(Resource.Success(storyList))
 
             }
+
+        }.addOnFailureListener {
+            storyMutableLiveData.postValue(it.localizedMessage?.let { it1 -> Resource.Error(it1) })
         }
 
-
-//        storyList.add(Story("", 0, 0, "", Firebase.auth.currentUser!!.uid))
-//
-//        val ref = firestore.collection("Story")
-//        storyList.clear()
-//
-//        for (id in followList) {
-//            var countStory = 0
-//            ref.document(id).addSnapshotListener { value, error ->
-//                if (error != null) {
-//
-//
-//                } else {
-//                    if (value != null && value.exists()) {
-//                        val doc = value.data as HashMap<*, *>
-//                        try {
-//
-//                            var ustory: Story? = null
-//                            val timecurrent = System.currentTimeMillis()
-//                            for (i in doc) {
-//                                val story = i.value as HashMap<*, *>
-//                                val timestart = story["timeStart"] as Long
-//                                val timeend = story["timeEnd"] as Long
-//                                val imageurl = story["imageurl"] as String
-//                                val storyId = story["storyId"] as String
-//                                val userId = story["userId"] as String
-//                                if (timecurrent > timestart && timecurrent < timeend) {
-//                                    ++countStory
-//                                    break
-//                                }
-//                                ustory = Story(imageurl, timestart, timeend, storyId, userId)
-//
-//                            }
-//                            if (countStory > 0) {
-//                                if (ustory != null) {
-//                                    storyList.add(ustory)
-//                                }
-//                            }
-//
-//
-//                            storiesList.value = storyList
-//
-//
-//                        } catch (e: java.lang.NullPointerException) {
-//
-//
-//                        }
-//
-//
-//                    }
-//
-//                }
-//
-//            }
-//        }
-//
     }
+
 
 }

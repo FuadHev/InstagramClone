@@ -1,26 +1,19 @@
 package com.example.instagramclone.ui.fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
-import com.example.instagramclone.data.entity.Notification
 import com.example.instagramclone.databinding.FragmentHeartBinding
 import com.example.instagramclone.ui.adapters.NotificationsAdapter
 import com.example.instagramclone.ui.viewmodel.HeartViewModel
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class HeartFragment : Fragment() {

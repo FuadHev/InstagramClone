@@ -1,25 +1,24 @@
 package com.example.instagramclone.ui.fragments
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
-import com.example.instagramclone.HomeActivity
+import com.example.instagramclone.ui.view.activity.HomeActivity
 import com.example.instagramclone.R
-import com.example.instagramclone.data.entity.Users
 import com.example.instagramclone.databinding.FragmentSingupBinding
+import com.example.instagramclone.utils.PreferenceHelper
+import com.example.instagramclone.utils.PreferenceHelper.set
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.auth.User
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import org.checkerframework.checker.units.qual.K
 
 
 class SingupFragment : Fragment() {
@@ -28,6 +27,7 @@ class SingupFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
 
+    private lateinit var sharedPreferences:SharedPreferences
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -37,11 +37,7 @@ class SingupFragment : Fragment() {
         binding.singUpFragment = this
         firestore = Firebase.firestore
         auth = Firebase.auth
-
-
-
-
-
+        sharedPreferences=PreferenceHelper.getDefault(requireContext())
 
 
         return view
@@ -58,6 +54,7 @@ class SingupFragment : Fragment() {
 
             auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
                 creatAccount(email, userName, password)
+
 
 
             }.addOnFailureListener {
@@ -86,6 +83,7 @@ class SingupFragment : Fragment() {
             userMap["email"] = email
             userMap["username"] = userName
             userMap["password"] = password
+            userMap["online"]=false
             userMap["image_url"] =
                 "https://firebasestorage.googleapis.com/v0/b/instagramclone-9f5ee.appspot.com/o/defaultimage%2Fdefaultimage.png?alt=media&token=525e573c-6b43-4730-b4a2-17b30de66234"
             userMap["playerId"] = ""
@@ -99,7 +97,8 @@ class SingupFragment : Fragment() {
                         it.finish()
 
                     }
-
+                    sharedPreferences["email"] = email
+                    sharedPreferences["password"] = password
 
                 }.addOnFailureListener {
                     Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
