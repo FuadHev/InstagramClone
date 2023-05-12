@@ -4,13 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <variable
+            name="profileFragment"
+            type="com.example.instagramclone.ui.view.fragments.ProfileFragment" />
 
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.fragments.ProfileFragment">
+        tools:context=".ui.view.fragments.ProfileFragment">
 
         <LinearLayout
             android:id="@+id/linearLayout4"
@@ -55,9 +58,11 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/followers_linear"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:onClick="@{()->profileFragment.goFollowers()}"
                     android:orientation="vertical"
                     android:padding="10dp">
 
@@ -66,22 +71,26 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:onClick="@{()->profileFragment.goFollowers()}"
                         android:layout_weight="1"
                         android:text="0"
                         tools:ignore="NestedWeights" />
 
                     <TextView
-                        android:id="@+id/textView10"
+                        android:id="@+id/followers_txt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:onClick="@{()->profileFragment.goFollowers()}"
                         android:layout_weight="1"
                         android:text="followers" />
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/following_linear"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:onClick="@{()->profileFragment.goFollowing()}"
                     android:orientation="vertical"
                     android:padding="10dp">
 
@@ -89,15 +98,18 @@
                         android:id="@+id/following"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:onClick="@{()->profileFragment.goFollowing()}"
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:text="0"
                         tools:ignore="NestedWeights" />
 
                     <TextView
-                        android:id="@+id/textView11"
+                        android:id="@+id/following_txt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:onClick="@{()->profileFragment.goFollowing()}"
+
                         android:layout_weight="1"
                         android:text="following" />
                 </LinearLayout>
@@ -115,6 +127,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:layout_weight="1"
+                    android:onClick="@{()->profileFragment.clickEProfileFollowbtn()}"
                     android:backgroundTint="#D2D3D3"
                     android:text="follow" />
 
@@ -236,6 +249,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout5" />
 
+        <ImageView
+            android:id="@+id/no_posts_yet"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/fotos_rv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout5"
+            app:srcCompat="@drawable/no_posts_yet" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

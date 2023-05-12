@@ -46,6 +46,7 @@ class CommentsActivity : AppCompatActivity() {
         firebaseUser = Firebase.auth.currentUser!!
         binding.commentActivity=this
         binding.toolbar.title = "Comments"
+
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setTitleTextColor(Color.BLACK)
         firestore = Firebase.firestore

@@ -1,4 +1,4 @@
-package com.example.instagramclone.ui.fragments
+package com.example.instagramclone.ui.view.fragments
 
 import android.app.Dialog
 import android.graphics.Color
@@ -20,6 +20,7 @@ import com.example.instagramclone.databinding.FragmentMessagesBinding
 import com.example.instagramclone.ui.adapters.MessageClickListener
 import com.example.instagramclone.ui.adapters.MessaggeAdapter
 import com.example.instagramclone.ui.viewmodel.MessagesViewModel
+import com.example.instagramclone.utils.Constant
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -73,7 +74,7 @@ class MessagesFragment : BaseFragment() {
         viewModel.readMessages(senderRoom!!)
         val layoutManager = LinearLayoutManager(requireActivity())
         binding.messageRv.layoutManager = layoutManager
-        binding.messageRv.adapter = messageAdapter
+            binding.messageRv.adapter = messageAdapter
 
         binding.nestedScroll.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
             // RecyclerView'ın son elemanı ekranda görünürse
@@ -143,7 +144,7 @@ class MessagesFragment : BaseFragment() {
     private fun getPlayerIdSendNotification(userId: String, message: String) {
 
         var username = ""
-        var profilImage = ""
+        var profileImage = ""
         Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
             .addSnapshotListener { value, error ->
                 if (error != null) {
@@ -152,7 +153,7 @@ class MessagesFragment : BaseFragment() {
                 }
                 if (value != null) {
                     username = value.get("username") as String
-                    profilImage = value.get("image_url") as String
+                    profileImage = value.get("image_url") as String
                 }
 
             }
@@ -165,8 +166,7 @@ class MessagesFragment : BaseFragment() {
 
                 val playerId = value.get("playerId") as String?
                 if (playerId != null && playerId != "") {
-                    sentPushNotification(playerId, username, message, profilImage)
-                    return@addSnapshotListener
+                    sentPushNotification(playerId, username, message, profileImage)
                 }
 
             }
@@ -180,6 +180,7 @@ class MessagesFragment : BaseFragment() {
         val mDialog=Dialog(requireContext())
         mDialog.setContentView(dialogBinding.root)
         mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialogBinding.dInfo.text="Delete this message?"
 
         dialogBinding.yes.setOnClickListener {
             if (senderId==Firebase.auth.currentUser!!.uid){
@@ -192,7 +193,6 @@ class MessagesFragment : BaseFragment() {
             mDialog.dismiss()
         }
 
-
         dialogBinding.no.setOnClickListener {
 
             mDialog.dismiss()
@@ -200,11 +200,6 @@ class MessagesFragment : BaseFragment() {
 
         mDialog.create()
         mDialog.show()
-
-
-
-
-
 
     }
 
@@ -224,7 +219,7 @@ class MessagesFragment : BaseFragment() {
 
             val notificationContent = JSONObject(
                 """{
-        "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef", 
+        "app_id": "${Constant.APP_ID}", 
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
         "contents": {"en": "$message"},

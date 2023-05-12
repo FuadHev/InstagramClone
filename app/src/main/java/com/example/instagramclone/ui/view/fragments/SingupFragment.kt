@@ -1,4 +1,4 @@
-package com.example.instagramclone.ui.fragments
+package com.example.instagramclone.ui.view.fragments
 
 import android.content.Intent
 import android.content.SharedPreferences
@@ -45,17 +45,14 @@ class SingupFragment : Fragment() {
 
     fun singUp(email: String, userName: String, password: String) {
 
-
         if (email == "" || userName == "" || password == "") {
 
             Toast.makeText(requireContext(), "Enter all informations", Toast.LENGTH_SHORT).show()
 
         } else {
 
-            auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
-                creatAccount(email, userName, password)
-
-
+            auth.createUserWithEmailAndPassword(email,password).addOnSuccessListener {
+                creatAccount(email,userName,password)
 
             }.addOnFailureListener {
                 Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()

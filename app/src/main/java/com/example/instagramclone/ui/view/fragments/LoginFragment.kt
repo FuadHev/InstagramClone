@@ -1,13 +1,14 @@
-package com.example.instagramclone.ui.fragments
+package com.example.instagramclone.ui.view.fragments
 
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.SharedPreferences
+import android.opengl.Visibility
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
+import android.view.View.*
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
@@ -18,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.instagramclone.ui.view.activity.HomeActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.databinding.FragmentLoginBinding
+import com.example.instagramclone.ui.view.fragments.LoginFragmentDirections
 import com.example.instagramclone.utils.PreferenceHelper
 import com.example.instagramclone.utils.PreferenceHelper.get
 import com.example.instagramclone.utils.PreferenceHelper.set
@@ -50,6 +52,10 @@ class LoginFragment : Fragment() {
 
         sharedPreferences=PreferenceHelper.getDefault(requireActivity())
 
+
+
+        // bu one signal telefonun idsin qeyd etme hissesi 1 2 yerde yene yazilib harda stabil isleyirse onu saxlamaliyam,
+        // burda heleki stabil isleyir
         OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE)
 
         // OneSignal Initialization
@@ -57,7 +63,7 @@ class LoginFragment : Fragment() {
         OneSignal.setAppId(ONESIGNAL_APP_ID)
         // promptForPushNotifications will show the native Android notification permission prompt.
         // We recommend removing the following code and instead using an In-App Message to prompt for notification permission (See step 7)
-        OneSignal.promptForPushNotifications();
+        OneSignal.promptForPushNotifications()
 
 
         return view
@@ -69,28 +75,32 @@ class LoginFragment : Fragment() {
 
     fun singIn(email: String, password: String) {
 
-        val progress = ProgressDialog(requireContext())
-        progress.setMessage("Please wait")
+//        val progress = ProgressDialog(requireContext())
+//        progress.setMessage("Please wait")
         if (email.trim() == "" || password.trim() == "") {
             Toast.makeText(requireContext(), "Enter Email and Password ", Toast.LENGTH_SHORT).show()
-            progress.dismiss()
+//            progress.dismiss()
 
         } else {
-            progress.show()
+            binding.singIn.visibility= INVISIBLE
+            binding.loadingLottie.visibility= VISIBLE
+//            progress.show()
             auth.signInWithEmailAndPassword(email.trim(), password.trim()).addOnSuccessListener {
 
                 sharedPreferences["email"] = email
                 sharedPreferences["password"] = password
-                progress.dismiss()
+//                progress.dismiss()
+
                 activity?.let {
                     val intent = Intent(it, HomeActivity::class.java)
                     it.finish()
                     it.startActivity(intent)
-
                 }
 
             }.addOnFailureListener {
-                progress.dismiss()
+//                progress.dismiss()
+                binding.singIn.visibility= VISIBLE
+                binding.loadingLottie.visibility= GONE
                 Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
 
             }

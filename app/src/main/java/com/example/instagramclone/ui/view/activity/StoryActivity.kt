@@ -21,25 +21,26 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
     private var counter = 0
     private var prestime: Long = 0L
     private var limit: Long = 500
-    val storyList=ArrayList<Story>()
-    private lateinit var imageList: ArrayList<String>
-    private lateinit var storyIds: ArrayList<String>
+    val storyList = ArrayList<Story>()
+
+    //    private lateinit var imageList: ArrayList<String>
+//    private lateinit var storyIds: ArrayList<String>
     private lateinit var userId: String
-    private lateinit var storiesProgressView:StoriesProgressView
+    private lateinit var storiesProgressView: StoriesProgressView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityStoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        storiesProgressView=binding.stories
+        storiesProgressView = binding.stories
 
-        imageList= ArrayList()
-        storyIds= ArrayList()
+//        imageList= ArrayList()
+//        storyIds= ArrayList()
 
         userId = intent.getStringExtra("userId") as String
-        binding.storyDelete.visibility=View.GONE
+        binding.storyDelete.visibility = View.GONE
 
-        if(userId == Firebase.auth.currentUser!!.uid){
-            binding.storyDelete.visibility=View.VISIBLE
+        if (userId == Firebase.auth.currentUser!!.uid) {
+            binding.storyDelete.visibility = View.VISIBLE
         }
 
         getStories(userId)
@@ -53,7 +54,8 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
         binding.storyDelete.setOnClickListener {
             Snackbar.make(it, "Delete this story?", Snackbar.LENGTH_INDEFINITE)
                 .setAction("Yes") {
-                    Firebase.firestore.collection("Story").document(userId).update(storyList[counter].storyId,FieldValue.delete())
+                    Firebase.firestore.collection("Story").document(userId)
+                        .update(storyList[counter].storyId, FieldValue.delete())
                     finish()
                 }.show()
         }
@@ -64,7 +66,7 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
     }
 
 
-    private fun getUserInfo(userId:String){
+    private fun getUserInfo(userId: String) {
 
         Firebase.firestore.collection("user").document(userId).addSnapshotListener { value, error ->
             if (error != null) {
@@ -74,72 +76,63 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
                     val username = value.get("username") as String
                     val imageurl = value.get("image_url") as String
                     Picasso.get().load(imageurl).into(binding.storyPhoto)
-                    binding.storyUsername.text=username
+                    binding.storyUsername.text = username
                 }
             }
 
         }
     }
 
-    private fun addView(storyId:String){
-        Firebase.firestore.collection("Story").document(userId).update("$storyId.views.${Firebase.auth.currentUser!!.uid}",true)
+    private fun addView(storyId: String) {
+        Firebase.firestore.collection("Story").document(userId)
+            .update("$storyId.views.${Firebase.auth.currentUser!!.uid}", true)
     }
 
-    private fun getStories(userId:String){
+    private fun getStories(userId: String) {
 
-        val ref=Firebase.firestore.collection("Story").document(userId)
-        ref.addSnapshotListener { value, error ->
-            if (error != null) {
-            } else {
-                if (value != null && value.exists()) {
+        val ref = Firebase.firestore.collection("Story").document(userId)
+        ref.get().addOnSuccessListener { value ->
+            if (value != null && value.exists()) {
 //                    imageList.clear()
 //                    storyIds.clear()
-
-                    storyList.clear()
+                storyList.clear()
+                try {
                     val doc = value.data as HashMap<*,*>
-                    try {
-                        val timecurrent=System.currentTimeMillis()
-                        for (i in doc) {
-                            val story = i.value as HashMap<*, *>
-                            val timestart= story["timeStart"] as Long
-                            val timeend= story["timeEnd"] as Long
-                            val imageurl= story["imageurl"] as String
-                            val storyId= story["storyId"] as String
 
-                            if (timecurrent in (timestart + 1) until timeend){
+                    val timecurrent = System.currentTimeMillis()
+                    for (i in doc) {
+                        val story = i.value as HashMap<*, *>
+                        val timestart = story["timeStart"] as Long
+                        val timeend = story["timeEnd"] as Long
+                        val imageurl = story["imageurl"] as String
+                        val storyId = story["storyId"] as String
 
-                                val storyi= Story(imageurl,timestart,storyId)
-                                storyList.add(storyi)
-                            }
+                        if (timecurrent in (timestart + 1) until timeend) {
+
+                            val storyi = Story(imageurl, timestart, storyId)
+                            storyList.add(storyi)
                         }
-
-                        storyList.sortBy {
-                            it.timestart
-                        }
-                        val checkStory=storyList
-
-
-
-                        if (storyList.isNotEmpty()&&counter<storyList.size){
-                            storiesProgressView.setStoriesCount(storyList.size)
-                            storiesProgressView.setStoryDuration(5000L)
-                            storiesProgressView.setStoriesListener(this@StoryActivity)
-                            storiesProgressView.startStories(counter)
-                            Picasso.get().load(storyList[counter].imageurl).into(binding.image)
-
-                            addView(storyList[counter].storyId)
-                        }
-
-
-
-
-                    } catch (_: java.lang.NullPointerException) {
-
-
                     }
+
+                    storyList.sortBy {
+                        it.timestart
+                    }
+
+                    if (storyList.isNotEmpty() && counter < storyList.size) {
+                        storiesProgressView.setStoriesCount(storyList.size)
+                        storiesProgressView.setStoryDuration(5000L)
+                        storiesProgressView.setStoriesListener(this@StoryActivity)
+                        storiesProgressView.startStories(counter)
+                        Picasso.get().load(storyList[counter].imageurl).into(binding.image)
+
+                        addView(storyList[counter].storyId)
+                    }
+
+                } catch (_: java.lang.NullPointerException) {
 
 
                 }
+
 
             }
 
@@ -147,7 +140,6 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
         }
 
     }
-
 
 
     private val onTouchListener = object : OnTouchListener {
@@ -165,8 +157,6 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
                 }
 
             }
-
-
             return false
         }
 
@@ -182,8 +172,7 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
     }
 
     override fun onPrev() {
-        if (counter-1<0) return
-//        Picasso.get().load(imageList[--counter]).into(binding.image)
+        if (counter - 1 < 0) return
         Picasso.get().load(storyList[--counter].imageurl).into(binding.image)
     }
 

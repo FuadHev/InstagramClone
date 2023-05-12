@@ -1,4 +1,4 @@
-package com.example.instagramclone.ui.fragments
+package com.example.instagramclone.ui.view.fragments
 
 import android.os.Bundle
 import android.os.Handler
@@ -33,10 +33,19 @@ class FollowersFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val argument = arguments
 
+        val args = Bundle().also {
+            it.putString("profileId", arguments?.getString("id"))
+        }
+        fragmentList.add(FollowerFragment().also {
+            it.arguments = args
+        })
+        fragmentList.add(FollowingFragment().also {
+            it.arguments = args
+        })
+
         val adapter = MyViewPagerAdapter(requireActivity())
 
         binding.viewpager.adapter = adapter
-
 
 
         TabLayoutMediator(binding.tabLayout, binding.viewpager) { tab, position ->
@@ -51,12 +60,6 @@ class FollowersFragment : Fragment() {
             },500)
         }
 
-
-
-
-
-
-
     }
 
 
@@ -64,15 +67,6 @@ class FollowersFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args = Bundle().also {
-            it.putString("profileId", arguments?.getString("id"))
-        }
-        fragmentList.add(FollowerFragment().also {
-            it.arguments = args
-        })
-        fragmentList.add(FollowingFragment().also {
-            it.arguments = args
-        })
         fragmentTitleList.add("follower")
         fragmentTitleList.add("following")
     }

@@ -1,4 +1,4 @@
-package com.example.instagramclone.ui.fragments
+package com.example.instagramclone.ui.view.fragments
 
 import android.os.Bundle
 import android.util.Log

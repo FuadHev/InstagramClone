@@ -1,4 +1,4 @@
-package com.example.instagramclone.ui.fragments
+package com.example.instagramclone.ui.view.fragments
 
 import android.app.Activity
 import android.app.ProgressDialog
@@ -73,19 +73,15 @@ class EditProfileFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 //
         auth = Firebase.auth
-//        firestore = Firebase.firestore
         storage = Firebase.storage
+        binding.editProfileFragment=this
 //        getUserInfo()
 
 
         registerLauncher()
 
-        binding.changeProfilPhoto.setOnClickListener {
-            selectImage(it)
-        }
-        binding.save.setOnClickListener {
-            upload(it)
-        }
+
+
 
 
 
@@ -109,7 +105,7 @@ class EditProfileFragment : BaseFragment() {
 //    }
 
 
-    fun upload(view: View) {
+    fun upload() {
 
         val progress = ProgressDialog(requireContext())
         progress.setMessage("Please wait updating profile")
@@ -168,7 +164,6 @@ class EditProfileFragment : BaseFragment() {
             ) {
                 Snackbar.make(view, "Permission needed for gallery", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Give permission") {
-
                         permissionResultLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
                     }.show()
             } else {

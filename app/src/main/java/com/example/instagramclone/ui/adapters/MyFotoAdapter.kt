@@ -50,7 +50,7 @@ class MyFotoAdapter(private var postList:List<Posts>):RecyclerView.Adapter<MyFot
         }
     }
 
-    fun updateMyPosts(newPostList:ArrayList<Posts>){
+    fun updateMyPosts(newPostList:List<Posts>){
         this.postList=newPostList
         notifyDataSetChanged()
 

@@ -33,7 +33,6 @@ class MessagesViewModel : ViewModel() {
                 if (online){
                     checkSession.postValue("online")
                 }else{
-
                     checkSession.postValue("offline")
                 }
 

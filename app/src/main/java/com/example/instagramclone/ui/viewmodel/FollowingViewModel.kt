@@ -7,7 +7,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class FollowingViewModel: ViewModel() {
-    val userList= MutableLiveData<ArrayList<Users>>()
+    val userList= MutableLiveData<List<Users>>(emptyList())
     val firestore = Firebase.firestore
 
     private fun getUsers(idList:ArrayList<String>) {
@@ -26,10 +26,10 @@ class FollowingViewModel: ViewModel() {
                             val imageurl = user.get("image_url") as String
                             val bio = user.get("bio") as String
                             val user = Users(user_id, email, username, password, imageurl, bio)
-                            for (id in idList) {
-                                if (user_id == id) {
+                            if (idList.contains(user_id)) {
+
                                     usersList.add(user)
-                                }
+
                             }
                         }
                         userList.value=usersList
@@ -46,25 +46,28 @@ class FollowingViewModel: ViewModel() {
 
    fun getFollowings(id:String){
 
-        firestore.collection("Follow").document(id).addSnapshotListener { value, error ->
-            if (error != null) {
-
-            } else {
+        firestore.collection("Follow").document(id).get().addOnSuccessListener { value ->
                 try {
                     if (value != null) {
                         val idList=ArrayList<String>()
-                        val data = value.get("following") as HashMap<*, *>
+                        val data = value.get("following") as? HashMap<*,*>
 
-                        for (following in data) {
-                            idList.add(following.key.toString())
+                        if (data!=null){
+                            for (following in data) {
+                                idList.add(following.key.toString())
+                            }
+                            if (idList.isNotEmpty()){
+                                getUsers(idList)
+                            }
                         }
-                        getUsers(idList)
+
+
                     }
                 } catch (e: java.lang.NullPointerException) {
 
                 }
 
-            }
+
 
 
         }

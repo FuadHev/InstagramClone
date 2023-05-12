@@ -1,6 +1,8 @@
-package com.example.instagramclone.ui.fragments
+package com.example.instagramclone.ui.view.fragments
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -54,10 +56,19 @@ class ChatsFragment : Fragment() {
         return binding.root
     }
 
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         firestore = Firebase.firestore
         auth = Firebase.auth
+
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
+                .update("online", true)
+        },1000)
+
 
         binding.chatRv.layoutManager = LinearLayoutManager(requireActivity())
         binding.chatRv.adapter = adapter
@@ -76,11 +87,11 @@ class ChatsFragment : Fragment() {
                     it.data?.let { list -> adapter.updateChatList(list) }?:adapter.updateChatList(
                         emptyList()
                     )
-
                 }
                 is Resource.Error->{
                     Toast.makeText(requireContext(), it.data.toString(), Toast.LENGTH_SHORT).show()
                 }
+
             }
 
         }

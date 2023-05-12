@@ -1,4 +1,4 @@
-package com.example.instagramclone.ui.fragments
+package com.example.instagramclone.ui.view.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -8,41 +8,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
+import com.example.instagramclone.base.BaseFragment
 import com.example.instagramclone.model.Users
 import com.example.instagramclone.databinding.FragmentSearchBinding
 import com.example.instagramclone.ui.adapters.ClickListener
 import com.example.instagramclone.ui.adapters.UserAdapter
+import com.example.instagramclone.ui.viewmodel.SearchViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 
-class SearchFragment : Fragment() {
+class SearchFragment : BaseFragment() {
 
     private lateinit var binding: FragmentSearchBinding
-    private lateinit var adapter: UserAdapter
-    private lateinit var usersList: ArrayList<Users>
     private lateinit var firestore: FirebaseFirestore
-
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_search, container, false)
-
-        firestore = Firebase.firestore
-        usersList = ArrayList()
-
-
-
-        binding.rv.setHasFixedSize(true)
-        binding.rv.layoutManager = LinearLayoutManager(requireActivity())
-
-        adapter = UserAdapter(requireContext(),object : ClickListener {
+    private val viewModel by viewModels<SearchViewModel>()
+    private val adapter by lazy {
+       UserAdapter(requireContext(),object : ClickListener {
             override fun userClickListener(bundle: Bundle) {
                 val fNav=findNavController()
                 if ( fNav.currentDestination?.id==R.id.searctoFragment){
@@ -52,56 +40,44 @@ class SearchFragment : Fragment() {
                 }
             }
 
-        }, usersList)
-        binding.rv.adapter = adapter
+        }, emptyList())
+    }
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_search, container, false)
         // Inflate the layout for this fragment
         return binding.root
+    }
+
+    override fun addObserves() {
+        viewModel.userLiveData.observe(viewLifecycleOwner){
+            adapter.updateUsers(it)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        firestore = Firebase.firestore
+        binding.rv.setHasFixedSize(true)
+        binding.rv.layoutManager = LinearLayoutManager(requireActivity())
+        binding.rv.adapter = adapter
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
             androidx.appcompat.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                searchUsers(query.toString())
+                viewModel.searchUsers(query.toString())
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                searchUsers(newText.toString())
+                viewModel.searchUsers(newText.toString())
                 return true
             }
 
 
         })
-
     }
-
-    @SuppressLint("NotifyDataSetChanged", "SuspiciousIndentation")
-    fun searchUsers(s: String) {
-        val query = firestore.collection("user").orderBy("username").startAt(s).endAt(s + "\uf8ff")
-
-        query.addSnapshotListener { value, error ->
-
-            usersList.clear()
-            for (users in value!!.documents) {
-
-                val user_id = users.get("user_id") as String
-                val email = users.get("email") as String
-                val username = users.get("username") as String
-                val password = users.get("password") as String
-                val imageurl = users.get("image_url") as String
-                val bio = users.get("bio") as String
-                val user = Users(user_id, email, username, password, imageurl, bio)
-                usersList.add(user)
-
-            }
-            adapter.notifyDataSetChanged()
-        }
-
-
-    }
-
 
 }

@@ -1,4 +1,4 @@
-package com.example.instagramclone.ui.fragments
+package com.example.instagramclone.ui.view.fragments
 
 import android.app.Activity.RESULT_OK
 import android.app.ProgressDialog
@@ -111,6 +111,7 @@ class AddPostFragment : Fragment() {
                 uploadPictureReference.downloadUrl.addOnSuccessListener {
                     val downloadUrl = it.toString()
 
+                    progress.show()
                     val ref = firestore.collection("Posts").document()
 
 //                    firestore.collection("Comments").document(ref.id).set({FieldValue.delete()})
@@ -131,6 +132,7 @@ class AddPostFragment : Fragment() {
                         Toast.makeText(context, "Photo shared", Toast.LENGTH_SHORT).show()
                       findNavController().navigate(R.id.action_addPostFragment_to_homeFragment)
                     }.addOnFailureListener {
+                        progress.dismiss()
                         Toast.makeText(context, it.localizedMessage, Toast.LENGTH_SHORT).show()
                     }
 
@@ -138,10 +140,11 @@ class AddPostFragment : Fragment() {
 
 
             }.addOnFailureListener {
+                progress.dismiss()
                 Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
             }
         }else{
-            progress.dismiss()
+
             Toast.makeText(requireContext(), "Please select photo", Toast.LENGTH_SHORT).show()
         }
 

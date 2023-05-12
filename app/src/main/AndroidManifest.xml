@@ -22,22 +22,32 @@
         <activity
             android:name=".ui.view.activity.ChatActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_chat"
             android:theme="@style/Theme.InstagramClone.NoActionBar" />
         <activity
             android:name=".ui.view.activity.StoryActivity"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name=".ui.view.activity.AddStoryActivity"
+            android:screenOrientation="portrait"
+
             android:exported="false" />
         <activity
             android:name=".ui.view.activity.CommentsActivity"
+            android:screenOrientation="portrait"
+
             android:exported="false" />
         <activity
             android:name=".ui.view.activity.HomeActivity"
+            android:screenOrientation="portrait"
+
             android:exported="false" />
         <activity
             android:name=".ui.view.activity.MainActivity"
+            android:screenOrientation="portrait"
+
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

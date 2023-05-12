@@ -112,6 +112,7 @@ class UserAdapter(
 
 
         var username = ""
+        var profileImage=""
         Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
             .addSnapshotListener { value, error ->
                 if (error != null) {
@@ -119,6 +120,7 @@ class UserAdapter(
                 } else {
                     if (value != null) {
                         username = value.get("username") as String
+                        profileImage = value.get("image_url") as String
                     }
                 }
             }
@@ -131,7 +133,7 @@ class UserAdapter(
 
                     val playerId = value.get("playerId") as String?
                     if (playerId != null) {
-                        sentPushNotification(playerId, username)
+                        sentPushNotification(playerId, username,profileImage)
                     }
 
                 }
@@ -140,21 +142,30 @@ class UserAdapter(
 
     }
 
-    private fun sentPushNotification(playerId: String, username: String) {
+    private fun sentPushNotification(playerId: String, username: String,profileImage:String) {
         try {
-            if(username!=Firebase.auth.currentUser!!.uid){
-                OneSignal.postNotification(
-                    JSONObject(
-                        """{
-          "contents": {"en": "started following you"},
-          "include_player_ids": ["$playerId"],
-          "headings": {"en": "$username"}
-                  }
-        """.trimIndent()
-                    ),
-                    null
-                )
-            }
+//                OneSignal.postNotification(
+//                    JSONObject(
+//                        """{
+//          "contents": {"en": "started following you"},
+//          "include_player_ids": ["$playerId"],
+//          "headings": {"en": "$username"}
+//                  }
+//        """.trimIndent()
+//                    ),
+//                    null
+//                )
+
+            val notificationContent = JSONObject(
+                """{
+        "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef", 
+        "include_player_ids": ["$playerId"],
+        "headings": {"en": "$username"},
+        "contents": {"en": "started following you"},
+        "large_icon": "$profileImage"
+    }"""
+            )
+            OneSignal.postNotification(notificationContent, null)
 
 
         } catch (e: JSONException) {
@@ -231,7 +242,7 @@ class UserAdapter(
 
     }
 
-    fun updateUsers(newList: ArrayList<Users>) {
+    fun updateUsers(newList: List<Users>) {
         this.usersList = newList
         notifyDataSetChanged()
 

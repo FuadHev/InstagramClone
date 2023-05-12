@@ -13,7 +13,6 @@ import com.example.instagramclone.utils.Resource
 
 class ChatsViewModel : ViewModel() {
 
-    //    val chatList=MutableLiveData<List<ChatUser>>()
     val chatLiveData = MutableLiveData<Resource<List<ChatUser>>>(Resource.Loading())
 
 
@@ -44,7 +43,7 @@ class ChatsViewModel : ViewModel() {
 
     }
 
-    fun allUser(chatUserIdList: ArrayList<String>) {
+    private fun allUser(chatUserIdList: ArrayList<String>) {
 
         Firebase.firestore.collection("user").addSnapshotListener { value, error ->
             if (error != null) {
@@ -85,11 +84,9 @@ class ChatsViewModel : ViewModel() {
                 if (value != null) {
                     val chatlist = ArrayList<ChatUser>()
                     for (doc in value.documents) {
-                        Log.e("data", doc.data.toString())
-
                         val time = doc.get("time") as Timestamp
                         val seen = doc.get("seen") as Boolean
-                        val senderId = doc.get("senderId") as String
+                      //  val senderId = doc.get("senderId") as String
                         val lastMessage = doc.get("lastmessage") as String
                         for (user in alluser) {
                             if (Firebase.auth.currentUser!!.uid + user.user_id == doc.id) {
@@ -102,9 +99,7 @@ class ChatsViewModel : ViewModel() {
                                     seen
                                 )
                                 chatlist.add(chatUser)
-
                             }
-
                         }
                         chatlist.sortByDescending { chatItem ->
                             chatItem.time

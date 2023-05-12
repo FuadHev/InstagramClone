@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.recyclerview.widget.RecyclerView
 import com.example.instagramclone.ui.view.activity.CommentsActivity
 import com.example.instagramclone.R
@@ -61,7 +62,11 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
         b.like.tag = "like"
         Picasso.get().load(post.postImage).into(b.postImage)
 
-        if (post.description == "") {
+        if (post.publisher== Firebase.auth.currentUser!!.uid){
+            b.postOption.visibility= VISIBLE
+        }
+
+        if (post.description.trim() == "") {
             b.description.visibility = GONE
 
         } else {
@@ -74,21 +79,18 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
         getComments(post.post_id, b.comments)
         isSaved(post.post_id, b.save)
 
+
+        b.postOption.setOnClickListener {
+            postclickListener.postOptionCLickListener(post.post_id,it)
+        }
+
         b.userName.setOnClickListener {
 
-
-            val bundle = Bundle()
-
-            bundle.putString("profileid", post.publisher)
-
-            postclickListener.pImage_uNameClickListener(bundle)
+            goToProfile(post.publisher)
         }
         b.profileImage.setOnClickListener {
-            val bundle = Bundle()
 
-            bundle.putString("profileid", post.publisher)
-
-            postclickListener.pImage_uNameClickListener(bundle)
+            goToProfile(post.publisher)
         }
 
         var i = 0
@@ -141,6 +143,13 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
         }
 
 
+    }
+    private fun goToProfile(publisher: String){
+        val bundle = Bundle()
+
+        bundle.putString("profileid", publisher)
+
+        postclickListener.pImage_uNameClickListener(bundle)
     }
 
     private fun likePost(
@@ -452,4 +461,6 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
 }
 interface PostClickListener{
    fun pImage_uNameClickListener(bundle: Bundle)
+
+   fun postOptionCLickListener(postId: String,view:View)
 }

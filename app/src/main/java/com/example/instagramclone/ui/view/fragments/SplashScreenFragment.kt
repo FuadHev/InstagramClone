@@ -1,4 +1,4 @@
-package com.example.instagramclone.ui.fragments
+package com.example.instagramclone.ui.view.fragments
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -15,6 +15,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.databinding.FragmentSplashScreenBinding
+import com.example.instagramclone.ui.view.fragments.SplashScreenFragmentDirections
 import com.example.instagramclone.ui.view.activity.HomeActivity
 import com.example.instagramclone.utils.PreferenceHelper
 import com.google.firebase.auth.ktx.auth
@@ -51,7 +52,7 @@ class SplashScreenFragment : Fragment() {
                             it.finish()
                             it.startActivity(intent)
                         }
-                    }, 700)
+                    }, 800)
 
                 }.addOnFailureListener {
                     Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT).show()

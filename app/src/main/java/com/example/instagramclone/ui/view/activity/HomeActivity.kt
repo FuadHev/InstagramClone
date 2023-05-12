@@ -67,12 +67,17 @@ class HomeActivity : AppCompatActivity() {
         Firebase.firestore.collection("user").document(firebaseUser!!.uid).update("online", true)
 
 
-
         notifiCount()
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onRestart() {
+        super.onRestart()
+        Log.e("homeactivity onrestart","restart")
+        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
+            .update("online", true)
+    }
+    override fun onStop() {
+        super.onStop()
+        Log.e("homeactivity onstop","stop")
         Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
             .update("online", false)
     }

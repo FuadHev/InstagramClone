@@ -1,4 +1,4 @@
-package com.example.instagramclone.ui.fragments
+package com.example.instagramclone.ui.view.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
@@ -42,7 +43,7 @@ class FollowerFragment : Fragment() {
     private lateinit var usersList: ArrayList<Users>
     private lateinit var id: String
     private lateinit var firestore: FirebaseFirestore
-    private val viewModel by activityViewModels<FollowerViewModel>()
+    private val viewModel by viewModels<FollowerViewModel>()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

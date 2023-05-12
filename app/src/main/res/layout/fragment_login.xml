@@ -7,14 +7,30 @@
 
         <variable
             name="loginFragment"
-            type="com.example.instagramclone.ui.fragments.LoginFragment" />
+            type="com.example.instagramclone.ui.view.fragments.LoginFragment" />
 
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.fragments.LoginFragment">
+        tools:context=".ui.view.fragments.LoginFragment">
+
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/loading_lottie"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            android:visibility="gone"
+            app:layout_constraintVertical_bias="0.48"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:lottie_rawRes="@raw/loading"
+            />
 
         <ImageView
             android:id="@+id/imageView"
@@ -142,9 +158,11 @@
             android:id="@+id/singIn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
             android:onClick="@{()-> loginFragment.singIn(email.getText().toString(),password.getText().toString())}"
             android:text="@string/sing_in"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 

@@ -6,7 +6,7 @@
     <data>
         <variable
             name="singUpFragment"
-            type="com.example.instagramclone.ui.fragments.SingupFragment" />
+            type="com.example.instagramclone.ui.view.fragments.SingupFragment" />
 
 
 
@@ -15,7 +15,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.fragments.SingupFragment">
+        tools:context=".ui.view.fragments.SingupFragment">
 
 
         <LinearLayout
