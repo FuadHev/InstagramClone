@@ -17,4 +17,14 @@ class ChatActivity : AppCompatActivity() {
         binding=DataBindingUtil.setContentView(this, R.layout.activity_chat)
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
     }
+    override fun onRestart() {
+        super.onRestart()
+        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
+            .update("online", true)
+    }
+    override fun onStop() {
+        super.onStop()
+        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
+            .update("online", false)
+    }
 }

@@ -19,7 +19,7 @@ class HeartViewModel:ViewModel() {
         readNotification()
     }
 
-    fun readNotification() {
+    private fun readNotification() {
         Firebase.firestore.collection("Notification").document(Firebase.auth.currentUser!!.uid)
             .addSnapshotListener { value, error ->
                 if (error != null) {

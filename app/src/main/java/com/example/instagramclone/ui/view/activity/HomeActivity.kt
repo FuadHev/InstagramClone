@@ -1,13 +1,17 @@
 package com.example.instagramclone.ui.view.activity
 
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.example.instagramclone.R
 import com.example.instagramclone.databinding.ActivityHomeBinding
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
@@ -36,48 +40,60 @@ class HomeActivity : AppCompatActivity() {
 //        // promptForPushNotifications will show the native Android notification permission prompt.
 //        // We recommend removing the following code and instead using an In-App Message to prompt for notification permission (See step 7)
 //        OneSignal.promptForPushNotifications();
+      setBottomNavBar()
+        // get PlayerId
+        setPlayerId(firebaseUser!!)
+
+
+        notifiCount()
+    }
+    private fun setPlayerId(firebaseUser:FirebaseUser){
+        val deviceState = OneSignal.getDeviceState()
+        val userId = deviceState?.userId
+        if (userId != null) {
+            Firebase.firestore.collection("user").document(firebaseUser.uid)
+                .update("playerId", userId)
+        }
+        Firebase.firestore.collection("user").document(firebaseUser.uid).update("online", true)
+
+    }
+
+    private fun setBottomNavBar() {
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
 
         NavigationUI.setupWithNavController(binding.bottomNav, navHostFragment.navController)
 
         navHostFragment.navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.heartFragment) {
-                val badge = binding.bottomNav.getBadge(R.id.heartFragment)
-                badge?.isVisible = false
-                if (badge?.number != null && badge.number > 0) {
-                    Firebase.firestore.collection("NotificationCount")
-                        .document(Firebase.auth.currentUser!!.uid).update(
-                            "isawnotification",
-                            FieldValue.increment(badge.number.toLong())
-                        )
+            when (destination.id) {
+
+                R.id.heartFragment -> {
+                    val badge = binding.bottomNav.getBadge(R.id.heartFragment)
+                    badge?.isVisible = false
+                    if (badge?.number != null && badge.number > 0) {
+                        Firebase.firestore.collection("NotificationCount")
+                            .document(Firebase.auth.currentUser!!.uid).update(
+                                "isawnotification",
+                                FieldValue.increment(badge.number.toLong())
+                            )
+                    }
                 }
+                R.id.commentsFragment->{ binding.bottomNav.visibility=GONE }
+
+                else ->{binding.bottomNav.visibility= VISIBLE }
 
             }
 
         }
-        // get PlayerId
-        val deviceState = OneSignal.getDeviceState()
-        val userId = deviceState?.userId
-
-        if (userId != null) {
-            Firebase.firestore.collection("user").document(firebaseUser!!.uid)
-                .update("playerId", userId)
-        }
-        Firebase.firestore.collection("user").document(firebaseUser!!.uid).update("online", true)
-
-
-        notifiCount()
     }
+
     override fun onRestart() {
         super.onRestart()
-        Log.e("homeactivity onrestart","restart")
         Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
             .update("online", true)
     }
     override fun onStop() {
         super.onStop()
-        Log.e("homeactivity onstop","stop")
         Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
             .update("online", false)
     }
@@ -113,7 +129,6 @@ class HomeActivity : AppCompatActivity() {
                 } else {
                     try {
                         if (value != null) {
-
                             val allcomments = value.data as HashMap<*, *>
                             val count = allcomments.count()
                             val ncount = count - nshow

@@ -128,7 +128,7 @@
                     android:layout_marginTop="8dp"
                     android:layout_weight="1"
                     android:onClick="@{()->profileFragment.clickEProfileFollowbtn()}"
-                    android:backgroundTint="#D2D3D3"
+                    android:backgroundTint="@color/f_btn_color"
                     android:text="follow" />
 
                 <androidx.appcompat.widget.AppCompatButton
@@ -136,8 +136,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:onClick="@{()->profileFragment.getMessage()}"
                     android:layout_weight="1"
-                    android:backgroundTint="#D2D3D3"
+                    android:backgroundTint="@color/f_btn_color"
                     android:text="message" />
 
             </LinearLayout>
@@ -190,6 +191,7 @@
                     android:id="@+id/options"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:onClick="@{()->profileFragment.getOption()}"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
                     android:layout_marginEnd="10dp"
@@ -227,6 +229,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_weight="1"
+                android:onClick="@{()->profileFragment.setMyPhotosListRv()}"
                 android:src="@drawable/my_photos"
                 app:strokeColor="@null" />
 
@@ -235,6 +238,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_weight="1"
+                android:onClick="@{()->profileFragment.setSavesListRv()}"
                 android:src="@drawable/bookmark"
                 app:strokeColor="@null" />
         </LinearLayout>

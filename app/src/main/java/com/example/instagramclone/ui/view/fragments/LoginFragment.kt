@@ -1,27 +1,23 @@
 package com.example.instagramclone.ui.view.fragments
 
-import android.app.ProgressDialog
+
 import android.content.Intent
 import android.content.SharedPreferences
-import android.opengl.Visibility
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.*
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
+
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.example.instagramclone.ui.view.activity.HomeActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.databinding.FragmentLoginBinding
-import com.example.instagramclone.ui.view.fragments.LoginFragmentDirections
+import com.example.instagramclone.utils.Constant
 import com.example.instagramclone.utils.PreferenceHelper
-import com.example.instagramclone.utils.PreferenceHelper.get
 import com.example.instagramclone.utils.PreferenceHelper.set
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -37,12 +33,12 @@ class LoginFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
     private lateinit var sharedPreferences:SharedPreferences
-    private val ONESIGNAL_APP_ID = "9b3b9701-9264-41ef-b08c-1c69f1fabfef"
-
+    private val ONESIGNAL_APP_ID = Constant.APP_ID
+    //9b3b9701-9264-41ef-b08c-1c69f1fabfef
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_login, container, false)
         // Inflate the layout for this fragment
         val view = binding.root
@@ -75,30 +71,22 @@ class LoginFragment : Fragment() {
 
     fun singIn(email: String, password: String) {
 
-//        val progress = ProgressDialog(requireContext())
-//        progress.setMessage("Please wait")
-        if (email.trim() == "" || password.trim() == "") {
-            Toast.makeText(requireContext(), "Enter Email and Password ", Toast.LENGTH_SHORT).show()
-//            progress.dismiss()
 
+        if (email.trim() == "" || password.trim() == "") {
+            Toast.makeText(requireContext(), "Enter Email and Password", Toast.LENGTH_SHORT).show()
         } else {
             binding.singIn.visibility= INVISIBLE
             binding.loadingLottie.visibility= VISIBLE
-//            progress.show()
-            auth.signInWithEmailAndPassword(email.trim(), password.trim()).addOnSuccessListener {
 
+            auth.signInWithEmailAndPassword(email.trim(), password.trim()).addOnSuccessListener {
                 sharedPreferences["email"] = email
                 sharedPreferences["password"] = password
-//                progress.dismiss()
-
                 activity?.let {
                     val intent = Intent(it, HomeActivity::class.java)
                     it.finish()
                     it.startActivity(intent)
                 }
-
             }.addOnFailureListener {
-//                progress.dismiss()
                 binding.singIn.visibility= VISIBLE
                 binding.loadingLottie.visibility= GONE
                 Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()

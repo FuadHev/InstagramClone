@@ -13,7 +13,7 @@ import com.example.instagramclone.utils.Resource
 
 class ChatsViewModel : ViewModel() {
 
-    val chatLiveData = MutableLiveData<Resource<List<ChatUser>>>(Resource.Loading())
+    val chatLiveData = MutableLiveData<Resource<List<ChatUser>>>()
 
 
     init {
@@ -33,9 +33,10 @@ class ChatsViewModel : ViewModel() {
                     }
                 }
 
-                if (chatUserIdList.isNotEmpty()) {
+
+                    chatLiveData.postValue(Resource.Loading())
                     allUser(chatUserIdList)
-                }
+
 
             }
         }
@@ -51,7 +52,7 @@ class ChatsViewModel : ViewModel() {
                     ?: Resource.Error("Chat_Error"))
             } else {
                 if (value != null) {
-                    chatLiveData.postValue(Resource.Loading())
+
                     val alluser = ArrayList<Users>()
                     for (users in value.documents) {
                         val user_id = users.get("user_id") as String
@@ -104,8 +105,6 @@ class ChatsViewModel : ViewModel() {
                         chatlist.sortByDescending { chatItem ->
                             chatItem.time
                         }
-
-
                     }
                     chatLiveData.postValue(Resource.Success(chatlist))
                 }

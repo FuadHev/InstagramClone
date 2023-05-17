@@ -54,10 +54,11 @@ class ProfileDetailFragment : Fragment() {
         binding.postsRv.layoutManager = layoutManager
         adapter = postlist?.let { PostsAdapters(object : PostClickListener {
             override fun pImage_uNameClickListener(bundle: Bundle) {
-                if ( findNavController().currentDestination?.id==R.id.homeFragment){
-                    findNavController().navigate(R.id.action_homeFragment_to_search_nav,bundle)
-                }else if ( findNavController().currentDestination?.id==R.id.profileDetailFragment){
-                    findNavController().navigate(R.id.action_profileDetailFragment_to_profileFragment,bundle)
+                val fNav=findNavController()
+                if ( fNav.currentDestination?.id==R.id.homeFragment){
+                    fNav.navigate(R.id.action_homeFragment_to_search_nav,bundle)
+                }else if ( fNav.currentDestination?.id==R.id.profileDetailFragment){
+                    fNav.navigate(R.id.action_profileDetailFragment_to_profileFragment,bundle)
                 }
             }
 
@@ -79,6 +80,26 @@ class ProfileDetailFragment : Fragment() {
                     }
                 }
                 popupMenu.show()
+            }
+
+            override fun commentsClickListener(postId: String, publisherId: String) {
+                val fNav = findNavController()
+                if (fNav.currentDestination?.id == R.id.homeFragment) {
+
+                    fNav.navigate(
+                        HomeFragmentDirections.actionHomeFragmentToCommentsFragment(
+                            postId,
+                            publisherId
+                        )
+                    )
+                } else if (fNav.currentDestination?.id == R.id.profileDetailFragment) {
+                    fNav.navigate(
+                        ProfileDetailFragmentDirections.actionProfileDetailFragmentToCommentsFragment(
+                            postId,
+                            publisherId
+                        )
+                    )
+                }
             }
         },requireActivity(), it) }!!
 

@@ -4,6 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <variable
+            name="receiverUid"
+            type="String" />
+        <variable
+            name="senderUid"
+            type="String" />
+        <variable
+            name="messagesFragment"
+            type="com.example.instagramclone.ui.view.fragments.MessagesFragment" />
 
     </data>
 
@@ -135,6 +144,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:text="SEND"
+            android:onClick="@{()->messagesFragment.sendMessage(senderUid,receiverUid)}"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="@+id/edit_message"
             app:layout_constraintEnd_toEndOf="parent"

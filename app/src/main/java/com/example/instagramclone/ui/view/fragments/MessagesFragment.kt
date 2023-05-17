@@ -65,8 +65,14 @@ class MessagesFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         firestore = Firebase.firestore
         val receiverUid = args.userId
-
         val senderUid = Firebase.auth.currentUser!!.uid
+
+        binding.messagesFragment=this
+        binding.senderUid=senderUid
+        binding.receiverUid=receiverUid
+
+
+
 
         senderRoom = receiverUid + senderUid
         receiverRoom = senderUid + receiverUid
@@ -84,9 +90,9 @@ class MessagesFragment : BaseFragment() {
             }
         })
 
-        binding.send.setOnClickListener {
-            sendMessage(senderUid, receiverUid)
-        }
+//        binding.send.setOnClickListener {
+//            sendMessage(senderUid, receiverUid)
+//        }
 
 
     }
@@ -211,15 +217,9 @@ class MessagesFragment : BaseFragment() {
     ) {
         try {
 
-            // profil fotosu elave etmeliyem
-//
-//            "large_icon": "$profileImage",
-//            "large_icon_width": 64,
-//            "large_icon_height": 64
-
             val notificationContent = JSONObject(
                 """{
-        "app_id": "${Constant.APP_ID}", 
+        "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef", 
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
         "contents": {"en": "$message"},
@@ -228,19 +228,6 @@ class MessagesFragment : BaseFragment() {
             )
             OneSignal.postNotification(notificationContent, null)
 
-
-//
-//            OneSignal.postNotification(
-//                JSONObject(
-//                    """{
-//        "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef",
-//        "include_player_ids": ["$playerId"],
-//        "headings": {"en": "$username"},
-//        "contents": {"en": "$message"}
-//    }"""
-//                ),
-//                null
-//            )
 
 
         } catch (e: JSONException) {
@@ -258,7 +245,6 @@ class MessagesFragment : BaseFragment() {
             }
 
         }
-
         viewModel.userInfo.observe(viewLifecycleOwner) {
             binding.mUsername.text = it.username
             binding.toolbarUsername.text = it.username
@@ -266,10 +252,7 @@ class MessagesFragment : BaseFragment() {
             Picasso.get().load(it.imageurl).into(binding.tlbPImage)
         }
         viewModel.checkSession.observe(viewLifecycleOwner) {
-
             binding.session.text = it
-
-
         }
     }
 

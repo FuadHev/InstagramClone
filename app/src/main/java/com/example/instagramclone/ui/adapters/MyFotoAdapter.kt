@@ -41,6 +41,7 @@ class MyFotoAdapter(private var postList:List<Posts>):RecyclerView.Adapter<MyFot
 
         b.postImage.setOnClickListener {
 
+            // deyise bilerem eslinde butun listi oturmek istemirem ama lazim ola biler
             val bundle=Bundle()
             bundle.putParcelableArrayList("posts",postList as java.util.ArrayList<out Parcelable>)
             bundle.putInt("position",position)

@@ -71,11 +71,11 @@ class EditProfileFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//
+
         auth = Firebase.auth
         storage = Firebase.storage
         binding.editProfileFragment=this
-//        getUserInfo()
+
 
 
         registerLauncher()

@@ -70,97 +70,133 @@ class ProfileFragment : BaseFragment() {
         firbaseUser = Firebase.auth.currentUser!!
         firestore = Firebase.firestore
         val args = arguments
-        binding.profileFragment=this
+        binding.profileFragment = this
         profileid = args?.getString("profileid") ?: firbaseUser.uid
         (activity as AppCompatActivity).setSupportActionBar(binding.toolbar2)
+
         binding.fotosRv.setHasFixedSize(true)
         binding.fotosRv.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.fotosRv.adapter = adapter
 
+        getProfileInfo()
 
-        profileid?.let {
-            viewModel.userInfo(
-                it
-            )
+//        binding.options.setOnClickListener {
+//
+//            val popupMenu = PopupMenu(requireActivity(), binding.options)
+//            popupMenu.menuInflater.inflate(R.menu.option_menu, popupMenu.menu)
+//            popupMenu.setOnMenuItemClickListener { item ->
+//                when (item.itemId) {
+//                    R.id.log_out -> {
+//                        val sharedPreferences = PreferenceHelper.getDefault(requireActivity())
+//                        val intent = Intent(requireActivity(), MainActivity::class.java)
+//                        firestore.collection("user").document(firbaseUser.uid)
+//                            .update("playerId", "")
+//                        sharedPreferences["email"] = null
+//                        sharedPreferences["password"] = null
+//                        requireActivity().finish()
+//                        startActivity(intent)
+//                        true
+//                    }
+//                    else -> false
+//                }
+//
+//            }
+//            popupMenu.show()
+//        }
+
+//        binding.message.setOnClickListener {
+//            findNavController().navigate(
+//                ProfileFragmentDirections.actionChatsFragmentToMessagesFragment(
+//                    profileid!!
+//                )
+//            )
+//        }
+
+//        binding.save.setOnClickListener {
+//            viewModel.savesList.value?.let { it1 -> adapter.updateMyPosts(it1) }
+//        }
+//        binding.myPhotos.setOnClickListener {
+//            viewModel.postsList.value?.data?.let { it1 -> adapter.updateMyPosts(it1) }
+//        }
+
+
+    }
+
+    fun setSavesListRv() {
+        viewModel.savesList.value?.let { it ->
+                adapter.updateMyPosts(it)
         }
+
+    }
+
+    fun setMyPhotosListRv() {
+        viewModel.postsList.value?.data?.let { it1 -> adapter.updateMyPosts(it1) }
+    }
+
+    fun getOption() {
+        val popupMenu = PopupMenu(requireActivity(), binding.options)
+        popupMenu.menuInflater.inflate(R.menu.option_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.log_out -> {
+                    val sharedPreferences = PreferenceHelper.getDefault(requireActivity())
+                    val intent = Intent(requireActivity(), MainActivity::class.java)
+                    firestore.collection("user").document(firbaseUser.uid)
+                        .update("playerId", "")
+                    sharedPreferences["email"] = null
+                    sharedPreferences["password"] = null
+                    requireActivity().finish()
+                    startActivity(intent)
+                    true
+                }
+                else -> false
+            }
+
+        }
+        popupMenu.show()
+    }
+
+    fun getMessage() {
+        findNavController().navigate(
+            ProfileFragmentDirections.actionChatsFragmentToMessagesFragment(
+                profileid!!
+            )
+        )
+    }
+
+    private fun getProfileInfo() {
+        viewModel.userInfo(profileid!!)
+        viewModel.getFollower(profileid!!)
+        viewModel.getNrPost(profileid!!)
+        viewModel.myFotos(profileid!!)
 
         if (profileid == firbaseUser.uid) {
             binding.editProfil.text = "edit profile"
             binding.message.visibility = GONE
             binding.options.visibility = VISIBLE
             viewModel.mySaves()
-
         } else {
             viewModel.checkFollow(profileid!!)
-//            checkFollow()
             binding.save.visibility = GONE
             binding.options.visibility = INVISIBLE
 
         }
 
-        viewModel.getFollower(profileid!!)
-        viewModel.getNrPost(profileid!!)
-
-        profileid?.let { viewModel.myFotos(it) }
-
-
-
-
-        binding.options.setOnClickListener {
-
-            val popupMenu = PopupMenu(requireActivity(),binding.options)
-            popupMenu.menuInflater.inflate(R.menu.option_menu, popupMenu.menu)
-            popupMenu.setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.log_out -> {
-                        val sharedPreferences = PreferenceHelper.getDefault(requireActivity())
-                        val intent = Intent(requireActivity(), MainActivity::class.java)
-
-                        sharedPreferences["email"] = null
-                        sharedPreferences["password"] = null
-                        requireActivity().finish()
-                        startActivity(intent)
-                        true
-                    }
-                    R.id.settings -> {
-
-                        true
-                    }
-                    else -> false
-                }
-
-            }
-            popupMenu.show()
-        }
-
-        binding.message.setOnClickListener {
-            findNavController().navigate(
-                ProfileFragmentDirections.actionChatsFragmentToMessagesFragment(
-                    profileid!!
-                )
-            )
-        }
-        binding.save.setOnClickListener {
-            viewModel.savesList.value?.let { it1 -> adapter.updateMyPosts(it1) }
-        }
-        binding.myPhotos.setOnClickListener {
-            viewModel.postsList.value?.data?.let { it1 -> adapter.updateMyPosts(it1) }
-        }
-
-
     }
-    fun goFollowing(){
+
+    fun goFollowing() {
         arg.putString("id", profileid)
         arg.putString("follow", "following")
-        findNavController().navigate(R.id.action_profilfragment_to_followersFragment,arg)
-    }
-    fun goFollowers(){
-        arg.putString("id", profileid)
-        arg.putString("follow", "followers")
-        findNavController().navigate(R.id.action_profilfragment_to_followersFragment,arg)
+        findNavController().navigate(R.id.action_profilfragment_to_followersFragment, arg)
     }
 
-     fun clickEProfileFollowbtn() {
+    fun goFollowers() {
+        arg.putString("id", profileid)
+        arg.putString("follow", "followers")
+        findNavController().navigate(R.id.action_profilfragment_to_followersFragment, arg)
+    }
+
+    fun clickEProfileFollowbtn() {
         val btn = binding.editProfil.text.toString().lowercase()
         when (btn) {
             "edit profile" -> {
@@ -218,13 +254,13 @@ class ProfileFragment : BaseFragment() {
     private fun getPlayerIdSendNotification(userId: String) {
 
         var username = ""
-        var profileImage=""
+        var profileImage = ""
         Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid).get()
             .addOnSuccessListener { value ->
-                    if (value != null) {
-                        username = value.get("username") as String
-                        profileImage = value.get("image_url") as String
-                    }
+                if (value != null) {
+                    username = value.get("username") as String
+                    profileImage = value.get("image_url") as String
+                }
 
             }
         Firebase.firestore.collection("user").document(userId).get()
@@ -234,16 +270,16 @@ class ProfileFragment : BaseFragment() {
 
                     val playerId = value.get("playerId") as String?
                     if (playerId != null) {
-                        sentPushNotification(playerId, username,profileImage)
+                        sentPushNotification(playerId, username, profileImage)
                     }
 
                 }
 
-        }
+            }
 
     }
 
-    private fun sentPushNotification(playerId: String, username: String,profileImage:String) {
+    private fun sentPushNotification(playerId: String, username: String, profileImage: String) {
         try {
             val notificationContent = JSONObject(
                 """{
@@ -262,7 +298,7 @@ class ProfileFragment : BaseFragment() {
 
     }
 
-// bu kodu silmeliyem.viewmodelde yazdim
+    // bu kodu silmeliyem.viewmodelde yazdim
     private fun checkFollow() {
         binding.editProfil.text = "follow"
         firestore.collection("Follow").document(firbaseUser.uid)
@@ -302,20 +338,20 @@ class ProfileFragment : BaseFragment() {
 
     override fun addObserves() {
         viewModel.postsList.observe(viewLifecycleOwner) {
-            when(it){
-                is Resource.Loading->{
+            when (it) {
+                is Resource.Loading -> {
 
                 }
-                is Resource.Success->{
+                is Resource.Success -> {
                     it.data?.let { it1 -> adapter.updateMyPosts(it1) }
-                    if (it.data==null||it.data.isEmpty()){
-                        binding.noPostsYet.visibility=VISIBLE
-                    }else{
-                        binding.noPostsYet.visibility= GONE
+                    if (it.data == null || it.data.isEmpty()) {
+                        binding.noPostsYet.visibility = VISIBLE
+                    } else {
+                        binding.noPostsYet.visibility = GONE
                     }
 
                 }
-                is Resource.Error->{
+                is Resource.Error -> {
                     Toast.makeText(requireActivity(), it.data.toString(), Toast.LENGTH_SHORT).show()
                 }
 
@@ -337,8 +373,8 @@ class ProfileFragment : BaseFragment() {
         viewModel.postCount.observe(viewLifecycleOwner) {
             binding.post.text = it.toString()
         }
-        viewModel.checkFollowLiveData.observe(viewLifecycleOwner){
-            binding.editProfil.text=it
+        viewModel.checkFollowLiveData.observe(viewLifecycleOwner) {
+            binding.editProfil.text = it
         }
     }
 

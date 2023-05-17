@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_homeFragment_to_search_nav"
             app:destination="@id/search_nav" />
+        <action
+            android:id="@+id/action_homeFragment_to_commentsFragment"
+            app:destination="@id/commentsFragment" />
     </fragment>
     <fragment
         android:id="@+id/searctoFragment"
@@ -69,6 +72,9 @@
         <action
             android:id="@+id/action_profileDetailFragment_to_profileFragment"
             app:destination="@id/profilefragment" />
+        <action
+            android:id="@+id/action_profileDetailFragment_to_commentsFragment"
+            app:destination="@id/commentsFragment" />
     </fragment>
     <fragment
         android:id="@+id/editProfileFragment"
@@ -94,6 +100,18 @@
         tools:layout="@layout/fragment_messages" >
         <argument
             android:name="userId"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/commentsFragment"
+        android:name="com.example.instagramclone.ui.view.fragments.CommentsFragment"
+        android:label="CommentsFragment"
+        tools:layout="@layout/fragment_comments">
+        <argument
+            android:name="postId"
+            app:argType="string" />
+        <argument
+            android:name="publisherId"
             app:argType="string" />
     </fragment>
 </navigation>

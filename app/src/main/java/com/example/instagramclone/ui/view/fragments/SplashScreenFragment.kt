@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +20,7 @@ import com.example.instagramclone.ui.view.fragments.SplashScreenFragmentDirectio
 import com.example.instagramclone.ui.view.activity.HomeActivity
 import com.example.instagramclone.utils.PreferenceHelper
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestoreSettings
 import com.google.firebase.ktx.Firebase
 
 
@@ -42,6 +44,7 @@ class SplashScreenFragment : Fragment() {
         val email = sharedPreferences.getString("email", null)
         val password = sharedPreferences.getString("password", null)
 
+
         if (email != null && password != null) {
             Firebase.auth.signInWithEmailAndPassword(email.trim(), password.trim())
                 .addOnSuccessListener {
@@ -52,9 +55,10 @@ class SplashScreenFragment : Fragment() {
                             it.finish()
                             it.startActivity(intent)
                         }
-                    }, 800)
-
+                    }, 900)
                 }.addOnFailureListener {
+                    binding.lottieAnim.setAnimation(R.raw.lost_connection)
+                    binding.lottieAnim.playAnimation()
                     Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT).show()
                 }
         } else {

@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.fragment.findNavController
 import com.example.instagramclone.ui.view.activity.HomeActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.databinding.FragmentSingupBinding
@@ -27,8 +28,6 @@ class SingupFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
 
-    private lateinit var sharedPreferences:SharedPreferences
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -37,7 +36,6 @@ class SingupFragment : Fragment() {
         binding.singUpFragment = this
         firestore = Firebase.firestore
         auth = Firebase.auth
-        sharedPreferences=PreferenceHelper.getDefault(requireContext())
 
 
         return view
@@ -45,7 +43,7 @@ class SingupFragment : Fragment() {
 
     fun singUp(email: String, userName: String, password: String) {
 
-        if (email == "" || userName == "" || password == "") {
+        if (email.trim() == "" || userName.trim() == "" || password.trim() == "") {
 
             Toast.makeText(requireContext(), "Enter all informations", Toast.LENGTH_SHORT).show()
 
@@ -88,14 +86,17 @@ class SingupFragment : Fragment() {
             firestore.collection("user").document(auth.currentUser!!.uid).set(userMap)
                 .addOnSuccessListener {
 
-                    activity?.let {
-                        val intent = Intent(it, HomeActivity::class.java)
-                        it.startActivity(intent)
-                        it.finish()
+                    findNavController().navigate(SingupFragmentDirections.actionSingupFragmentToLoginFragment())
 
-                    }
-                    sharedPreferences["email"] = email
-                    sharedPreferences["password"] = password
+                    //evvel birbasa homeactivity-ye gedirdim indi singupdan sonra logine gonderecem
+//                    activity?.let {
+//                        val intent = Intent(it, HomeActivity::class.java)
+//                        it.startActivity(intent)
+//                        it.finish()
+//                    }
+//
+//                    sharedPreferences["email"] = email
+//                    sharedPreferences["password"] = password
 
                 }.addOnFailureListener {
                     Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()

@@ -110,18 +110,11 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
         }
 
         b.comments.setOnClickListener {
-            val intent = Intent(mContext, CommentsActivity::class.java)
-            intent.putExtra("postId", post.post_id)
-            intent.putExtra("publisherId", post.publisher)
-            mContext.startActivity(intent)
+            postclickListener.commentsClickListener(post.post_id,post.publisher)
 
         }
         b.comment.setOnClickListener {
-
-            val intent = Intent(mContext, CommentsActivity::class.java)
-            intent.putExtra("postId", post.post_id)
-            intent.putExtra("publisherId", post.publisher)
-            mContext.startActivity(intent)
+            postclickListener.commentsClickListener(post.post_id,post.publisher)
 
         }
 
@@ -463,4 +456,6 @@ interface PostClickListener{
    fun pImage_uNameClickListener(bundle: Bundle)
 
    fun postOptionCLickListener(postId: String,view:View)
+
+   fun commentsClickListener(postId:String,publisherId:String)
 }

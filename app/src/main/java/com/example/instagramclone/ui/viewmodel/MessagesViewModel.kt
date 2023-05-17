@@ -25,21 +25,17 @@ class MessagesViewModel : ViewModel() {
 
                 val username = value.get("username") as String
                 val imageurl = value.get("image_url") as String
-                val online = value.get("online") as Boolean
+                val online = value.get("online") as? Boolean?
 
                 val user= Users(username,imageurl)
 
                 Log.e("checksession",online.toString())
-                if (online){
+                if (online!=null&&online==true){
                     checkSession.postValue("online")
                 }else{
                     checkSession.postValue("offline")
                 }
-
                 userInfo.postValue(user)
-
-
-
             }
 
         }
@@ -49,7 +45,9 @@ class MessagesViewModel : ViewModel() {
         Firebase.firestore.collection("Messages").document(senderRoom)
             .addSnapshotListener { value, error ->
                 if (error != null) {
-                } else {
+                    error.localizedMessage?.let { Log.e("user_Error", it) }
+                    return@addSnapshotListener
+                }
                     if (value != null && value.exists()) {
                         try {
                             val doc = value.data as HashMap<*, *>
@@ -64,7 +62,6 @@ class MessagesViewModel : ViewModel() {
 
                                 val messages = Message(messageId, messageTxt, senderId, time, seen)
                                 messagesList.add(messages)
-
                             }
                             messagesList.sortBy {
                                 it.time
@@ -73,6 +70,7 @@ class MessagesViewModel : ViewModel() {
 
 
                         } catch (e: java.lang.NullPointerException) {
+                            e.localizedMessage?.let { Log.e("user_Error", it) }
 
 
                         }
@@ -80,7 +78,7 @@ class MessagesViewModel : ViewModel() {
 
                     }
 
-                }
+
             }
     }
 }

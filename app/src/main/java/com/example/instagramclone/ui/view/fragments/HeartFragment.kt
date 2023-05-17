@@ -19,7 +19,6 @@ import com.google.firebase.ktx.Firebase
 class HeartFragment : Fragment() {
 
     private lateinit var binding: FragmentHeartBinding
-//    private lateinit var nList: ArrayList<Notification>
     private val adapter by lazy {
         NotificationsAdapter(emptyList())
     }
@@ -46,47 +45,9 @@ class HeartFragment : Fragment() {
             adapter.updateList(it)
         }
 
-//        readNotification()
-
     }
 
 
-//    fun readNotification() {
-//        Firebase.firestore.collection("Notification").document(firebaseUser.uid)
-//            .addSnapshotListener { value, error ->
-//                if (error != null) {
-//                    error.localizedMessage?.let { Log.e("error", it) }
-//                } else {
-//                    if (value != null) {
-//                        nList.clear()
-//                        try {
-//                            val datakeys = value.data as HashMap<*,*>
-//                            for (data in datakeys){
-//                                val valuedata=data.value as HashMap<*,*>
-//                                val userId=valuedata["userId"] as String
-//                                val ntext=valuedata["nText"] as String
-//                                val postId=valuedata["postId"] as String
-//                                val isPost=valuedata["isPost"] as Boolean
-//                                val time=valuedata["time"] as Timestamp
-//                                val notification=Notification(userId,ntext,postId,isPost,time)
-//                                nList.add(notification)
-//
-//                            }
-//                            nList.sortByDescending {
-//                                it.time
-//                            }
-//                            adapter.notifyDataSetChanged()
-//
-//                        } catch (e: NullPointerException) {
-//                            e.printStackTrace()
-//                        }
-//
-//                    }
-//
-//                }
-//
-//            }
-//    }
 
 
 }

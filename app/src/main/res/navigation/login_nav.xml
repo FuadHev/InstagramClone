@@ -21,7 +21,13 @@
         android:id="@+id/singupFragment"
         android:name="com.example.instagramclone.ui.view.fragments.SingupFragment"
         android:label="fragment_singup"
-        tools:layout="@layout/fragment_singup" />
+        tools:layout="@layout/fragment_singup" >
+        <action
+            android:id="@+id/action_singupFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/singupFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
     <fragment
         android:id="@+id/forgotPasswordFragment"
         android:name="com.example.instagramclone.ui.view.fragments.ForgotPasswordFragment"

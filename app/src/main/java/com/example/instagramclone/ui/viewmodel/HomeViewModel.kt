@@ -20,7 +20,6 @@ class HomeViewModel : ViewModel() {
     val storyMutableLiveData = MutableLiveData<Resource<List<Story>>>()
     val followList =
         ArrayList<String>()// belke funksiyanin icine yazib burdan silesi oldum.(checkFollow funksiyasi)
-
     val firestore = Firebase.firestore
     val checkMessageLiveData = MutableLiveData(true)
 
@@ -80,12 +79,12 @@ class HomeViewModel : ViewModel() {
                                 followList.add(i.key as String)
                             }
                             viewModelScope.launch {
-                                readStory()
+                                readPost()
+
                             }
                             viewModelScope.launch {
-                                readPost()
+                                readStory()
                             }
-
 
                         } catch (e: java.lang.NullPointerException) {
 
@@ -122,11 +121,11 @@ class HomeViewModel : ViewModel() {
                             postList.sortByDescending {
                                 it.time
                             }
-
                             postMutableLiveData.postValue(Resource.Success(postList))
 
                         } catch (exception: java.lang.NullPointerException) {
-                            postMutableLiveData.postValue(exception.localizedMessage?.let { Resource.Error(it)
+                            postMutableLiveData.postValue(exception.localizedMessage?.let {
+                                Resource.Error(it)
                             })
 
                         }
@@ -150,7 +149,6 @@ class HomeViewModel : ViewModel() {
                     var countStory = 0
                     if (followList.contains(document.id)) {
                         val stories = document.data as HashMap<*, *>
-
                         for (storyIds in stories) {
                             val story = storyIds.value as? HashMap<*, *>
                             if (story != null) {
@@ -165,13 +163,11 @@ class HomeViewModel : ViewModel() {
                                 ustory = Story(imageurl, timestart, timeend, storyId, userId)
                             }
                         }
-
                         if (countStory > 0) {
                             if (ustory != null) {
                                 storyList.add(ustory)
                             }
                         }
-
                     }
                 }
                 storyList.sortedByDescending {

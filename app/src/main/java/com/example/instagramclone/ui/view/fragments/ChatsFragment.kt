@@ -3,6 +3,7 @@ package com.example.instagramclone.ui.view.fragments
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.instagramclone.base.BaseFragment
 import com.example.instagramclone.databinding.FragmentChatsBinding
 import com.example.instagramclone.ui.adapters.ChatAdapter
 import com.example.instagramclone.ui.adapters.UserClickListener
@@ -25,7 +27,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 
-class ChatsFragment : Fragment() {
+class ChatsFragment : BaseFragment() {
 
     private lateinit var binding: FragmentChatsBinding
     private lateinit var firestore: FirebaseFirestore
@@ -56,6 +58,37 @@ class ChatsFragment : Fragment() {
         return binding.root
     }
 
+    override fun addObserves() {
+        viewModel.chatLiveData.observe(viewLifecycleOwner) {
+
+            when (it) {
+                is Resource.Loading -> {
+
+                }
+                is Resource.Success -> {
+                    binding.messageLottie.visibility = GONE
+                    binding.chatRv.visibility = VISIBLE
+                    it.data?.let { list ->
+                        if (list.isEmpty()){
+                            binding.messageLottie.visibility = VISIBLE
+                            binding.chatRv.visibility = GONE
+                            return@let
+                        }
+                        adapter.updateChatList(list)
+                    } ?: {
+                        binding.messageLottie.visibility =
+                            VISIBLE
+                        binding.chatRv.visibility = GONE
+                    }
+                }
+                is Resource.Error -> {
+                    Toast.makeText(requireContext(), it.data.toString(), Toast.LENGTH_SHORT).show()
+                }
+
+            }
+
+        }
+    }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -67,34 +100,14 @@ class ChatsFragment : Fragment() {
         Handler(Looper.getMainLooper()).postDelayed({
             Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
                 .update("online", true)
-        },1000)
+        }, 1000)
 
 
         binding.chatRv.layoutManager = LinearLayoutManager(requireActivity())
         binding.chatRv.adapter = adapter
 
         viewModel.getUsersId()
-        viewModel.chatLiveData.observe(viewLifecycleOwner) {
 
-            when(it){
-                is Resource.Loading->{
-                    binding.messageLottie.visibility=VISIBLE
-                    binding.chatRv.visibility= GONE
-                }
-                is Resource.Success->{
-                    binding.messageLottie.visibility= GONE
-                    binding.chatRv.visibility= VISIBLE
-                    it.data?.let { list -> adapter.updateChatList(list) }?:adapter.updateChatList(
-                        emptyList()
-                    )
-                }
-                is Resource.Error->{
-                    Toast.makeText(requireContext(), it.data.toString(), Toast.LENGTH_SHORT).show()
-                }
-
-            }
-
-        }
 
 
     }

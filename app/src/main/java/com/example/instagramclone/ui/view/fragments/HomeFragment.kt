@@ -69,6 +69,26 @@ class HomeFragment : BaseFragment() {
 
 
             }
+
+            override fun commentsClickListener(postId: String, publisherId: String) {
+                val fNav = findNavController()
+                if (fNav.currentDestination?.id == R.id.homeFragment) {
+
+                    fNav.navigate(
+                        HomeFragmentDirections.actionHomeFragmentToCommentsFragment(
+                            postId,
+                            publisherId
+                        )
+                    )
+                } else if (fNav.currentDestination?.id == R.id.profileDetailFragment) {
+                    fNav.navigate(
+                        ProfileDetailFragmentDirections.actionProfileDetailFragmentToCommentsFragment(
+                            postId,
+                            publisherId
+                        )
+                    )
+                }
+            }
         }, requireContext(), emptyList())
     }
     private val storyAdapter by lazy {
@@ -170,18 +190,14 @@ class HomeFragment : BaseFragment() {
                 is Resource.Loading -> {
                     binding.shimmer.visibility = View.VISIBLE
                     binding.postRv.visibility = View.GONE
-                    binding.storyRv.visibility = View.GONE
                 }
                 is Resource.Success -> {
                     binding.shimmer.visibility = View.GONE
                     binding.shimmer.stopShimmer()
-                    adapter.updatePosts(it.data ?: emptyList())
-                    it.data?.let { list ->
-                        if (list.isEmpty()) {
-                            binding.followLottieLinear.visibility = View.VISIBLE
-                        }
-                    }
                     binding.postRv.visibility = View.VISIBLE
+                    binding.postRv.visibility = View.VISIBLE
+                    adapter.updatePosts(it.data ?: emptyList())
+
                 }
                 is Resource.Error -> {
                     binding.postRv.visibility = View.GONE

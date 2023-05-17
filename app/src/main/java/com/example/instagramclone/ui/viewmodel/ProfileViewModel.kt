@@ -22,14 +22,13 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     val postCount = MutableLiveData(0)
     val checkFollowLiveData = MutableLiveData<String>()
 
-
     fun getFollower(profileid: String) {
 
         Firebase.firestore.collection("Follow").document(profileid)
             .addSnapshotListener { documentSnapshot, error ->
                 if (error != null) {
                     error.localizedMessage?.let {
-                        Log.e("", it)
+                        Log.e("get_Follow_error", it)
                         return@addSnapshotListener
                     }
                 } else {
