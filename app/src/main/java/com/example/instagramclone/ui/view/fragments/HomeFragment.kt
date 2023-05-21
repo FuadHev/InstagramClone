@@ -52,42 +52,11 @@ class HomeFragment : BaseFragment() {
             }
 
             override fun postOptionCLickListener(postId: String, view: View) {
-                val popupMenu = PopupMenu(requireActivity(), view)
-                popupMenu.menuInflater.inflate(R.menu.post_option_menu, popupMenu.menu)
-                popupMenu.setOnMenuItemClickListener { item ->
-                    when (item.itemId) {
-                        R.id.post_delete -> {
-
-                            showDeletePostDialog(postId)
-
-                            true
-                        }
-                        else -> false
-                    }
-                }
-                popupMenu.show()
-
-
+                setPopUpMenu(postId,view)
             }
 
             override fun commentsClickListener(postId: String, publisherId: String) {
-                val fNav = findNavController()
-                if (fNav.currentDestination?.id == R.id.homeFragment) {
-
-                    fNav.navigate(
-                        HomeFragmentDirections.actionHomeFragmentToCommentsFragment(
-                            postId,
-                            publisherId
-                        )
-                    )
-                } else if (fNav.currentDestination?.id == R.id.profileDetailFragment) {
-                    fNav.navigate(
-                        ProfileDetailFragmentDirections.actionProfileDetailFragmentToCommentsFragment(
-                            postId,
-                            publisherId
-                        )
-                    )
-                }
+                setCommentClickListener(postId,publisherId)
             }
         }, requireContext(), emptyList())
     }
@@ -117,8 +86,6 @@ class HomeFragment : BaseFragment() {
         binding.postRv.layoutManager = linerLayoutManager
 
 
-
-
         binding.storyRv.adapter = storyAdapter
         binding.postRv.adapter = adapter
 
@@ -136,7 +103,51 @@ class HomeFragment : BaseFragment() {
         }
 
     }
+    private fun setCommentClickListener(postId:String,publisherId:String){
+        val fNav = findNavController()
+        when (fNav.currentDestination?.id) {
+            R.id.homeFragment -> {
+                fNav.navigate(
+                    HomeFragmentDirections.actionHomeFragmentToCommentsFragment(
+                        postId,
+                        publisherId
+                    )
+                )
+            }
+            R.id.profileDetailFragment -> {
+                fNav.navigate(
+                    ProfileDetailFragmentDirections.actionProfileDetailFragmentToCommentsFragment(
+                        postId,
+                        publisherId
+                    )
+                )
+            }
+            R.id.discoverPostsFragment -> {
+                fNav.navigate(
+                    DiscoverPostsFragmentDirections.actionDiscoverPostsFragmentToCommentsFragment(
+                        postId,
+                        publisherId
+                    )
+                )
+            }
+        }
+    }
 
+    private fun setPopUpMenu(postId: String,view: View){
+        val popupMenu = PopupMenu(requireActivity(),view)
+        popupMenu.menuInflater.inflate(R.menu.post_option_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.post_delete -> {
+                    showDeletePostDialog(postId)
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
+
+    }
     private fun showDeletePostDialog(postId: String) {
         val dialogBinding = DeleteMessageDialogBinding.inflate(layoutInflater)
         val mDialog = Dialog(requireContext())

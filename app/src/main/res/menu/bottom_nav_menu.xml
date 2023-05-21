@@ -28,7 +28,7 @@
         app:showAsAction="always"/>
 
     <item
-        android:id="@+id/profilefragment"
+        android:id="@+id/profileFragment"
         android:icon="@drawable/profil_selector"
         android:title=""
         app:showAsAction="always"/>

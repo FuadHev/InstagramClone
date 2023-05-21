@@ -22,7 +22,9 @@ import com.example.instagramclone.ui.view.activity.MainActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.base.BaseFragment
 import com.example.instagramclone.databinding.FragmentProfileBinding
+import com.example.instagramclone.model.Posts
 import com.example.instagramclone.ui.adapters.MyFotoAdapter
+import com.example.instagramclone.ui.adapters.MyPostCLickListener
 import com.example.instagramclone.ui.view.fragments.ProfileFragmentDirections
 import com.example.instagramclone.ui.viewmodel.ProfileViewModel
 import com.example.instagramclone.utils.Constant
@@ -49,7 +51,19 @@ class ProfileFragment : BaseFragment() {
     private lateinit var binding: FragmentProfileBinding
     private lateinit var firbaseUser: FirebaseUser
     private val adapter by lazy {
-        MyFotoAdapter(emptyList())
+        MyFotoAdapter(object : MyPostCLickListener {
+            override fun postClickListener(currentPosts: Posts, bundle: Bundle) {
+                val fNav = findNavController()
+                if (fNav.currentDestination?.id == R.id.profileFragment) {
+                    findNavController().navigate(
+                        R.id.action_profilfragment_to_profileDetailFragment,
+                        bundle
+                    )
+                } else if (fNav.currentDestination?.id == R.id.searctoFragment){
+                    findNavController().navigate(SearchFragmentDirections.actionSearctoFragmentToDiscoverPostsFragment(currentPosts))
+                }
+            }
+        }, emptyList())
     }
     private lateinit var firestore: FirebaseFirestore
     private var profileid: String? = null
@@ -124,7 +138,7 @@ class ProfileFragment : BaseFragment() {
 
     fun setSavesListRv() {
         viewModel.savesList.value?.let { it ->
-                adapter.updateMyPosts(it)
+            adapter.updateMyPosts(it)
         }
 
     }
@@ -308,29 +322,27 @@ class ProfileFragment : BaseFragment() {
                         Log.e("", it)
                         return@addSnapshotListener
                     }
-                } else {
-                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                        val follow = documentSnapshot.data
-
-                        if (follow != null) {
-
-                            try {
-                                val following = follow["following"] as HashMap<*, *>
-                                if (following.containsKey(profileid)) {
-                                    binding.editProfil.text = "following"
-                                } else {
-                                    binding.editProfil.text = "follow"
-                                }
-                            } catch (_: java.lang.NullPointerException) {
-
+                }
+                if (documentSnapshot != null && documentSnapshot.exists()) {
+                    val follow = documentSnapshot.data
+                    if (follow != null) {
+                        try {
+                            val following = follow["following"] as HashMap<*, *>
+                            if (following.containsKey(profileid)) {
+                                binding.editProfil.text = "following"
+                            } else {
+                                binding.editProfil.text = "follow"
                             }
+                        } catch (_: java.lang.NullPointerException) {
 
                         }
 
-                    } else {
-                        Log.e("", "Document not fount")
                     }
+
+                } else {
+                    Log.e("", "Document not fount")
                 }
+
             }
 
 

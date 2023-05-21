@@ -34,11 +34,11 @@
             android:screenOrientation="portrait"
 
             android:exported="false" />
-        <activity
-            android:name=".ui.view.activity.CommentsActivity"
-            android:screenOrientation="portrait"
+<!--        <activity-->
+<!--            android:name=".ui.view.activity.CommentsActivity"-->
+<!--            android:screenOrientation="portrait"-->
 
-            android:exported="false" />
+<!--            android:exported="false" />-->
         <activity
             android:name=".ui.view.activity.HomeActivity"
             android:screenOrientation="portrait"

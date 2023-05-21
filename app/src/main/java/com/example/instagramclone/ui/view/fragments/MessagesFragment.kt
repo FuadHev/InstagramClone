@@ -46,7 +46,7 @@ class MessagesFragment : BaseFragment() {
     private val messageAdapter by lazy {
         MessaggeAdapter(object : MessageClickListener {
             override fun messageClickListener(senderId: String, messageId: String) {
-                showDeleteMessageDialog(senderId,messageId)
+                showDeleteMessageDialog(senderId, messageId)
             }
         }, emptyList())
     }
@@ -67,9 +67,9 @@ class MessagesFragment : BaseFragment() {
         val receiverUid = args.userId
         val senderUid = Firebase.auth.currentUser!!.uid
 
-        binding.messagesFragment=this
-        binding.senderUid=senderUid
-        binding.receiverUid=receiverUid
+        binding.messagesFragment = this
+        binding.senderUid = senderUid
+        binding.receiverUid = receiverUid
 
 
 
@@ -80,7 +80,7 @@ class MessagesFragment : BaseFragment() {
         viewModel.readMessages(senderRoom!!)
         val layoutManager = LinearLayoutManager(requireActivity())
         binding.messageRv.layoutManager = layoutManager
-            binding.messageRv.adapter = messageAdapter
+        binding.messageRv.adapter = messageAdapter
 
         binding.nestedScroll.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
             // RecyclerView'ın son elemanı ekranda görünürse
@@ -96,6 +96,7 @@ class MessagesFragment : BaseFragment() {
 
 
     }
+
     fun sendMessage(senderUid: String, receiverUid: String) {
         val randomkey = UUID.randomUUID().toString()
         val message = binding.editMessage.text.toString()
@@ -147,6 +148,7 @@ class MessagesFragment : BaseFragment() {
             .update("seen", true)
 
     }
+
     private fun getPlayerIdSendNotification(userId: String, message: String) {
 
         var username = ""
@@ -161,7 +163,6 @@ class MessagesFragment : BaseFragment() {
                     username = value.get("username") as String
                     profileImage = value.get("image_url") as String
                 }
-
             }
         Firebase.firestore.collection("user").document(userId).addSnapshotListener { value, error ->
             if (error != null) {
@@ -181,20 +182,22 @@ class MessagesFragment : BaseFragment() {
 
     }
 
-    private fun showDeleteMessageDialog(senderId: String, messageId: String){
-        val dialogBinding=DeleteMessageDialogBinding.inflate(layoutInflater)
-        val mDialog=Dialog(requireContext())
+    private fun showDeleteMessageDialog(senderId: String, messageId: String) {
+        val dialogBinding = DeleteMessageDialogBinding.inflate(layoutInflater)
+        val mDialog = Dialog(requireContext())
         mDialog.setContentView(dialogBinding.root)
         mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialogBinding.dInfo.text="Delete this message?"
+        dialogBinding.dInfo.text = "Delete this message?"
 
         dialogBinding.yes.setOnClickListener {
-            if (senderId==Firebase.auth.currentUser!!.uid){
-                Firebase.firestore.collection("Messages").document(senderRoom!!).update(messageId,FieldValue.delete())
-                Firebase.firestore.collection("Messages").document(receiverRoom!!).update(messageId,FieldValue.delete())
-//                Firebase.firestore.collection("Chats").document(senderRoom!!).update("lastmessage","")
-            }else{
-                Firebase.firestore.collection("Messages").document(senderRoom!!).update(messageId,FieldValue.delete())
+            if (senderId == Firebase.auth.currentUser!!.uid) {
+                Firebase.firestore.collection("Messages").document(senderRoom!!)
+                    .update(messageId, FieldValue.delete())
+                Firebase.firestore.collection("Messages").document(receiverRoom!!)
+                    .update(messageId, FieldValue.delete())
+            } else {
+                Firebase.firestore.collection("Messages").document(senderRoom!!)
+                    .update(messageId, FieldValue.delete())
             }
             mDialog.dismiss()
         }
@@ -227,7 +230,6 @@ class MessagesFragment : BaseFragment() {
     }"""
             )
             OneSignal.postNotification(notificationContent, null)
-
 
 
         } catch (e: JSONException) {

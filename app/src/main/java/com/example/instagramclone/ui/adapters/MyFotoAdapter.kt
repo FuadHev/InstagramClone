@@ -11,7 +11,7 @@ import com.example.instagramclone.model.Posts
 import com.example.instagramclone.databinding.FotosItemBinding
 import com.squareup.picasso.Picasso
 
-class MyFotoAdapter(private var postList:List<Posts>):RecyclerView.Adapter<MyFotoAdapter.CardViewHolder>() {
+class MyFotoAdapter(private val postClickListener: MyPostCLickListener,private var postList:List<Posts>):RecyclerView.Adapter<MyFotoAdapter.CardViewHolder>() {
 
 
     inner class CardViewHolder(val view: FotosItemBinding) : RecyclerView.ViewHolder(view.root){
@@ -35,7 +35,6 @@ class MyFotoAdapter(private var postList:List<Posts>):RecyclerView.Adapter<MyFot
         val post=postList[position]
         val b=holder.view
 
-//        Picasso.get().load(post.postImage).resize(1980,1720).centerCrop().into(b.postImage)
         Picasso.get().load(post.postImage).resize(1280,1070).centerCrop().into(b.postImage)
 
 
@@ -45,7 +44,8 @@ class MyFotoAdapter(private var postList:List<Posts>):RecyclerView.Adapter<MyFot
             val bundle=Bundle()
             bundle.putParcelableArrayList("posts",postList as java.util.ArrayList<out Parcelable>)
             bundle.putInt("position",position)
-            Navigation.findNavController(it).navigate(R.id.action_profilfragment_to_profileDetailFragment,bundle)
+            postClickListener.postClickListener(post,bundle)
+//            Navigation.findNavController(it).navigate(R.id.action_profilfragment_to_profileDetailFragment,bundle)
 
 
         }
@@ -57,6 +57,7 @@ class MyFotoAdapter(private var postList:List<Posts>):RecyclerView.Adapter<MyFot
 
     }
 
-
-
+}
+interface MyPostCLickListener{
+    fun postClickListener(currentPosts: Posts,bundle: Bundle)
 }

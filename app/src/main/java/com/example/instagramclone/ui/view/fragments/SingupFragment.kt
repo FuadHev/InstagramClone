@@ -67,13 +67,10 @@ class SingupFragment : Fragment() {
 
             val ref = Firebase.firestore.collection("NotificationCount")
                 .document(Firebase.auth.currentUser!!.uid)
-
             // gorulen notification sayi  ucun data yaradir
             val hmap = hashMapOf<String, Any>("isawnotification" to 0)
             ref.set(hmap)
-
             val userMap = hashMapOf<String, Any>()
-
             userMap["user_id"] = auth.currentUser!!.uid
             userMap["email"] = email
             userMap["username"] = userName

@@ -135,6 +135,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
                         } catch (e: Exception) {
 
+                            Log.e("saves_error", e.localizedMessage!!)
                         }
                     }
                     savesList.postValue(savepostList)
@@ -180,38 +181,35 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
         Firebase.firestore.collection("Posts").addSnapshotListener { value, error ->
             if (error != null) {
-                error.localizedMessage?.let { postsList.postValue(Resource.Error(it))}
-            } else {
-
-                if (value != null) {
-                    postsList.postValue(Resource.Loading())
-                    val postList = ArrayList<Posts>()
-                    for (document in value.documents) {
-                        try {
+                error.localizedMessage?.let { postsList.postValue(Resource.Error(it)) }
+                return@addSnapshotListener
+            }
+            if (value != null) {
+                postsList.postValue(Resource.Loading())
+                val postList = ArrayList<Posts>()
+                for (document in value.documents) {
+                    try {
+                        val publisher = document.get("publisher") as String
+                        if (publisher == profileid) {
                             val postid = document.get("postId") as String
                             val postImage = document.get("postImage") as String
                             val description = document.get("description") as String
-                            val publisher = document.get("publisher") as String
                             val time = document.get("time") as Timestamp
                             val post = Posts(postid, postImage, description, publisher, time)
-
-                            if (publisher == profileid) {
-                                postList.add(post)
-                            }
-                        } catch (e: java.lang.NullPointerException) {
-                            e.localizedMessage?.let { postsList.postValue(Resource.Error(it))}
+                            postList.add(post)
                         }
-
+                    } catch (e: java.lang.NullPointerException) {
+                        e.localizedMessage?.let { postsList.postValue(Resource.Error(it)) }
                     }
-                    postList.sortByDescending {
-                        it.time
-                    }
-                    postsList.postValue(Resource.Success(postList))
 
                 }
-
+                postList.sortByDescending {
+                    it.time
+                }
+                postsList.postValue(Resource.Success(postList))
 
             }
+
 
         }
 
@@ -227,26 +225,26 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                         Log.e("CheckFollow_Error", it)
                         return@addSnapshotListener
                     }
-                } else {
-                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                        val follow = documentSnapshot.data
+                }
+                if (documentSnapshot != null && documentSnapshot.exists()) {
+                    val follow = documentSnapshot.data
 
-                        if (follow != null) {
+                    if (follow != null) {
 
-                            try {
-                                val following = follow["following"] as HashMap<*, *>
-                                if (following.containsKey(profileid)) {
-                                    checkFollowLiveData.postValue("following")
-                                } else {
-                                    checkFollowLiveData.postValue("follow")
-                                }
-                            } catch (_: java.lang.NullPointerException) {
-
+                        try {
+                            val following = follow["following"] as HashMap<*, *>
+                            if (following.containsKey(profileid)) {
+                                checkFollowLiveData.postValue("following")
+                            } else {
+                                checkFollowLiveData.postValue("follow")
                             }
+                        } catch (_: java.lang.NullPointerException) {
 
                         }
+
                     }
                 }
+
             }
 
 

@@ -64,8 +64,10 @@ class ChatsFragment : BaseFragment() {
             when (it) {
                 is Resource.Loading -> {
 
+                    binding.progressBar.visibility= VISIBLE
                 }
                 is Resource.Success -> {
+                    binding.progressBar.visibility= GONE
                     binding.messageLottie.visibility = GONE
                     binding.chatRv.visibility = VISIBLE
                     it.data?.let { list ->

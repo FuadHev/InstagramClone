@@ -4,7 +4,6 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -16,9 +15,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.recyclerview.widget.RecyclerView
-import com.example.instagramclone.ui.view.activity.CommentsActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.model.Posts
 import com.example.instagramclone.databinding.PostsCardViewBinding
@@ -115,7 +112,6 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
         }
         b.comment.setOnClickListener {
             postclickListener.commentsClickListener(post.post_id,post.publisher)
-
         }
 
         b.save.setOnClickListener {
@@ -442,8 +438,6 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
 
             }
         }
-
-
     }
 
     override fun onViewAttachedToWindow(holder: CardViewHolder) {

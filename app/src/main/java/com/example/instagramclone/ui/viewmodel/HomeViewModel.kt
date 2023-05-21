@@ -106,30 +106,30 @@ class HomeViewModel : ViewModel() {
                 if (value != null) {
                     val postList = ArrayList<Posts>()
                     postMutableLiveData.postValue(Resource.Loading())
-                    for (document in value.documents) {
-                        try {
-                            val post_id = document.get("postId") as String
-                            val postImage = document.get("postImage") as String
-                            val description = document.get("description") as String
+                    try {
+                        for (document in value.documents) {
                             val publisher = document.get("publisher") as String
-                            val time = document.get("time") as Timestamp
-                            val post = Posts(post_id, postImage, description, publisher, time)
-
                             if (followList.contains(publisher)) {
+                                val post_id = document.get("postId") as String
+                                val postImage = document.get("postImage") as String
+                                val description = document.get("description") as String
+                                val time = document.get("time") as Timestamp
+                                val post = Posts(post_id, postImage, description, publisher, time)
                                 postList.add(post)
                             }
-                            postList.sortByDescending {
-                                it.time
-                            }
-                            postMutableLiveData.postValue(Resource.Success(postList))
-
-                        } catch (exception: java.lang.NullPointerException) {
-                            postMutableLiveData.postValue(exception.localizedMessage?.let {
-                                Resource.Error(it)
-                            })
-
                         }
+                        postList.sortByDescending {
+                            it.time
+                        }
+                        postMutableLiveData.postValue(Resource.Success(postList))
+
+                    }catch (exception: java.lang.NullPointerException) {
+                        postMutableLiveData.postValue(exception.localizedMessage?.let {
+                            Resource.Error(it)
+                        })
+
                     }
+
                 }
 
             }.addOnFailureListener { exception ->

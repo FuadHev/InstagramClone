@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -27,32 +28,8 @@ class ProfileDetailFragment : Fragment() {
 
 
     private lateinit var binding: FragmentProfileDetailBinding
-    private lateinit var adapter: PostsAdapters
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_profile_detail, container, false)
-
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-
-        val bundle = arguments
-        val postlist = bundle?.getParcelableArrayList<Posts>("posts")
-
-
-        val position = bundle!!.getInt("position")
-
-        binding.postsRv.setHasFixedSize(true)
-
-        val layoutManager = LinearLayoutManager(requireContext())
-
-        binding.postsRv.layoutManager = layoutManager
-        adapter = postlist?.let { PostsAdapters(object : PostClickListener {
+    private val adapter by lazy {
+        PostsAdapters(object : PostClickListener{
             override fun pImage_uNameClickListener(bundle: Bundle) {
                 val fNav=findNavController()
                 if ( fNav.currentDestination?.id==R.id.homeFragment){
@@ -63,48 +40,67 @@ class ProfileDetailFragment : Fragment() {
             }
 
             override fun postOptionCLickListener(postId: String, view: View) {
-                val popupMenu = PopupMenu(requireActivity(),view)
-                popupMenu.menuInflater.inflate(R.menu.post_option_menu, popupMenu.menu)
-
-                popupMenu.setOnMenuItemClickListener {item->
-                    when(item.itemId){
-                        R.id.post_delete->{
-
-                            showDeletePostDialog(postId)
-
-                            true
-                        }
-
-
-                        else-> false
-                    }
-                }
-                popupMenu.show()
+                popUpMenu(postId,view)
             }
 
             override fun commentsClickListener(postId: String, publisherId: String) {
-                val fNav = findNavController()
-                if (fNav.currentDestination?.id == R.id.homeFragment) {
-
-                    fNav.navigate(
-                        HomeFragmentDirections.actionHomeFragmentToCommentsFragment(
-                            postId,
-                            publisherId
-                        )
-                    )
-                } else if (fNav.currentDestination?.id == R.id.profileDetailFragment) {
-                    fNav.navigate(
-                        ProfileDetailFragmentDirections.actionProfileDetailFragmentToCommentsFragment(
-                            postId,
-                            publisherId
-                        )
-                    )
-                }
+                setCommentClickListener(postId,publisherId)
             }
-        },requireActivity(), it) }!!
 
+        },requireActivity(), emptyList())
+    }
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_profile_detail, container, false)
 
-        Handler().postDelayed({
+        return binding.root
+    }
+
+    fun setCommentClickListener(postId: String,publisherId:String){
+        val fNav = findNavController()
+        when (fNav.currentDestination?.id) {
+            R.id.homeFragment -> {
+                fNav.navigate(
+                    HomeFragmentDirections.actionHomeFragmentToCommentsFragment(
+                        postId,
+                        publisherId
+                    )
+                )
+            }
+            R.id.profileDetailFragment -> {
+                fNav.navigate(
+                    ProfileDetailFragmentDirections.actionProfileDetailFragmentToCommentsFragment(
+                        postId,
+                        publisherId
+                    )
+                )
+            }
+            R.id.discoverPostsFragment -> {
+                fNav.navigate(
+                    DiscoverPostsFragmentDirections.actionDiscoverPostsFragmentToCommentsFragment(
+                        postId,
+                        publisherId
+                    )
+                )
+            }
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val bundle = arguments
+        val postlist = bundle?.getParcelableArrayList<Posts>("posts")
+        val position = bundle!!.getInt("position")
+
+        binding.postsRv.setHasFixedSize(true)
+        val layoutManager = LinearLayoutManager(requireContext())
+        binding.postsRv.layoutManager = layoutManager
+
+        postlist?.let { adapter.updatePosts(postlist) }
+        Handler(Looper.getMainLooper()).postDelayed({
             binding.postsRv.adapter = adapter
             layoutManager.scrollToPositionWithOffset(position, 0)
         },300)
@@ -112,6 +108,21 @@ class ProfileDetailFragment : Fragment() {
 
 
 
+    }
+    private fun popUpMenu(postId: String,view: View){
+        val popupMenu = PopupMenu(requireActivity(),view)
+        popupMenu.menuInflater.inflate(R.menu.post_option_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener {item->
+            when(item.itemId){
+                R.id.post_delete->{
+                    showDeletePostDialog(postId)
+                    true
+                }
+
+                else-> false
+            }
+        }
+        popupMenu.show()
     }
     private fun showDeletePostDialog(postId: String){
         val dialogBinding= DeleteMessageDialogBinding.inflate(layoutInflater)
