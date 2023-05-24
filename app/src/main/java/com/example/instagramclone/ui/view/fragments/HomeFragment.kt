@@ -24,6 +24,7 @@ import com.example.instagramclone.databinding.FragmentHomeBinding
 import com.example.instagramclone.ui.adapters.PostClickListener
 import com.example.instagramclone.ui.adapters.PostsAdapters
 import com.example.instagramclone.ui.adapters.StoryAdapter
+import com.example.instagramclone.ui.adapters.StoryClickListener
 import com.example.instagramclone.ui.viewmodel.HomeViewModel
 import com.example.instagramclone.utils.Resource
 import com.google.android.material.snackbar.Snackbar
@@ -39,7 +40,9 @@ class HomeFragment : BaseFragment() {
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var binding: FragmentHomeBinding
+    private val viewModel by activityViewModels<HomeViewModel>()
     private lateinit var auth: FirebaseAuth
+
     private val adapter by lazy {
         PostsAdapters(object : PostClickListener {
             override fun pImage_uNameClickListener(bundle: Bundle) {
@@ -52,19 +55,22 @@ class HomeFragment : BaseFragment() {
             }
 
             override fun postOptionCLickListener(postId: String, view: View) {
-                setPopUpMenu(postId,view)
+                setPopUpMenu(postId, view)
             }
 
             override fun commentsClickListener(postId: String, publisherId: String) {
-                setCommentClickListener(postId,publisherId)
+                setCommentClickListener(postId, publisherId)
             }
         }, requireContext(), emptyList())
     }
     private val storyAdapter by lazy {
-        StoryAdapter(requireContext(), emptyList())
-    }
-    private val viewModel by activityViewModels<HomeViewModel>()
+        StoryAdapter(object : StoryClickListener {
+            override fun storyclickListener() {
+                findNavController().navigate(R.id.action_homeFragment_to_addStoryFragment)
+            }
 
+        }, requireContext(), emptyList())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -77,23 +83,13 @@ class HomeFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.homeFragment = this
         auth = Firebase.auth
         firestore = Firebase.firestore
-        binding.postRv.setHasFixedSize(true)
-        val linerLayoutManager = LinearLayoutManager(requireActivity())
-        binding.storyRv.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.postRv.layoutManager = linerLayoutManager
+
+        setRecyclerViews()
 
 
-        binding.storyRv.adapter = storyAdapter
-        binding.postRv.adapter = adapter
-
-
-        binding.chat.setOnClickListener {
-            val intent = Intent(requireActivity(), ChatActivity::class.java)
-            requireActivity().startActivity(intent)
-        }
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.checkFollowing()
             Handler(Looper.getMainLooper()).postDelayed({
@@ -103,7 +99,24 @@ class HomeFragment : BaseFragment() {
         }
 
     }
-    private fun setCommentClickListener(postId:String,publisherId:String){
+
+    private fun setRecyclerViews() {
+
+        binding.postRv.setHasFixedSize(true)
+        val linerLayoutManager = LinearLayoutManager(requireActivity())
+        binding.storyRv.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.postRv.layoutManager = linerLayoutManager
+        binding.storyRv.adapter = storyAdapter
+        binding.postRv.adapter = adapter
+    }
+
+    fun chatClickListener() {
+        val intent = Intent(requireActivity(), ChatActivity::class.java)
+        requireActivity().startActivity(intent)
+    }
+
+    private fun setCommentClickListener(postId: String, publisherId: String) {
         val fNav = findNavController()
         when (fNav.currentDestination?.id) {
             R.id.homeFragment -> {
@@ -133,8 +146,8 @@ class HomeFragment : BaseFragment() {
         }
     }
 
-    private fun setPopUpMenu(postId: String,view: View){
-        val popupMenu = PopupMenu(requireActivity(),view)
+    private fun setPopUpMenu(postId: String, view: View) {
+        val popupMenu = PopupMenu(requireActivity(), view)
         popupMenu.menuInflater.inflate(R.menu.post_option_menu, popupMenu.menu)
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -148,6 +161,7 @@ class HomeFragment : BaseFragment() {
         popupMenu.show()
 
     }
+
     private fun showDeletePostDialog(postId: String) {
         val dialogBinding = DeleteMessageDialogBinding.inflate(layoutInflater)
         val mDialog = Dialog(requireContext())

@@ -4,12 +4,13 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.example.instagramclone.ui.view.activity.AddStoryActivity
 import com.example.instagramclone.ui.view.activity.StoryActivity
 import com.example.instagramclone.model.Story
 import com.example.instagramclone.databinding.StoryItemBinding
@@ -19,7 +20,7 @@ import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 
-class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
+class StoryAdapter(private val storyClickListener: StoryClickListener,val mContext: Context, private var storyList: List<Story>) :
     RecyclerView.Adapter<StoryAdapter.ViewHolder>() {
 
     inner class ViewHolder(val view: StoryItemBinding) :
@@ -42,8 +43,8 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
 
         userInfo(b, story.userId, position)
 
-        if (position!=0){
-            seenStory(b.profilImage,story.userId)
+        if (position != 0) {
+            seenStory(b.profilImage, story.userId)
         }
 
 
@@ -59,8 +60,8 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
                 myStory(b.username, true)
             } else {
                 // go to Story
-                val intent=Intent(mContext, StoryActivity::class.java)
-                intent.putExtra("userId",story.userId)
+                val intent = Intent(mContext, StoryActivity::class.java)
+                intent.putExtra("userId", story.userId)
                 mContext.startActivity(intent)
             }
 
@@ -69,18 +70,15 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateStory(newStories:List<Story>){
-        this.storyList=newStories
+    fun updateStory(newStories: List<Story>) {
+        this.storyList = newStories
         notifyDataSetChanged()
     }
 
 
-
     private fun userInfo(viewHoder: StoryItemBinding, userId: String, position: Int) {
-        Firebase.firestore.collection("user").document(userId).addSnapshotListener { value, error ->
-            if (error != null) {
-
-            } else {
+        Firebase.firestore.collection("user").document(userId)
+            .get().addOnSuccessListener { value ->
                 if (value != null) {
                     val username = value.get("username") as String
                     val imageurl = value.get("image_url") as String
@@ -94,19 +92,19 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
                         viewHoder.username.text = username
                     }
                 }
+
+
+            }.addOnFailureListener {
+
+                it.localizedMessage?.let { it1 -> Log.e("user_error", it1) }
             }
-
-
-        }
 
     }
 
     private fun myStory(textView: TextView, click: Boolean) {
         Firebase.firestore.collection("Story").document(Firebase.auth.currentUser!!.uid)
-            .addSnapshotListener { value, error ->
-                if (error != null) {
+            .get().addOnSuccessListener { value->
 
-                } else {
                     var count = 0
                     if (value != null) {
                         try {
@@ -130,23 +128,23 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
                                 val alert = AlertDialog.Builder(mContext)
                                 alert.setNegativeButton("view story") { d, i ->
 
-                                    val intent=Intent(mContext, StoryActivity::class.java)
-                                    intent.putExtra("userId",Firebase.auth.currentUser!!.uid)
+                                    val intent = Intent(mContext, StoryActivity::class.java)
+                                    intent.putExtra("userId", Firebase.auth.currentUser!!.uid)
                                     mContext.startActivity(intent)
-                                    d.cancel()
+                                    d.dismiss()
 
                                 }
                                 alert.setPositiveButton("add story") { d, i ->
-                                    val intent = Intent(mContext, AddStoryActivity::class.java)
-                                    mContext.startActivity(intent)
-                                    d.cancel()
+
+                                    storyClickListener.storyclickListener()
+
+                                    d.dismiss()
                                 }
                                 alert.setCancelable(true)
                                 alert.create().show()
 
                             } else {
-                                val intent = Intent(mContext, AddStoryActivity::class.java)
-                                mContext.startActivity(intent)
+                                storyClickListener.storyclickListener()
                             }
 
 
@@ -160,9 +158,11 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
 
 
                     }
-                }
 
 
+
+            }.addOnFailureListener {
+                Toast.makeText(mContext, it.localizedMessage, Toast.LENGTH_SHORT).show()
             }
 
 
@@ -171,32 +171,32 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
     private fun seenStory(profilImage: CircleImageView, userId: String) {
 
 
-        val ref=Firebase.firestore.collection("Story").document(userId)
+        val ref = Firebase.firestore.collection("Story").document(userId)
 
         ref.addSnapshotListener { value, error ->
-
             if (error != null) {
-            } else {
+                Log.e("story_error",error.localizedMessage!!)
+                return@addSnapshotListener
+            }
                 if (value != null && value.exists()) {
-                    val stories = value.data as HashMap<*,*>
+                    val stories = value.data as HashMap<*, *>
                     try {
-                        var i=true
+                        var i = true
                         for (storykey in stories) {
-                            val story = storykey.value as HashMap<*,*>
+                            val story = storykey.value as HashMap<*, *>
                             val timeend = story["timeEnd"] as Long
-                            val views=story["views"] as HashMap<*,*>
-                            if (views.containsKey(Firebase.auth.currentUser!!.uid) && System.currentTimeMillis()<timeend){
-                               i=true
-                            }else if (System.currentTimeMillis()<timeend){
-                                i=false
+                            val views = story["views"] as HashMap<*, *>
+                            if (views.containsKey(Firebase.auth.currentUser!!.uid) && System.currentTimeMillis() < timeend) {
+                                i = true
+                            } else if (System.currentTimeMillis() < timeend) {
+                                i = false
                             }
                         }
-                        if (i){
-                            profilImage.borderWidth=0
-                        }else{
-                            profilImage.borderWidth=6
+                        if (i) {
+                            profilImage.borderWidth = 0
+                        } else {
+                            profilImage.borderWidth = 6
                         }
-
 
 
                     } catch (e: java.lang.NullPointerException) {
@@ -207,7 +207,7 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
 
                 }
 
-            }
+
 
 
         }
@@ -217,8 +217,12 @@ class StoryAdapter(val mContext: Context, private var storyList:List<Story>) :
 
 //    override fun getItemViewType(position: Int): Int {
 //        if (position==0){
-//            return 0
-//        }
+//            return 0 //        }
 //        return 1
 //    }
+}
+interface StoryClickListener{
+
+    fun storyclickListener()
+
 }

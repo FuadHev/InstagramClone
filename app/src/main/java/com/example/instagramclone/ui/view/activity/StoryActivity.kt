@@ -68,19 +68,21 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
 
     private fun getUserInfo(userId: String) {
 
-        Firebase.firestore.collection("user").document(userId).addSnapshotListener { value, error ->
-            if (error != null) {
-                Toast.makeText(this, error.localizedMessage, Toast.LENGTH_SHORT).show()
-            } else {
+        Firebase.firestore.collection("user").document(userId)
+            .get().addOnSuccessListener { value ->
+
                 if (value != null && value.exists()) {
                     val username = value.get("username") as String
                     val imageurl = value.get("image_url") as String
                     Picasso.get().load(imageurl).into(binding.storyPhoto)
                     binding.storyUsername.text = username
                 }
-            }
 
-        }
+
+            }.addOnFailureListener {
+                Toast.makeText(this, it.localizedMessage, Toast.LENGTH_SHORT).show()
+
+            }
     }
 
     private fun addView(storyId: String) {
@@ -97,7 +99,7 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
 //                    storyIds.clear()
                 storyList.clear()
                 try {
-                    val doc = value.data as HashMap<*,*>
+                    val doc = value.data as HashMap<*, *>
 
                     val timecurrent = System.currentTimeMillis()
                     for (i in doc) {

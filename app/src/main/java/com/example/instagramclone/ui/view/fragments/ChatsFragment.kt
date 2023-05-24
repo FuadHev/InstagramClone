@@ -63,7 +63,6 @@ class ChatsFragment : BaseFragment() {
 
             when (it) {
                 is Resource.Loading -> {
-
                     binding.progressBar.visibility= VISIBLE
                 }
                 is Resource.Success -> {

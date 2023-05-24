@@ -29,16 +29,7 @@
             android:name=".ui.view.activity.StoryActivity"
             android:screenOrientation="portrait"
             android:exported="false" />
-        <activity
-            android:name=".ui.view.activity.AddStoryActivity"
-            android:screenOrientation="portrait"
 
-            android:exported="false" />
-<!--        <activity-->
-<!--            android:name=".ui.view.activity.CommentsActivity"-->
-<!--            android:screenOrientation="portrait"-->
-
-<!--            android:exported="false" />-->
         <activity
             android:name=".ui.view.activity.HomeActivity"
             android:screenOrientation="portrait"

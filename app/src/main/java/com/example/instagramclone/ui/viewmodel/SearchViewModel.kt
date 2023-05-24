@@ -1,13 +1,11 @@
 package com.example.instagramclone.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.instagramclone.model.Posts
 import com.example.instagramclone.model.Users
 import com.example.instagramclone.utils.Resource
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.auth.User
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 

@@ -1,19 +1,24 @@
-package com.example.instagramclone.ui.view.activity
+package com.example.instagramclone.ui.view.fragments
 
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.instagramclone.databinding.ActivityAddStoryBinding
+import androidx.databinding.DataBindingUtil
+import com.example.instagramclone.R
+import com.example.instagramclone.databinding.FragmentAddStoryBinding
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -25,48 +30,40 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import java.util.*
 
-class AddStoryActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityAddStoryBinding
+
+class AddStoryFragment : Fragment() {
+
+    private lateinit var binding:FragmentAddStoryBinding
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     private lateinit var permissionResultLauncher: ActivityResultLauncher<String>
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
     var selectPicture: Uri? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityAddStoryBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding=DataBindingUtil.inflate(inflater,R.layout.fragment_add_story, container, false)
+        return binding.root
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         auth = Firebase.auth
         firestore = Firebase.firestore
         storage = Firebase.storage
-
-
+        binding.addStoryFragment=this
         registerLauncher()
 
-        binding.imageView.setOnClickListener {
-            selectImage(it)
-        }
-
-
-        binding.imageViewLottie.setOnClickListener {
-            selectImage(it)
-        }
-
-        binding.sharePost.setOnClickListener {
-
-            upload()
-
-        }
 
     }
 
 
     fun upload() {
 
-        val progress = ProgressDialog(this)
+        val progress = ProgressDialog( requireActivity())
         progress.setMessage("Please wait adding the post")
         progress.show()
         val uuid = UUID.randomUUID()
@@ -98,18 +95,18 @@ class AddStoryActivity : AppCompatActivity() {
 
                     ref.set(hmapkey, SetOptions.merge()).addOnSuccessListener {
                         progress.dismiss()
-                        Toast.makeText(this, "Story successfully shared", Toast.LENGTH_SHORT).show()
+                        Toast.makeText( requireActivity(), "Story successfully shared", Toast.LENGTH_SHORT).show()
                     }
 
                 }
 
 
             }.addOnFailureListener {
-                Toast.makeText(this, it.localizedMessage, Toast.LENGTH_SHORT).show()
+                Toast.makeText( requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT).show()
             }
         } else {
             progress.dismiss()
-            Toast.makeText(this, "Please select photo", Toast.LENGTH_SHORT).show()
+            Toast.makeText( requireActivity(), "Please select photo", Toast.LENGTH_SHORT).show()
         }
 
 
@@ -118,12 +115,12 @@ class AddStoryActivity : AppCompatActivity() {
     fun selectImage(view: View) {
 
         if (ContextCompat.checkSelfPermission(
-                this,
+                requireActivity(),
                 android.Manifest.permission.READ_EXTERNAL_STORAGE
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    this,
+                    requireActivity(),
                     android.Manifest.permission.READ_EXTERNAL_STORAGE
                 )
             ) {
@@ -149,11 +146,17 @@ class AddStoryActivity : AppCompatActivity() {
 
     }
 
+
+
+
+
+
+
     private fun registerLauncher() {
 
         activityResultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
+                if (result.resultCode == AppCompatActivity.RESULT_OK) {
                     val intentFromResult = result.data
 
                     if (intentFromResult != null) {
@@ -179,7 +182,7 @@ class AddStoryActivity : AppCompatActivity() {
 
                 } else {
 
-                    Toast.makeText(this, "Permission needed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Permission needed", Toast.LENGTH_SHORT).show()
 
                 }
             }
@@ -187,10 +190,5 @@ class AddStoryActivity : AppCompatActivity() {
 
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        val intent=Intent(this@AddStoryActivity, HomeActivity::class.java)
-        finish()
-        startActivity(intent)
-    }
+
 }

@@ -12,6 +12,8 @@ import com.google.firebase.ktx.Firebase
 
 class ChatActivity : AppCompatActivity() {
     private lateinit var binding:ActivityChatBinding
+
+    ////36562127-4f41522f3d336a3fe6b64a038
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding=DataBindingUtil.setContentView(this, R.layout.activity_chat)

@@ -165,7 +165,6 @@ class AddPostFragment : Fragment() {
             ) {
                 Snackbar.make(view, "Permission needed for gallery", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Give permission") {
-
                         permissionResultLauncher.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
                     }.show()
             } else {

@@ -30,7 +30,11 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.UUID
 
-class PostsAdapters(private val postclickListener: PostClickListener,val mContext: Context, var postsList: List<Posts>) :
+class PostsAdapters(
+    private val postclickListener: PostClickListener,
+    val mContext: Context,
+    var postsList: List<Posts>
+) :
     RecyclerView.Adapter<PostsAdapters.CardViewHolder>() {
 
     val firebaseUser = Firebase.auth.currentUser
@@ -59,8 +63,8 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
         b.like.tag = "like"
         Picasso.get().load(post.postImage).into(b.postImage)
 
-        if (post.publisher== Firebase.auth.currentUser!!.uid){
-            b.postOption.visibility= VISIBLE
+        if (post.publisher == Firebase.auth.currentUser!!.uid) {
+            b.postOption.visibility = VISIBLE
         }
 
         if (post.description.trim() == "") {
@@ -78,7 +82,7 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
 
 
         b.postOption.setOnClickListener {
-            postclickListener.postOptionCLickListener(post.post_id,it)
+            postclickListener.postOptionCLickListener(post.post_id, it)
         }
 
         b.userName.setOnClickListener {
@@ -95,7 +99,14 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
             ++i
             android.os.Handler(Looper.getMainLooper()).postDelayed({
                 if (i == 2) {
-                    likePost(b.like, post.post_id, post.publisher, b.likeCount, b.likeAnim,post.postImage)
+                    likePost(
+                        b.like,
+                        post.post_id,
+                        post.publisher,
+                        b.likeCount,
+                        b.likeAnim,
+                        post.postImage
+                    )
                 }
                 i = 0
             }, 500)
@@ -103,15 +114,15 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
 
         }
         b.like.setOnClickListener {
-            likePost(b.like, post.post_id, post.publisher, b.likeCount, b.likeAnim,post.postImage)
+            likePost(b.like, post.post_id, post.publisher, b.likeCount, b.likeAnim, post.postImage)
         }
 
         b.comments.setOnClickListener {
-            postclickListener.commentsClickListener(post.post_id,post.publisher)
+            postclickListener.commentsClickListener(post.post_id, post.publisher)
 
         }
         b.comment.setOnClickListener {
-            postclickListener.commentsClickListener(post.post_id,post.publisher)
+            postclickListener.commentsClickListener(post.post_id, post.publisher)
         }
 
         b.save.setOnClickListener {
@@ -133,7 +144,8 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
 
 
     }
-    private fun goToProfile(publisher: String){
+
+    private fun goToProfile(publisher: String) {
         val bundle = Bundle()
 
         bundle.putString("profileid", publisher)
@@ -156,27 +168,22 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
             map[firebaseUser!!.uid] = true
             firestore.collection("Likes").document(postId).set(map, SetOptions.merge())
                 .addOnSuccessListener {
-
                     likeAnimation(likeImage)
                     nrLike(likeCount, postId)
                     likeBtn.setImageResource(R.drawable.like)
                     likeBtn.tag = "liked"
                     if (postPublisher != firebaseUser.uid) {
                         addNotification(postPublisher, postId)
-                        getPlayerIdSendNotification(postPublisher,imageUrl)
+                        getPlayerIdSendNotification(postPublisher, imageUrl)
                     }
-
                 }
 
         } else {
             val ref = firestore.collection("Likes").document(postId)
-
-
             val updates = hashMapOf<String, Any>(
                 firebaseUser!!.uid to FieldValue.delete()
             )
-
-           ref.update(updates).addOnSuccessListener {
+            ref.update(updates).addOnSuccessListener {
                 nrLike(likeCount, postId)
                 likeBtn.setImageResource(R.drawable.heart_noselected)
                 likeBtn.tag = "like"
@@ -188,13 +195,11 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
 
     }
 
-     private fun likeAnimation(likeImage: ImageView) {
+    private fun likeAnimation(likeImage: ImageView) {
         likeImage.visibility = VISIBLE
         val scaleanimX = ObjectAnimator.ofFloat(likeImage, "scaleX", 1.0f, 1.5f)
         val scaleanimY = ObjectAnimator.ofFloat(likeImage, "scaleY", 1.0f, 1.5f)
         val scaleanimAlpha = ObjectAnimator.ofFloat(likeImage, "alpha", 0.0f, 1.0f)
-
-
         val animation = AnimatorSet().apply {
             duration = 1200
             playTogether(scaleanimX, scaleanimY, scaleanimAlpha)
@@ -203,9 +208,6 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
         android.os.Handler().postDelayed({
             likeImage.visibility = View.INVISIBLE
         }, 1800)
-
-
-
     }
 
 
@@ -236,21 +238,22 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
 
 
         var username = ""
-        firestore.collection("user").document(firebaseUser!!.uid).get().addOnSuccessListener {value->
-            if (value != null) {
-                username = value.get("username") as String
-            }
-
-        }
-        firestore.collection("user").document(postPublisher).get().addOnSuccessListener { value ->
+        firestore.collection("user").document(firebaseUser!!.uid).get()
+            .addOnSuccessListener { value ->
                 if (value != null) {
-                    val playerId = value.get("playerId") as String?
-
-                    if (playerId != null) {
-                        sentPushNotification(playerId, username, imageUrl)
-                    }
-
+                    username = value.get("username") as String
                 }
+
+            }
+        firestore.collection("user").document(postPublisher).get().addOnSuccessListener { value ->
+            if (value != null) {
+                val playerId = value.get("playerId") as String?
+
+                if (playerId != null) {
+                    sentPushNotification(playerId, username, imageUrl)
+                }
+
+            }
 
         }
 
@@ -290,7 +293,7 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
             } else {
                 try {
                     if (value != null) {
-                        val allcomments = value.data as? HashMap<*,*>
+                        val allcomments = value.data as? HashMap<*, *>
 
                         val count = allcomments?.count()
 
@@ -446,10 +449,11 @@ class PostsAdapters(private val postclickListener: PostClickListener,val mContex
     }
 
 }
-interface PostClickListener{
-   fun pImage_uNameClickListener(bundle: Bundle)
 
-   fun postOptionCLickListener(postId: String,view:View)
+interface PostClickListener {
+    fun pImage_uNameClickListener(bundle: Bundle)
 
-   fun commentsClickListener(postId:String,publisherId:String)
+    fun postOptionCLickListener(postId: String, view: View)
+
+    fun commentsClickListener(postId: String, publisherId: String)
 }

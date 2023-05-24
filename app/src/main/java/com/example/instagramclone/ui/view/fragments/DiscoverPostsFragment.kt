@@ -4,6 +4,8 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -45,6 +47,7 @@ class DiscoverPostsFragment : BaseFragment() {
                     fNav.navigate(R.id.action_profileDetailFragment_to_profileFragment, bundle)
                 }
             }
+
             override fun postOptionCLickListener(postId: String, view: View) {
                 setPopUpMenu(postId, view)
             }
@@ -52,7 +55,7 @@ class DiscoverPostsFragment : BaseFragment() {
             override fun commentsClickListener(postId: String, publisherId: String) {
                 setCommentClickListener(postId, publisherId)
             }
-        }, requireContext(),emptyList())
+        }, requireContext(), emptyList())
     }
 
     override fun onCreateView(
@@ -66,19 +69,19 @@ class DiscoverPostsFragment : BaseFragment() {
     }
 
     override fun addObserves() {
-        viewModel.postMutableLiveData.observe(viewLifecycleOwner){
-            when(it){
+        viewModel.postMutableLiveData.observe(viewLifecycleOwner) {
+            when (it) {
                 is Resource.Loading -> {
-                    binding.progressBar2.visibility=VISIBLE
+                    binding.progressBar2.visibility = VISIBLE
                 }
                 is Resource.Success -> {
 
                     postAdapter.updatePosts(it.data ?: emptyList())
-                    binding.progressBar2.visibility=GONE
+                    binding.progressBar2.visibility = GONE
 
                 }
                 is Resource.Error -> {
-                    binding.progressBar2.visibility=GONE
+                    binding.progressBar2.visibility = GONE
                     Toast.makeText(requireContext(), it.data.toString(), Toast.LENGTH_SHORT).show()
                 }
                 else -> {}
@@ -88,10 +91,20 @@ class DiscoverPostsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val currentPost = args.post
         setRecyclerView()
-
-        val currentPost=args.post
         viewModel.readPost(currentPost)
+        refreshLayout()
+
+    }
+
+    private fun refreshLayout() {
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.readPost(args.post)
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.swipeRefresh.isRefreshing = false
+            }, 1000)
+        }
     }
 
     private fun setPopUpMenu(postId: String, view: View) {

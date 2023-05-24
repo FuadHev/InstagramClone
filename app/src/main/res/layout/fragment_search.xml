@@ -10,7 +10,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.view.fragments.SearchFragment">
+        tools:context=".ui.view.fragments.SearchFragment"
+        android:padding="4dp">
 
         <androidx.appcompat.widget.SearchView
             android:id="@+id/searchView"
@@ -18,6 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             app:iconifiedByDefault="false"
+
             android:background="@drawable/search_bg"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
