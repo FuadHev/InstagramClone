@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.instagramclone.R
 import com.example.instagramclone.model.Posts
 import com.example.instagramclone.databinding.PostsCardViewBinding
+import com.example.instagramclone.utils.Constant
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
@@ -32,18 +33,17 @@ import java.util.UUID
 
 class PostsAdapters(
     private val postclickListener: PostClickListener,
-    val mContext: Context,
-    var postsList: List<Posts>
+    private val mContext: Context,
+    private var postsList: List<Posts>
 ) :
     RecyclerView.Adapter<PostsAdapters.CardViewHolder>() {
 
-    val firebaseUser = Firebase.auth.currentUser
-    val firestore = Firebase.firestore
+    private val firebaseUser = Firebase.auth.currentUser
+    private val firestore = Firebase.firestore
 
 
     inner class CardViewHolder(val view: PostsCardViewBinding) :
-        RecyclerView.ViewHolder(view.root) {
-    }
+        RecyclerView.ViewHolder(view.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -59,7 +59,7 @@ class PostsAdapters(
         val post = postsList[position]
         val b = holder.view
         b.like.setImageResource(R.drawable.heart_noselected)
-        b.comments.text = "View all 0 comments"
+//        b.comments.text = "View all 0 comments"
         b.like.tag = "like"
         Picasso.get().load(post.postImage).into(b.postImage)
 
@@ -69,7 +69,6 @@ class PostsAdapters(
 
         if (post.description.trim() == "") {
             b.description.visibility = GONE
-
         } else {
             b.description.visibility = VISIBLE
             b.description.text = post.description
@@ -136,8 +135,6 @@ class PostsAdapters(
             } else {
                 firestore.collection("Saves").document(firebaseUser!!.uid)
                     .update(post.post_id, FieldValue.delete())
-
-
             }
 
         }
@@ -150,7 +147,7 @@ class PostsAdapters(
 
         bundle.putString("profileid", publisher)
 
-        postclickListener.pImage_uNameClickListener(bundle)
+        postclickListener.pImageuNameClickListener(bundle)
     }
 
     private fun likePost(
@@ -169,9 +166,10 @@ class PostsAdapters(
             firestore.collection("Likes").document(postId).set(map, SetOptions.merge())
                 .addOnSuccessListener {
                     likeAnimation(likeImage)
-                    nrLike(likeCount, postId)
-                    likeBtn.setImageResource(R.drawable.like)
-                    likeBtn.tag = "liked"
+                    //artiq ehtiyac yoxdur
+//                    nrLike(likeCount, postId)
+//                    likeBtn.setImageResource(R.drawable.like)
+//                    likeBtn.tag = "liked"
                     if (postPublisher != firebaseUser.uid) {
                         addNotification(postPublisher, postId)
                         getPlayerIdSendNotification(postPublisher, imageUrl)
@@ -184,9 +182,9 @@ class PostsAdapters(
                 firebaseUser!!.uid to FieldValue.delete()
             )
             ref.update(updates).addOnSuccessListener {
-                nrLike(likeCount, postId)
-                likeBtn.setImageResource(R.drawable.heart_noselected)
-                likeBtn.tag = "like"
+//                nrLike(likeCount, postId)
+//                likeBtn.setImageResource(R.drawable.heart_noselected)
+//                likeBtn.tag = "like"
             }
 
 
@@ -205,12 +203,13 @@ class PostsAdapters(
             playTogether(scaleanimX, scaleanimY, scaleanimAlpha)
         }
         animation.start()
-        android.os.Handler().postDelayed({
+        android.os.Handler(Looper.getMainLooper()).postDelayed({
             likeImage.visibility = View.INVISIBLE
         }, 1800)
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updatePosts(newPostsList: List<Posts>) {
         this.postsList = newPostsList
         notifyDataSetChanged()
@@ -236,7 +235,6 @@ class PostsAdapters(
 
     private fun getPlayerIdSendNotification(postPublisher: String, imageUrl: String) {
 
-
         var username = ""
         firestore.collection("user").document(firebaseUser!!.uid).get()
             .addOnSuccessListener { value ->
@@ -252,7 +250,6 @@ class PostsAdapters(
                 if (playerId != null) {
                     sentPushNotification(playerId, username, imageUrl)
                 }
-
             }
 
         }
@@ -261,11 +258,11 @@ class PostsAdapters(
 
     private fun sentPushNotification(playerId: String, username: String, imageUrl: String) {
         try {
-            /*paylasmadan  qabaq appId deyismelidi*/
+            /*paylasmadan  qabaq appId gizli saxla saxlanilmalidi*/
             OneSignal.postNotification(
                 JSONObject(
                     """{
-        "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef", 
+        "app_id": "${Constant.APP_ID}", 
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
         "contents": {"en": "Liked Your Post"},
@@ -274,7 +271,6 @@ class PostsAdapters(
                 ),
                 null
             )
-
 
         } catch (e: JSONException) {
             e.printStackTrace()
@@ -290,28 +286,33 @@ class PostsAdapters(
             if (error != null) {
                 Toast.makeText(mContext, error.localizedMessage, Toast.LENGTH_SHORT).show()
                 comments.text = "View all 0 comments"
-            } else {
-                try {
-                    if (value != null) {
-                        val allcomments = value.data as? HashMap<*, *>
+                return@addSnapshotListener
+            }
+            try {
+                if (value != null) {
+                    val allcomments = value.data as? HashMap<*, *>
 
-                        val count = allcomments?.count()
+                    val count = allcomments?.count()
 
-                        if (count == null) {
-                            comments.text = "View all 0 comments"
-                        } else {
-                            comments.text = "View all $count comments"
-                        }
+                    if (count == null) {
+                        val viewAllComments =
+                            mContext.getString(R.string.view_all_comments, 0.toString())
+                        comments.text = viewAllComments
+                    } else {
+
+                        val viewAllComments =
+                            mContext.getString(R.string.view_all_comments, count.toString())
+                        comments.text = viewAllComments
+
+//                            comments.text = "View all $count comments"
+                    }
 //                        Log.e("countcomment",count.toString())
 //                        comments.text = "View all $count comments"
 
-                    }
-                } catch (_: NullPointerException) {
-
-
                 }
+            } catch (e: NullPointerException) {
 
-
+                Log.e("Comments_Error", e.localizedMessage!! )
             }
 
 
@@ -331,25 +332,24 @@ class PostsAdapters(
 
 
         firestore.collection("Likes").document(postId).addSnapshotListener { value, error ->
-
             if (error != null) {
                 Toast.makeText(mContext, error.localizedMessage, Toast.LENGTH_SHORT).show()
                 return@addSnapshotListener
-            } else {
-                if (value != null) {
-                    val doc = value.data as? HashMap<*, *>
-                    val count = doc?.count()
-                    if (count == null) {
-                        likes.text = "0 likes"
-                    } else {
-                        likes.text = "$count likes"
-                    }
-
+            }
+            if (value != null) {
+                val doc = value.data as? HashMap<*, *>
+                val count = doc?.count()
+                if (count == null) {
+                    val viewLikesCount = mContext.getString(R.string.likes_count, 0.toString())
+                    likes.text = viewLikesCount
                 } else {
-                    likes.text = "0 likes"
+                    val viewLikesCount = mContext.getString(R.string.likes_count, count.toString())
+                    likes.text = viewLikesCount
                 }
 
-
+            } else {
+                val viewLikesCount = mContext.getString(R.string.likes_count, 0.toString())
+                likes.text = viewLikesCount
             }
 
         }
@@ -364,28 +364,23 @@ class PostsAdapters(
             if (error != null) {
                 Toast.makeText(mContext, error.localizedMessage, Toast.LENGTH_SHORT).show()
                 return@addSnapshotListener
-            } else {
-                if (value != null) {
-                    val doc = value.data as? HashMap<*, *>
-                    if (doc != null) {
+            }
+            if (value != null) {
+                val doc = value.data as? HashMap<*, *>
+                if (doc != null) {
 
-                        if (doc.containsKey(firebaseUser!!.uid)) {
-                            imageView.setImageResource(R.drawable.like)
-                            imageView.tag = "liked"
-                        } else {
-                            imageView.setImageResource(R.drawable.heart_noselected)
-                            imageView.tag = "like"
-                        }
-
-
+                    if (doc.containsKey(firebaseUser!!.uid)) {
+                        imageView.setImageResource(R.drawable.like)
+                        imageView.tag = "liked"
+                    } else {
+                        imageView.setImageResource(R.drawable.heart_noselected)
+                        imageView.tag = "like"
                     }
-
-
-                } else {
-                    Toast.makeText(mContext, "", Toast.LENGTH_SHORT).show()
                 }
 
 
+            } else {
+                Log.e("isLike_error", "")
             }
 
 
@@ -400,24 +395,19 @@ class PostsAdapters(
         publisher: TextView,
         userId: String
     ) {
-        firestore.collection("user").document(userId).addSnapshotListener { value, error ->
-            if (error != null) {
-                Toast.makeText(mContext, error.localizedMessage, Toast.LENGTH_SHORT).show()
-                return@addSnapshotListener
+        firestore.collection("user").document(userId).get().addOnSuccessListener { value ->
+            if (value != null && value.exists()) {
+                val imageUrl = value["image_url"] as String
+                val userName = value["username"] as String
+                Picasso.get().load(imageUrl).into(profil_image)
+                username.text = userName
+                publisher.text = userName
             } else {
-                if (value != null && value.exists()) {
-                    val imageUrl = value["image_url"] as String
-                    val userName = value["username"] as String
-                    Picasso.get().load(imageUrl).into(profil_image)
-                    username.text = userName
-                    publisher.text = userName
-                } else {
-                    Toast.makeText(mContext, "User not found", Toast.LENGTH_SHORT).show()
-                }
-
-
+                Toast.makeText(mContext, "User not found", Toast.LENGTH_SHORT).show()
             }
 
+        }.addOnFailureListener {
+            Log.e("publisher_Info", it.localizedMessage!!)
         }
 
     }
@@ -451,7 +441,7 @@ class PostsAdapters(
 }
 
 interface PostClickListener {
-    fun pImage_uNameClickListener(bundle: Bundle)
+    fun pImageuNameClickListener(bundle: Bundle)
 
     fun postOptionCLickListener(postId: String, view: View)
 

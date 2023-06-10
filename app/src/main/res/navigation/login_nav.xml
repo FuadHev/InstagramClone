@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.LoginFragment"
+        android:name="com.example.instagramclone.ui.view.login_singup.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
@@ -19,7 +19,7 @@
     </fragment>
     <fragment
         android:id="@+id/singupFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.SingupFragment"
+        android:name="com.example.instagramclone.ui.view.login_singup.SingupFragment"
         android:label="fragment_singup"
         tools:layout="@layout/fragment_singup" >
         <action
@@ -30,12 +30,12 @@
     </fragment>
     <fragment
         android:id="@+id/forgotPasswordFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.ForgotPasswordFragment"
+        android:name="com.example.instagramclone.ui.view.forgot_password.ForgotPasswordFragment"
         android:label="ForgotPasswordFragment"
         tools:layout="@layout/fragment_forgot_password"/>
     <fragment
         android:id="@+id/splashScreenFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.SplashScreenFragment"
+        android:name="com.example.instagramclone.ui.view.login_singup.SplashScreenFragment"
         android:label="SplashScreenFragment"
         tools:layout="@layout/fragment_splash_screen">
         <action

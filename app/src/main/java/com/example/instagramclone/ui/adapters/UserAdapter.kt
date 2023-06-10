@@ -10,6 +10,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
+import com.example.instagramclone.R
 import com.example.instagramclone.model.Users
 import com.example.instagramclone.databinding.UsersItemBinding
 import com.google.firebase.auth.ktx.auth
@@ -23,20 +24,20 @@ import com.squareup.picasso.Picasso
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
 class UserAdapter(
     var mContext: Context,
     private val clickListener: ClickListener,
-    var usersList:List<Users>
+    private var usersList:List<Users>
 ) :
     RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
     inner class ViewHolder(val view: UsersItemBinding) : RecyclerView.ViewHolder(view.root)
 
-
+    val auth = Firebase.auth
+    val firestore = Firebase.firestore
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         val view: UsersItemBinding = UsersItemBinding.inflate(layoutInflater, parent, false)
@@ -47,8 +48,6 @@ class UserAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val user = usersList[position]
         val v = holder.view
-        val auth = Firebase.auth
-        val firestore = Firebase.firestore
         v.follow.visibility = VISIBLE
         if (user.user_id == auth.currentUser!!.uid) {
             v.follow.visibility = GONE
@@ -68,77 +67,73 @@ class UserAdapter(
 
         }
         v.follow.setOnClickListener {
-
-            val following = hashMapOf<String, HashMap<String, Boolean>>()
-            val id = hashMapOf<String, Boolean>()
-            id[user.user_id] = true
-            following["following"] = id
-
-            val follower = hashMapOf<String, HashMap<String, Boolean>>()
-            val id2 = hashMapOf<String, Boolean>()
-            id2[auth.currentUser!!.uid] = true
-            follower["followers"] = id2
-            if (v.follow.text.toString().lowercase().trim() == "follow") {
-                firestore.collection("Follow").document(auth.currentUser!!.uid)
-                    .set(following, SetOptions.merge())
-                firestore.collection("Follow").document(user.user_id)
-                    .set(follower, SetOptions.merge())
-                if(user.user_id!=Firebase.auth.currentUser!!.uid){
-                    addNotification(user.user_id)
-                }
-                v.follow.text = "following"
-
-                getPlayerIdSendNotification(user.user_id)
-            } else {
-
-                firestore.collection("Follow").document(auth.currentUser!!.uid).update(
-                    "following.${user.user_id}",
-                    FieldValue.delete()
-                )
-                firestore.collection("Follow").document(user.user_id).update(
-                    "followers.${auth.currentUser!!.uid}",
-                    FieldValue.delete()
-                )
-                v.follow.text = "follow"
-            }
-
-
+            followClickListener(user,v.follow)
         }
 
 
     }
+    private fun followClickListener(user:Users,follow:Button){
+        val following = hashMapOf<String, HashMap<String, Boolean>>()
+        val id = hashMapOf<String, Boolean>()
+        id[user.user_id] = true
+        following["following"] = id
+
+        val follower = hashMapOf<String, HashMap<String, Boolean>>()
+        val id2 = hashMapOf<String, Boolean>()
+        id2[auth.currentUser!!.uid] = true
+        follower["followers"] = id2
+        if (follow.text.toString().lowercase().trim() == "follow") {
+            firestore.collection("Follow").document(auth.currentUser!!.uid)
+                .set(following, SetOptions.merge())
+            firestore.collection("Follow").document(user.user_id)
+                .set(follower, SetOptions.merge())
+            if(user.user_id!=Firebase.auth.currentUser!!.uid){
+                addNotification(user.user_id)
+            }
+            follow.setText(R.string.following)
+
+            getPlayerIdSendNotification(user.user_id)
+        } else {
+
+            firestore.collection("Follow").document(auth.currentUser!!.uid).update(
+                "following.${user.user_id}",
+                FieldValue.delete()
+            )
+            firestore.collection("Follow").document(user.user_id).update(
+                "followers.${auth.currentUser!!.uid}",
+                FieldValue.delete()
+            )
+            follow.setText(R.string.follow)
+        }
+    }
 
     private fun getPlayerIdSendNotification(userId: String) {
 
+        firestore.collection("user").document(Firebase.auth.currentUser!!.uid).get()
 
-        var username = ""
-        var profileImage=""
-        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
-            .addSnapshotListener { value, error ->
-                if (error != null) {
-
-                } else {
+            .addOnSuccessListener { value ->
                     if (value != null) {
-                        username = value.get("username") as String
-                        profileImage = value.get("image_url") as String
+                        val username = value.get("username") as String
+                        val profileImage = value.get("image_url") as String
+
+                        firestore.collection("user").document(userId)
+                            .get().addOnSuccessListener { userValue->
+                                if (userValue != null) {
+                                    val playerId = userValue.get("playerId") as String?
+                                    if (playerId != null) {
+                                        sentPushNotification(playerId, username,profileImage)
+                                    }
+
+                                }
+
+                            }
+
+
                     }
-                }
+
+
             }
-        Firebase.firestore.collection("user").document(userId).addSnapshotListener { value, error ->
-            if (error != null) {
-                error.localizedMessage?.let { Log.e("userError", it) }
 
-            } else {
-                if (value != null) {
-
-                    val playerId = value.get("playerId") as String?
-                    if (playerId != null) {
-                        sentPushNotification(playerId, username,profileImage)
-                    }
-
-                }
-            }
-        }
 
     }
 
@@ -211,7 +206,7 @@ class UserAdapter(
                         Log.e("", it)
                         return@addSnapshotListener
                     }
-                } else {
+                }
                     if (documentSnapshot != null && documentSnapshot.exists()) {
                         val follow = documentSnapshot.data
                         if (follow != null) {
@@ -219,9 +214,9 @@ class UserAdapter(
                                 val following = follow["following"] as HashMap<*, *>
 
                                 if (following.containsKey(userId)) {
-                                    button.text = "following"
+                                    button.setText(R.string.following)
                                 } else {
-                                    button.text = "follow"
+                                    button.setText(R.string.follow)
                                 }
 
 
@@ -232,7 +227,7 @@ class UserAdapter(
                     } else {
                         Log.e("", "")
                     }
-                }
+
             }
     }
 
@@ -242,6 +237,7 @@ class UserAdapter(
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateUsers(newList: List<Users>) {
         this.usersList = newList
         notifyDataSetChanged()

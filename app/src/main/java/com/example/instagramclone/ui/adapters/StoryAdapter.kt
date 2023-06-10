@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.instagramclone.R
 import com.example.instagramclone.ui.view.activity.StoryActivity
 import com.example.instagramclone.model.Story
 import com.example.instagramclone.databinding.StoryItemBinding
@@ -20,7 +21,7 @@ import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 
-class StoryAdapter(private val storyClickListener: StoryClickListener,val mContext: Context, private var storyList: List<Story>) :
+class StoryAdapter(private val storyClickListener: StoryClickListener,private val mContext: Context, private var storyList: List<Story>) :
     RecyclerView.Adapter<StoryAdapter.ViewHolder>() {
 
     inner class ViewHolder(val view: StoryItemBinding) :
@@ -84,7 +85,7 @@ class StoryAdapter(private val storyClickListener: StoryClickListener,val mConte
                     val imageurl = value.get("image_url") as String
                     if (position == 0) {
                         Picasso.get().load(imageurl).into(viewHoder.profilImage)
-                        viewHoder.username.text = "My story"
+                        viewHoder.username.setText(R.string.add_Story)
                         viewHoder.profilImage.borderWidth = 0
                     } else {
                         Picasso.get().load(imageurl).into(viewHoder.profilImage)
@@ -108,14 +109,17 @@ class StoryAdapter(private val storyClickListener: StoryClickListener,val mConte
                     var count = 0
                     if (value != null) {
                         try {
-                            val stories = value.data as HashMap<*, *>
-                            for (story in stories) {
-                                val storyinfo = story.value as HashMap<*, *>
-                                val timecurrent = System.currentTimeMillis()
-                                val timeStart = storyinfo["timeStart"] as Long
-                                val timeEnd = storyinfo["timeEnd"] as Long
-                                if (timecurrent in (timeStart + 1) until timeEnd) {
-                                    ++count
+                            val stories = value.data as? HashMap<*,*>
+                            if (stories != null) {
+                                for (story in stories) {
+                                    val storyinfo = story.value as HashMap<*, *>
+                                    val timecurrent = System.currentTimeMillis()
+                                    val timeStart = storyinfo["timeStart"] as Long
+                                    val timeEnd = storyinfo["timeEnd"] as Long
+                                    if (timecurrent in (timeStart + 1) until timeEnd) {
+                                        ++count
+
+                                    }
                                 }
                             }
                         } catch (_: NullPointerException) {
@@ -124,9 +128,10 @@ class StoryAdapter(private val storyClickListener: StoryClickListener,val mConte
 
                         if (click) {
 
+
                             if (count > 0) {
                                 val alert = AlertDialog.Builder(mContext)
-                                alert.setNegativeButton("view story") { d, i ->
+                                alert.setNegativeButton("view story") { d, _ ->
 
                                     val intent = Intent(mContext, StoryActivity::class.java)
                                     intent.putExtra("userId", Firebase.auth.currentUser!!.uid)
@@ -134,7 +139,7 @@ class StoryAdapter(private val storyClickListener: StoryClickListener,val mConte
                                     d.dismiss()
 
                                 }
-                                alert.setPositiveButton("add story") { d, i ->
+                                alert.setPositiveButton("add story") { d, _ ->
 
                                     storyClickListener.storyclickListener()
 
@@ -149,10 +154,11 @@ class StoryAdapter(private val storyClickListener: StoryClickListener,val mConte
 
 
                         } else {
+                            Log.e("storytime count++",count.toString())
                             if (count > 0) {
-                                textView.text = "My story"
+                                textView.setText(R.string.my_Story)
                             } else {
-                                textView.text = "Add story"
+                                textView.setText(R.string.add_Story)
                             }
                         }
 
@@ -179,17 +185,19 @@ class StoryAdapter(private val storyClickListener: StoryClickListener,val mConte
                 return@addSnapshotListener
             }
                 if (value != null && value.exists()) {
-                    val stories = value.data as HashMap<*, *>
+                    val stories = value.data as? HashMap<*,*>
                     try {
                         var i = true
-                        for (storykey in stories) {
-                            val story = storykey.value as HashMap<*, *>
-                            val timeend = story["timeEnd"] as Long
-                            val views = story["views"] as HashMap<*, *>
-                            if (views.containsKey(Firebase.auth.currentUser!!.uid) && System.currentTimeMillis() < timeend) {
-                                i = true
-                            } else if (System.currentTimeMillis() < timeend) {
-                                i = false
+                        if (stories != null) {
+                            for (storykey in stories) {
+                                val story = storykey.value as HashMap<*, *>
+                                val timeend = story["timeEnd"] as Long
+                                val views = story["views"] as HashMap<*, *>
+                                if (views.containsKey(Firebase.auth.currentUser!!.uid) && System.currentTimeMillis() < timeend) {
+                                    i = true
+                                } else if (System.currentTimeMillis() < timeend) {
+                                    i = false
+                                }
                             }
                         }
                         if (i) {
@@ -200,6 +208,7 @@ class StoryAdapter(private val storyClickListener: StoryClickListener,val mConte
 
 
                     } catch (e: java.lang.NullPointerException) {
+                        Log.e("story_error",e.localizedMessage!!)
 
 
                     }

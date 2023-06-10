@@ -6,7 +6,7 @@
     <data>
         <variable
             name="addStoryFragment"
-            type="com.example.instagramclone.ui.view.fragments.AddStoryFragment" />
+            type="com.example.instagramclone.ui.view.add_post_story.AddStoryFragment" />
 
     </data>
 
@@ -15,7 +15,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.view.fragments.AddStoryFragment">
+        tools:context=".ui.view.add_post_story.AddStoryFragment">
 
         <ImageView
             android:id="@+id/imageView"

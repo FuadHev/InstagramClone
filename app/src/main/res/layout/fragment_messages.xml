@@ -12,14 +12,14 @@
             type="String" />
         <variable
             name="messagesFragment"
-            type="com.example.instagramclone.ui.view.fragments.MessagesFragment" />
+            type="com.example.instagramclone.ui.view.messages_view.MessagesFragment" />
 
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.view.fragments.MessagesFragment">
+        tools:context=".ui.view.messages_view.MessagesFragment">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar6"

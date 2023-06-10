@@ -17,4 +17,19 @@
     <string name="logout">Logout</string>
     <string name="sing_in">Sing in</string>
     <string name="follow_other_user">Follow other users and see what they post</string>
+    <string name="my_Story">My story</string>
+    <string name="add_Story">Add story</string>
+    <string name="delete_post_txt">Delete this post?</string>
+    <string name="view_all_comments">View all %s comments</string>
+    <string name="likes_count">%s likes</string>
+    <string name="follow">follow</string>
+    <string name="following">following</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="email">Email</string>
+    <string name="edit_profile_username">Username</string>
+    <string name="edit_profile_biography">Biography</string>
+    <string name="change_profile_photo">Change profile photo</string>
+    <string name="instalife">InstaLife</string>
+
 </resources>

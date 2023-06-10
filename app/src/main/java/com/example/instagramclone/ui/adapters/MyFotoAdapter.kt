@@ -1,5 +1,6 @@
 package com.example.instagramclone.ui.adapters
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
@@ -14,9 +15,7 @@ import com.squareup.picasso.Picasso
 class MyFotoAdapter(private val postClickListener: MyPostCLickListener,private var postList:List<Posts>):RecyclerView.Adapter<MyFotoAdapter.CardViewHolder>() {
 
 
-    inner class CardViewHolder(val view: FotosItemBinding) : RecyclerView.ViewHolder(view.root){
-
-    }
+    inner class CardViewHolder(val view: FotosItemBinding) : RecyclerView.ViewHolder(view.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
 
@@ -51,6 +50,7 @@ class MyFotoAdapter(private val postClickListener: MyPostCLickListener,private v
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateMyPosts(newPostList:List<Posts>){
         this.postList=newPostList
         notifyDataSetChanged()

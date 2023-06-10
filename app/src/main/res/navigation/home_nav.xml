@@ -7,7 +7,7 @@
     app:startDestination="@id/homeFragment">
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.HomeFragment"
+        android:name="com.example.instagramclone.ui.view.home.HomeFragment"
         android:label="HomeFragment"
         tools:layout="@layout/fragment_home">
         <action
@@ -22,7 +22,7 @@
     </fragment>
     <fragment
         android:id="@+id/searctoFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.SearchFragment"
+        android:name="com.example.instagramclone.ui.view.search_view.SearchFragment"
         android:label="SearchFragment"
         tools:layout="@layout/fragment_search">
         <action
@@ -34,12 +34,12 @@
     </fragment>
     <fragment
         android:id="@+id/heartFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.HeartFragment"
+        android:name="com.example.instagramclone.ui.view.notification_view.HeartFragment"
         android:label="HeartFragment"
         tools:layout="@layout/fragment_heart"/>
     <fragment
-        android:id="@+id/profileFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.ProfileFragment"
+        android:id="@+id/profilefragment"
+        android:name="com.example.instagramclone.ui.view.profile_view.ProfileFragment"
         android:label="ProfileFragment"
         tools:layout="@layout/fragment_profile">
         <action
@@ -57,7 +57,7 @@
     </fragment>
     <fragment
         android:id="@+id/addPostFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.AddPostFragment"
+        android:name="com.example.instagramclone.ui.view.add_post_story.AddPostFragment"
         android:label="AddPostFragment"
         tools:layout="@layout/fragment_add_post">
         <action
@@ -68,7 +68,7 @@
     </fragment>
     <fragment
         android:id="@+id/profileDetailFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.ProfileDetailFragment"
+        android:name="com.example.instagramclone.ui.view.profile_view.ProfileDetailFragment"
         android:label="ProfileDetailFragment"
         tools:layout="@layout/fragment_profile_detail">
         <argument
@@ -77,31 +77,31 @@
             android:defaultValue="0" />
         <action
             android:id="@+id/action_profileDetailFragment_to_profileFragment"
-            app:destination="@id/profileFragment" />
+            app:destination="@id/profilefragment" />
         <action
             android:id="@+id/action_profileDetailFragment_to_commentsFragment"
             app:destination="@id/commentsFragment" />
     </fragment>
     <fragment
         android:id="@+id/editProfileFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.EditProfileFragment"
+        android:name="com.example.instagramclone.ui.view.edit_profie.EditProfileFragment"
         android:label="EditProfileFragment"
         tools:layout="@layout/fragment_edit_profile"/>
     <fragment
         android:id="@+id/followersFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.FollowersFragment"
+        android:name="com.example.instagramclone.ui.view.followers_view.FollowersFragment"
         android:label="FollowersFragment"
         tools:layout="@layout/fragment_followers">
 
 
         <action
             android:id="@+id/action_followersFragment_to_profileFragment"
-            app:destination="@id/profileFragment" />
+            app:destination="@id/profilefragment" />
     </fragment>
     <include app:graph="@navigation/search_nav" />
     <fragment
         android:id="@+id/action_chatsFragment_to_messagesFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.MessagesFragment"
+        android:name="com.example.instagramclone.ui.view.messages_view.MessagesFragment"
         android:label="fragment_messages"
         tools:layout="@layout/fragment_messages" >
         <argument
@@ -110,7 +110,7 @@
     </fragment>
     <fragment
         android:id="@+id/commentsFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.CommentsFragment"
+        android:name="com.example.instagramclone.ui.view.comments_view.CommentsFragment"
         android:label="CommentsFragment"
         tools:layout="@layout/fragment_comments">
         <argument
@@ -122,7 +122,7 @@
     </fragment>
     <fragment
         android:id="@+id/discoverPostsFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.DiscoverPostsFragment"
+        android:name="com.example.instagramclone.ui.view.discover_posts.DiscoverPostsFragment"
         android:label="DiscoverPostsFragment"
         tools:layout="@layout/fragment_discover_posts">
         <argument
@@ -131,10 +131,13 @@
         <action
             android:id="@+id/action_discoverPostsFragment_to_commentsFragment"
             app:destination="@id/commentsFragment" />
+        <action
+            android:id="@+id/action_discoverPostsFragment_to_search_nav"
+            app:destination="@id/search_nav" />
     </fragment>
     <fragment
         android:id="@+id/addStoryFragment"
-        android:name="com.example.instagramclone.ui.view.fragments.AddStoryFragment"
+        android:name="com.example.instagramclone.ui.view.add_post_story.AddStoryFragment"
         android:label="AddStoryFragment"
         tools:layout="@layout/fragment_add_story"/>
 </navigation>

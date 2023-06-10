@@ -6,7 +6,7 @@
     <data>
         <variable
             name="commentsFragment"
-            type="com.example.instagramclone.ui.view.fragments.CommentsFragment" />
+            type="com.example.instagramclone.ui.view.comments_view.CommentsFragment" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

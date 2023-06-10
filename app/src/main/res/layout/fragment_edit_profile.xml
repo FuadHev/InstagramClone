@@ -6,14 +6,14 @@
     <data>
         <variable
             name="editProfileFragment"
-            type="com.example.instagramclone.ui.view.fragments.EditProfileFragment" />
+            type="com.example.instagramclone.ui.view.edit_profie.EditProfileFragment" />
 
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.view.fragments.EditProfileFragment">
+        tools:context=".ui.view.edit_profie.EditProfileFragment">
 
 
         <androidx.appcompat.widget.Toolbar
@@ -44,8 +44,8 @@
                     android:textColor="@color/black"
                     android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:layout_editor_absoluteX="44dp" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/save"
@@ -78,42 +78,76 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar3" />
 
-        <EditText
-            android:id="@+id/username"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="36dp"
-            android:ems="10"
-            android:hint="Username"
-            android:inputType="textPersonName"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.502"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/changeProfilPhoto" />
 
-        <EditText
-            android:id="@+id/bio"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:ems="10"
-            android:hint="Bio"
-            android:imeOptions="actionNext"
-            android:inputType="textMultiLine"
-            android:maxLength="100"
-            android:scrollbars="vertical"
-            android:scrollHorizontally="false"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical"
+            android:padding="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.502"
+            app:layout_constraintVertical_bias="0.1"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/username" />
+            app:layout_constraintTop_toBottomOf="@+id/changeProfilPhoto">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_profile_username"
+                android:gravity="center"
+                android:textSize="25sp" />
+
+            <EditText
+                android:id="@+id/username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:layout_gravity="center"
+                android:hint="Username"
+                android:layout_marginTop="10dp"
+                android:inputType="textPersonName"
+                android:textSize="20sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.502"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/changeProfilPhoto" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_profile_biography"
+                android:gravity="center"
+                android:layout_marginTop="10dp"
+                android:textSize="25sp" />
+
+            <EditText
+                android:id="@+id/bio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Bio"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:imeOptions="actionNext"
+                android:inputType="textMultiLine"
+                android:maxLength="100"
+                android:scrollbars="vertical"
+                android:scrollHorizontally="false"
+                android:textSize="20sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.502"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/username" />
+        </LinearLayout>
+
 
         <TextView
             android:id="@+id/changeProfilPhoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Change profile photo"
+            android:text="@string/change_profile_photo"
             android:textSize="18sp"
             android:onClick="@{()->editProfileFragment.selectImage(changeProfilPhoto)}"
             android:textColor="@color/purple_500"

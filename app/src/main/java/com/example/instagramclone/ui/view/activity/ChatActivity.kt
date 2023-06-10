@@ -12,7 +12,6 @@ import com.google.firebase.ktx.Firebase
 
 class ChatActivity : AppCompatActivity() {
     private lateinit var binding:ActivityChatBinding
-
     ////36562127-4f41522f3d336a3fe6b64a038
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,9 +23,9 @@ class ChatActivity : AppCompatActivity() {
         Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
             .update("online", true)
     }
-    override fun onStop() {
-        super.onStop()
-        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
-            .update("online", false)
-    }
+//    override fun onStop() {
+//        super.onStop()
+//        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
+//            .update("online", false)
+//    }
 }
