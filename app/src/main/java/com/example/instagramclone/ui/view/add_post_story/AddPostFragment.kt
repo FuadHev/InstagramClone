@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
 import com.example.instagramclone.R
 
@@ -49,7 +50,7 @@ class AddPostFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentAddPostBinding.inflate(inflater, container, false)
+        binding = DataBindingUtil.inflate(inflater,R.layout.fragment_add_post, container, false)
         // Inflate the layout for this fragment
         val view = binding.root
         auth = Firebase.auth
@@ -69,9 +70,7 @@ class AddPostFragment : Fragment() {
         }
 
         binding.sharePost.setOnClickListener {
-
             upload()
-
         }
 
         return view

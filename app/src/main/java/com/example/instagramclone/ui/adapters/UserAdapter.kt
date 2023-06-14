@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.instagramclone.R
 import com.example.instagramclone.model.Users
 import com.example.instagramclone.databinding.UsersItemBinding
+import com.example.instagramclone.utils.Constant
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
@@ -153,7 +154,7 @@ class UserAdapter(
 
             val notificationContent = JSONObject(
                 """{
-        "app_id": "9b3b9701-9264-41ef-b08c-1c69f1fabfef", 
+        "app_id": "${Constant.APP_ID}", 
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
         "contents": {"en": "started following you"},
@@ -161,7 +162,6 @@ class UserAdapter(
     }"""
             )
             OneSignal.postNotification(notificationContent, null)
-
 
         } catch (e: JSONException) {
             e.printStackTrace()

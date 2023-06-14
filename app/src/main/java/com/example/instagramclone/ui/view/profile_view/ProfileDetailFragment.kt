@@ -63,7 +63,6 @@ class ProfileDetailFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_profile_detail, container, false)
-
         return binding.root
     }
 
@@ -108,10 +107,9 @@ class ProfileDetailFragment : Fragment() {
         binding.postsRv.setHasFixedSize(true)
         val layoutManager = LinearLayoutManager(requireContext())
         binding.postsRv.layoutManager = layoutManager
-
+        binding.postsRv.adapter = adapter
         postlist?.let { adapter.updatePosts(postlist) }
         Handler(Looper.getMainLooper()).postDelayed({
-            binding.postsRv.adapter = adapter
             layoutManager.scrollToPositionWithOffset(position, 0)
         },300)
 

@@ -1,6 +1,5 @@
 package com.example.instagramclone.ui.view.activity
 
-import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.instagramclone.databinding.ActivityMainBinding
@@ -22,5 +21,6 @@ class MainActivity : AppCompatActivity() {
         // promptForPushNotifications will show the native Android notification permission prompt.
         // We recommend removing the following code and instead using an In-App Message to prompt for notification permission (See step 7)
         OneSignal.promptForPushNotifications();
+
     }
 }

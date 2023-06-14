@@ -17,10 +17,8 @@ class CommentsViewModel:ViewModel() {
 
 
     fun allUsers(publishersIds:List<String>) {
-        firestore.collection("user").addSnapshotListener { value, error ->
-            if (error != null) {
-                error.localizedMessage?.let { Log.e("error", it) }
-            } else {
+        firestore.collection("user").get().addOnSuccessListener { value ->
+
                 if (value != null) {
                     val allPublisherList=ArrayList<Users>()
                     for (users in value.documents) {
@@ -28,13 +26,13 @@ class CommentsViewModel:ViewModel() {
                             val userid = users.get("user_id") as String
                             val username = users.get("username") as String
                             val imageurl = users.get("image_url") as String
-                            val user = Users(userid, "", username, "", imageurl, "")
+                            val user = Users(userid, "", username, "",imageurl, "")
                             allPublisherList.add(user)
                         }
                     }
                     publisherInfoLiveData.postValue(allPublisherList)
                 }
-            }
+
         }
 
     }
@@ -43,25 +41,28 @@ class CommentsViewModel:ViewModel() {
         firestore.collection("Comments").document(postId).addSnapshotListener { value, error ->
             if (error != null) {
 
-            } else {
+                Log.e("comment", "readComment_error")
+                return@addSnapshotListener
+            }
                 if (value != null && value.exists()) {
-                    val doc = value.data as HashMap<*,*>
+                    val doc = value.data as? HashMap<*,*>
                     try {
-
                         val publisherIdList=ArrayList<String>()
                         val commentList=ArrayList<Comment>()
-                        for (i in doc) {
-                            val com = i.value as HashMap<*, *>
-                            val comm = com["comment"] as String
-                            val publisher = com["publisher"] as String
-                            val time = com["time"] as Timestamp
-                            val comment = Comment(comm, publisher, time)
-                            publisherIdList.add(publisher)
-                            commentList.add(comment)
+                        if (doc != null) {
+                            for (i in doc) {
+                                val com = i.value as HashMap<*, *>
+                                val comm = com["comment"] as String
+                                val publisher = com["publisher"] as String
+                                val commentId = com["comment_id"] as String
+                                val time = com["time"] as Timestamp
 
+                                val comment = Comment(comm,publisher,postId,commentId,time)
+                                publisherIdList.add(publisher)
+                                commentList.add(comment)
+
+                            }
                         }
-
-
                         allUsers(publisherIdList)
                         commentList.sortByDescending {
                             it.time
@@ -69,6 +70,7 @@ class CommentsViewModel:ViewModel() {
                         commentsList.postValue(commentList)
 
                     } catch (e: java.lang.NullPointerException) {
+                        Log.e("comment", "readComment_error")
 
 
                     }
@@ -76,7 +78,7 @@ class CommentsViewModel:ViewModel() {
 
                 }
 
-            }
+
 
         }
 

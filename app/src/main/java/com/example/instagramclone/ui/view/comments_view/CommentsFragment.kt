@@ -1,6 +1,8 @@
 package com.example.instagramclone.ui.view.comments_view
 
+import android.app.Dialog
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,11 +16,14 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
 import com.example.instagramclone.base.BaseFragment
+import com.example.instagramclone.databinding.DeleteMessageDialogBinding
 import com.example.instagramclone.databinding.FragmentCommentsBinding
 import com.example.instagramclone.ui.adapters.CommentAdapter
+import com.example.instagramclone.ui.adapters.CommentClickListener
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -34,7 +39,7 @@ import kotlin.random.Random
 class CommentsFragment : BaseFragment() {
 
 
-    private lateinit var binding:FragmentCommentsBinding
+    private lateinit var binding: FragmentCommentsBinding
     private lateinit var postId: String
     private lateinit var publisherId: String
     private lateinit var firebaseUser: FirebaseUser
@@ -42,14 +47,21 @@ class CommentsFragment : BaseFragment() {
     private val viewModel by viewModels<CommentsViewModel>()
     private val args by navArgs<CommentsFragmentArgs>()
     private val adapter by lazy {
-        CommentAdapter(requireActivity(), emptyList(), emptyList())
+        CommentAdapter(object : CommentClickListener {
+            override fun commentLongClickListener(postId: String, commentId: String) {
+                showDeletePostDialog(postId,commentId)
+            }
+
+
+        }, requireActivity(), emptyList(), emptyList())
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
 
-        binding=DataBindingUtil.inflate(inflater,R.layout.fragment_comments, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_comments, container, false)
         // Inflate the layout for this fragment
         return binding.root
     }
@@ -58,35 +70,53 @@ class CommentsFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         firebaseUser = Firebase.auth.currentUser!!
-        binding.commentsFragment=this
+        binding.commentsFragment = this
         binding.toolbar.title = "Comments"
-
-
         (activity as AppCompatActivity).setSupportActionBar(binding.toolbar)
+
         binding.toolbar.setTitleTextColor(Color.BLACK)
         firestore = Firebase.firestore
 
-        val arg=args
-
+        val arg = args
         postId = arg.postId
         publisherId = arg.publisherId
+
+
 
         binding.commentsRv.setHasFixedSize(true)
         binding.commentsRv.layoutManager = LinearLayoutManager(requireActivity())
         binding.commentsRv.adapter = adapter
 
-
-//        binding.post.setOnClickListener {
-//            sendComment()
-//        }
-
         getImage()
         viewModel.readComment(postId)
     }
 
+    private fun showDeletePostDialog(postId: String,commentId:String){
+        val dialogBinding= DeleteMessageDialogBinding.inflate(layoutInflater)
+        val mDialog= Dialog(requireContext())
+        mDialog.setContentView(dialogBinding.root)
+        mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialogBinding.dInfo.setText(R.string.delete_post_comment)
+
+        dialogBinding.yes.setOnClickListener {
+            firestore.collection("Comments").document(postId).update(commentId,FieldValue.delete())
+
+            mDialog.dismiss()
+        }
+
+        dialogBinding.no.setOnClickListener {
+
+            mDialog.dismiss()
+        }
+
+        mDialog.create()
+        mDialog.show()
+
+    }
 
 
-    fun sendComment(){
+
+    fun sendComment() {
         val comment = binding.addToComment
         if (comment.text.trim().toString() == "") {
             Toast.makeText(requireContext(), "Please add the comment", Toast.LENGTH_SHORT).show()
@@ -94,8 +124,9 @@ class CommentsFragment : BaseFragment() {
 
         } else {
             addComment()
+            comment.text.clear()
         }
-        comment.text.clear()
+
 
     }
 
@@ -105,9 +136,10 @@ class CommentsFragment : BaseFragment() {
         firestore.collection("user").document(firebaseUser.uid).get()
 
             .addOnSuccessListener { value ->
-                    if (value != null) {
-                        username = value.get("username") as String
-                        firestore.collection("user").document(postPublisher).get().addOnSuccessListener { uservalue ->
+                if (value != null) {
+                    username = value.get("username") as String
+                    firestore.collection("user").document(postPublisher).get()
+                        .addOnSuccessListener { uservalue ->
                             if (uservalue != null) {
                                 val playerId = uservalue.get("playerId") as String?
                                 if (playerId != null && postPublisher != firebaseUser.uid) {
@@ -115,9 +147,9 @@ class CommentsFragment : BaseFragment() {
                                 }
                             }
                         }.addOnFailureListener {
-                            it.localizedMessage?.let { message -> Log.e("User_Notification", message) }
-                        }
+                        it.localizedMessage?.let { message -> Log.e("User_Notification", message) }
                     }
+                }
             }
 
 
@@ -165,7 +197,7 @@ class CommentsFragment : BaseFragment() {
 
     private fun addComment() {
 
-        val randomValue = (20..28).random()
+        val randomValue = (20..40).random()
         val commentId =
             randomAlphaNumericString(randomValue)//UUID.randomUUID().toString() ile evez ede bilerem baxacam axirda.
         val time = Timestamp.now()
@@ -174,6 +206,7 @@ class CommentsFragment : BaseFragment() {
         val hmap = HashMap<String, Any>()
         hmap["comment"] = binding.addToComment.text.toString()
         hmap["publisher"] = firebaseUser.uid
+        hmap["comment_id"]=commentId
         hmap["time"] = time
         hmapkey[commentId] = hmap
         reference.set(hmapkey, SetOptions.merge())
@@ -198,7 +231,7 @@ class CommentsFragment : BaseFragment() {
     }
 
 
-    fun randomAlphaNumericString(length: Int): String {
+    private fun randomAlphaNumericString(length: Int): String {
         val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
         return (1..length)
             .map { Random.nextInt(0, charPool.size) }
@@ -211,7 +244,7 @@ class CommentsFragment : BaseFragment() {
             adapter.updateElements(it)
         }
 
-        viewModel.publisherInfoLiveData.observe(viewLifecycleOwner){
+        viewModel.publisherInfoLiveData.observe(viewLifecycleOwner) {
             adapter.updatePublisher(it)
         }
     }

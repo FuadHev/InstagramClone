@@ -1,6 +1,6 @@
 package com.example.instagramclone.ui.view.activity
 
-import android.opengl.Visibility
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.View.GONE
@@ -9,12 +9,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
+import com.example.instagramclone.receivers.NetworkChangeReceiver
 import com.example.instagramclone.R
 import com.example.instagramclone.databinding.ActivityHomeBinding
 import com.example.instagramclone.utils.Constant
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.onesignal.OneSignal
@@ -26,18 +28,22 @@ class HomeActivity : AppCompatActivity() {
 
     private val ONESIGNAL_APP_ID = Constant.APP_ID
     private lateinit var firebaseUser: FirebaseUser
+    private lateinit var firestore:FirebaseFirestore
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        firebaseUser = Firebase.auth.currentUser!!
+        setFirebaseUtils()
         setBottomNavBar()
         setOnesingnal()
         setPlayerId()
-        Firebase.firestore.collection("user").document(firebaseUser.uid).update("online", true)
-
+        firestore.collection("user").document(firebaseUser.uid).update("online", true)
         notifiCount()
+    }
+    private fun setFirebaseUtils(){
+        firestore=Firebase.firestore
+        firebaseUser = Firebase.auth.currentUser!!
     }
 
     private fun setOnesingnal() {
@@ -46,14 +52,15 @@ class HomeActivity : AppCompatActivity() {
 
         val isOneSignalInitialized = OneSignal.getDeviceState() != null
         if (isOneSignalInitialized) {
-            // OneSignal zaten başarıyla başlatıldıysa burada gerekli işlemleri yapabilirsiniz
             OneSignal.promptForPushNotifications()
         } else {
-            // OneSignal henüz başlatılmadıysa init işlemini gerçekleştirin
             OneSignal.initWithContext(this)
             OneSignal.setAppId(ONESIGNAL_APP_ID)
             OneSignal.promptForPushNotifications()
         }
+        val intentFilter= IntentFilter()
+        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE")
+        registerReceiver(NetworkChangeReceiver(),intentFilter)
 
 
 //        OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE)
@@ -66,7 +73,7 @@ class HomeActivity : AppCompatActivity() {
         val deviceState = OneSignal.getDeviceState()
         val userId = deviceState?.userId
         if (userId != null) {
-            Firebase.firestore.collection("user").document(firebaseUser.uid)
+            firestore.collection("user").document(firebaseUser.uid)
                 .update("playerId", userId)
         }
 
@@ -83,7 +90,7 @@ class HomeActivity : AppCompatActivity() {
                     val badge = binding.bottomNav.getBadge(R.id.heartFragment)
                     badge?.isVisible = false
                     if (badge?.number != null && badge.number > 0) {
-                        Firebase.firestore.collection("NotificationCount")
+                        firestore.collection("NotificationCount")
                             .document(Firebase.auth.currentUser!!.uid).update(
                                 "isawnotification",
                                 FieldValue.increment(badge.number.toLong())
@@ -104,19 +111,21 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onRestart() {
         super.onRestart()
-        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
+        firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
             .update("online", true)
     }
 
     override fun onStop() {
         super.onStop()
-        Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
+        firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
             .update("online", false)
     }
 
+//
+
     fun notifiCount() {
         var nshow = 0
-        val ref = Firebase.firestore.collection("NotificationCount")
+        val ref = firestore.collection("NotificationCount")
             .document(Firebase.auth.currentUser!!.uid)
         // Bu hisseni axirda silmeliyem. Singupda yazilib.// evvel notification bolmesi yoxuydu deye diger userlerde bu yoxdu
 //        val hmap = hashMapOf<String, Any>("isawnotification" to 0)
@@ -138,10 +147,11 @@ class HomeActivity : AppCompatActivity() {
             }
 
         }
-        Firebase.firestore.collection("Notification").document(Firebase.auth.currentUser!!.uid)
+        //viewmodel yaratmagin menasi yoxuydu deye bele saxladim
+        firestore.collection("Notification").document(Firebase.auth.currentUser!!.uid)
             .addSnapshotListener { value, error ->
                 if (error != null) {
-                    Toast.makeText(this, error.localizedMessage, Toast.LENGTH_SHORT).show()
+                    error.localizedMessage?.let { Log.e("Notification_error", it) }
                     return@addSnapshotListener
                 }
                 try {
@@ -158,7 +168,6 @@ class HomeActivity : AppCompatActivity() {
                     }
                 } catch (e: NullPointerException) {
                     Toast.makeText(this, e.localizedMessage, Toast.LENGTH_SHORT).show()
-
                 }
 
             }

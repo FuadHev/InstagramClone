@@ -79,7 +79,6 @@ class HomeFragment : BaseFragment() {
             override fun storyclickListener() {
                 findNavController().navigate(R.id.action_homeFragment_to_addStoryFragment)
             }
-
         }, requireContext(), emptyList())
     }
 
@@ -104,7 +103,6 @@ class HomeFragment : BaseFragment() {
             Handler(Looper.getMainLooper()).postDelayed({
                 binding.swipeRefresh.isRefreshing = false
             }, 1000)
-
         }
 
     }
@@ -184,9 +182,7 @@ class HomeFragment : BaseFragment() {
             }
             mDialog.dismiss()
         }
-
         dialogBinding.no.setOnClickListener {
-
             mDialog.dismiss()
         }
 

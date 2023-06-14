@@ -20,6 +20,7 @@
     <string name="my_Story">My story</string>
     <string name="add_Story">Add story</string>
     <string name="delete_post_txt">Delete this post?</string>
+    <string name="delete_post_comment">Delete this comment?</string>
     <string name="view_all_comments">View all %s comments</string>
     <string name="likes_count">%s likes</string>
     <string name="follow">follow</string>

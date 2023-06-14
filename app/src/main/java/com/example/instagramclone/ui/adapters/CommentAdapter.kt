@@ -2,6 +2,7 @@ package com.example.instagramclone.ui.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -9,20 +10,24 @@ import com.example.instagramclone.model.Comment
 import com.example.instagramclone.model.Users
 import com.example.instagramclone.databinding.CommentItemBinding
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.squareup.picasso.Picasso
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.log
 
-class CommentAdapter(
+class CommentAdapter(private val commentClickListener: CommentClickListener,
     private val mContext: Context,
     private var commentlist: List<Comment>,
     var allPublisherList:List<Users>
 ) :
     RecyclerView.Adapter<CommentAdapter.ViewHolder>() {
 
-    private lateinit var firbaseUser: FirebaseUser
-    private var firestore = Firebase.firestore
+
 
     inner class ViewHolder(val view: CommentItemBinding) : RecyclerView.ViewHolder(view.root)
 
@@ -38,6 +43,7 @@ class CommentAdapter(
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateElements(newCommentList: ArrayList<Comment>) {
         this.commentlist = newCommentList
         notifyDataSetChanged()
@@ -46,6 +52,7 @@ class CommentAdapter(
 //        val difference=DiffUtil.calculateDiff(callBack)
 //        difference.dispatchUpdatesTo(this)
     }
+    @SuppressLint("NotifyDataSetChanged")
     fun updatePublisher(newPublisherList:List<Users>){
         this.allPublisherList=newPublisherList
         notifyDataSetChanged()
@@ -58,6 +65,15 @@ class CommentAdapter(
         val user=allPublisherList.find {
             it.user_id==comment.publiser
         }
+
+        b.commentCard.setOnLongClickListener{
+            if (comment.publiser==Firebase.auth.currentUser!!.uid){
+                commentClickListener.commentLongClickListener(comment.postId, comment.commentId)
+            }
+            true
+        }
+
+
         Picasso.get().load(user?.imageurl).into(b.imageProfile)
         b.username.text=user?.username
         b.comment.text = comment.comment
@@ -66,7 +82,7 @@ class CommentAdapter(
     }
 
 
-
-
-
+}
+interface CommentClickListener{
+    fun commentLongClickListener(postId:String,commentId:String)
 }

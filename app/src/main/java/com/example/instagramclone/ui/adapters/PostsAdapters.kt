@@ -29,7 +29,9 @@ import com.onesignal.OneSignal
 import com.squareup.picasso.Picasso
 import org.json.JSONException
 import org.json.JSONObject
-import java.util.UUID
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.HashMap
 
 class PostsAdapters(
     private val postclickListener: PostClickListener,
@@ -79,6 +81,11 @@ class PostsAdapters(
         getComments(post.post_id, b.comments)
         isSaved(post.post_id, b.save)
 
+        val timestamp = post.time // Firestore'dan aldığınız timestamp
+        val date = timestamp.toDate()
+        val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.US)
+        val formattedDate: String = dateFormat.format(date)
+        b.time.text=formattedDate
 
         b.postOption.setOnClickListener {
             postclickListener.postOptionCLickListener(post.post_id, it)

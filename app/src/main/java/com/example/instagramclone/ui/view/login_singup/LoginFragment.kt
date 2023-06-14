@@ -55,7 +55,6 @@ class LoginFragment : Fragment() {
 
     fun singIn(email: String, password: String) {
 
-
         if (email.trim() == "" || password.trim() == "") {
             Toast.makeText(requireContext(), "Enter Email and Password", Toast.LENGTH_SHORT).show()
         } else {
@@ -76,13 +75,10 @@ class LoginFragment : Fragment() {
                 Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
 
             }
-
-
         }
 
 
     }
-
     fun singUp() {
        findNavController().navigate(LoginFragmentDirections.goToSingUp())
     }

@@ -70,11 +70,10 @@ class SingupFragment : Fragment() {
             // gorulen notification sayi  ucun data yaradir
             val hmap = hashMapOf<String, Any>("isawnotification" to 0)
             ref.set(hmap)
-            // follow documenti yaradilir
+            // follow documenti yaradilir null olmamalidi.
             val refFollow=firestore.collection("Follow").document(auth.currentUser!!.uid)
             refFollow.set({})
             refFollow.update("arity", FieldValue.delete())
-
             // user collectionunda melumatlari yaradiram
             val userMap = hashMapOf<String, Any>()
             userMap["user_id"] = auth.currentUser!!.uid

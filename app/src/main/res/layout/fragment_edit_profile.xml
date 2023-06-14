@@ -96,6 +96,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/edit_profile_username"
                 android:gravity="center"
+                android:textColor="@color/black"
                 android:textSize="25sp" />
 
             <EditText
@@ -118,6 +119,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/edit_profile_biography"
                 android:gravity="center"
+                android:textColor="@color/black"
                 android:layout_marginTop="10dp"
                 android:textSize="25sp" />
 
@@ -131,7 +133,7 @@
                 android:layout_marginTop="10dp"
                 android:imeOptions="actionNext"
                 android:inputType="textMultiLine"
-                android:maxLength="100"
+                android:maxLength="50"
                 android:scrollbars="vertical"
                 android:scrollHorizontally="false"
                 android:textSize="20sp"

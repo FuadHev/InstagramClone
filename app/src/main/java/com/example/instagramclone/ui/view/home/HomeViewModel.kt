@@ -157,13 +157,15 @@ class HomeViewModel : ViewModel() {
                                     }
                                     ustory = Story(imageurl, timestart, timeend, storyId, userId)
                                 }
+
+                            }
+                            if (countStory > 0) {
+                                if (ustory != null) {
+                                    storyList.add(ustory)
+                                }
                             }
                         }
-                        if (countStory > 0) {
-                            if (ustory != null) {
-                                storyList.add(ustory)
-                            }
-                        }
+
                     }
                 }
                 storyList.sortedByDescending {

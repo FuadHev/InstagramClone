@@ -10,6 +10,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.base.BaseFragment
@@ -45,7 +46,7 @@ class ChatsFragment : BaseFragment() {
 
         }, emptyList())
     }
-    private val viewModel by activityViewModels<ChatsViewModel>()
+    private val viewModel by viewModels<ChatsViewModel>()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -94,12 +95,10 @@ class ChatsFragment : BaseFragment() {
         firestore = Firebase.firestore
         auth = Firebase.auth
 
-
         Handler(Looper.getMainLooper()).postDelayed({
             Firebase.firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
                 .update("online", true)
         }, 1000)
-
 
         binding.chatRv.layoutManager = LinearLayoutManager(requireActivity())
         binding.chatRv.adapter = adapter

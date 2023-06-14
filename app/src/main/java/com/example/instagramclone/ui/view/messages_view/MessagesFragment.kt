@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.instagramclone.R
@@ -42,7 +43,7 @@ class MessagesFragment : BaseFragment() {
     var senderRoom: String? = null
     var receiverRoom: String? = null
     private lateinit var firestore: FirebaseFirestore
-    private val viewModel by activityViewModels<MessagesViewModel>()
+    private val viewModel by viewModels<MessagesViewModel>()
     private val messageAdapter by lazy {
         MessaggeAdapter(object : MessageClickListener {
             override fun messageClickListener(senderId: String, messageId: String) {

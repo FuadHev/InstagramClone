@@ -62,10 +62,10 @@ class AddStoryFragment : Fragment() {
 
 
     fun upload() {
-
         val progress = ProgressDialog( requireActivity())
         progress.setMessage("Please wait adding the post")
         progress.show()
+
         val uuid = UUID.randomUUID()
         val imageName = "$uuid.jpg"
 
@@ -75,8 +75,8 @@ class AddStoryFragment : Fragment() {
         if (selectPicture != null) {
             imageReference.putFile(selectPicture!!).addOnSuccessListener {
                 val uploadPictureReference = storage.reference.child("story").child(imageName)
-                uploadPictureReference.downloadUrl.addOnSuccessListener {
-                    val downloadUrl = it.toString()
+                uploadPictureReference.downloadUrl.addOnSuccessListener { imgUrl ->
+                    val downloadUrl = imgUrl.toString()
 
                     val ramdonkey = UUID.randomUUID().toString()
                     val myId = Firebase.auth.currentUser!!.uid
@@ -96,10 +96,12 @@ class AddStoryFragment : Fragment() {
                     ref.set(hmapkey, SetOptions.merge()).addOnSuccessListener {
                         progress.dismiss()
                         Toast.makeText( requireActivity(), "Story successfully shared", Toast.LENGTH_SHORT).show()
+                    }.addOnFailureListener {error->
+                        progress.dismiss()
+                        Toast.makeText( requireActivity(), "Story not shared ${error.localizedMessage}", Toast.LENGTH_SHORT).show()
                     }
 
                 }
-
 
             }.addOnFailureListener {
                 Toast.makeText( requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT).show()
@@ -158,7 +160,6 @@ class AddStoryFragment : Fragment() {
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == AppCompatActivity.RESULT_OK) {
                     val intentFromResult = result.data
-
                     if (intentFromResult != null) {
                         selectPicture = intentFromResult.data
                         selectPicture?.let {
