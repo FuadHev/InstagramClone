@@ -14,7 +14,8 @@ Here are the home page, notifications, discovery page, profile, profile settings
 You can Post and share story
 You can find other users by name
 
-![homeactivi](https://github.com/FuadHev/InstagramClone/assets/121355264/6c32b6d4-5142-4424-9c26-faf49b9fe675)
+![homeactivity](https://github.com/FuadHev/InstagramClone/assets/121355264/25960a15-9b6e-453c-a46f-634d308ad631)
+
 
 Messages and story screen
 
