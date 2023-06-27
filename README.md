@@ -16,7 +16,7 @@ You can find other users by name
 
 ![homeactivi](https://github.com/FuadHev/InstagramClone/assets/121355264/6c32b6d4-5142-4424-9c26-faf49b9fe675)
 
-Mesajlasma ve story
+Messages and story screen
 
 ![end](https://github.com/FuadHev/InstagramClone/assets/121355264/0953c151-8a84-43bf-a43f-f8608882e353)
 
