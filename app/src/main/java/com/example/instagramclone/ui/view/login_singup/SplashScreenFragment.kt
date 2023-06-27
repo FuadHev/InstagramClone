@@ -27,6 +27,7 @@ class SplashScreenFragment : Fragment() {
 
     private lateinit var binding: FragmentSplashScreenBinding
     private lateinit var sharedPreferences: SharedPreferences
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

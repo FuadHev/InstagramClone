@@ -87,7 +87,7 @@ class CommentsFragment : BaseFragment() {
         binding.commentsRv.layoutManager = LinearLayoutManager(requireActivity())
         binding.commentsRv.adapter = adapter
 
-        getImage()
+        getCurrentUserImage()
         viewModel.readComment(postId)
     }
 
@@ -132,12 +132,12 @@ class CommentsFragment : BaseFragment() {
 
     private fun getPlayerIdSendNotification(postPublisher: String, comment: String) {
 
-        var username = ""
+
         firestore.collection("user").document(firebaseUser.uid).get()
 
             .addOnSuccessListener { value ->
                 if (value != null) {
-                    username = value.get("username") as String
+                    val username = value.get("username") as String
                     firestore.collection("user").document(postPublisher).get()
                         .addOnSuccessListener { uservalue ->
                             if (uservalue != null) {
@@ -157,12 +157,12 @@ class CommentsFragment : BaseFragment() {
 
     private fun sentPushNotification(playerId: String, username: String, comment: String) {
         try {
-
             OneSignal.postNotification(
                 JSONObject(
                     """{
           "contents": {"en": "Commented on your post: $comment"},
           "include_player_ids": ["$playerId"],
+          "small_icon": "mipmap/ic_launcher_instalife",
           "headings": {"en": "$username"}
                  }
         """.trimIndent()
@@ -216,7 +216,7 @@ class CommentsFragment : BaseFragment() {
 
     }
 
-    private fun getImage() {
+    private fun getCurrentUserImage() {
         val reference = firestore.collection("user").document(firebaseUser.uid)
         reference.addSnapshotListener { value, error ->
             if (error != null) {

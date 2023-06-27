@@ -22,9 +22,6 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
     private var prestime: Long = 0L
     private var limit: Long = 500
     val storyList = ArrayList<Story>()
-
-    //    private lateinit var imageList: ArrayList<String>
-//    private lateinit var storyIds: ArrayList<String>
     private lateinit var userId: String
     private lateinit var storiesProgressView: StoriesProgressView
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,8 +30,6 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
         setContentView(binding.root)
         storiesProgressView = binding.stories
 
-//        imageList= ArrayList()
-//        storyIds= ArrayList()
 
         userId = intent.getStringExtra("userId") as String
         binding.storyDelete.visibility = View.GONE
@@ -95,22 +90,20 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
         val ref = Firebase.firestore.collection("Story").document(userId)
         ref.get().addOnSuccessListener { value ->
             if (value != null && value.exists()) {
-//                    imageList.clear()
-//                    storyIds.clear()
+
                 storyList.clear()
                 try {
-                    val doc = value.data as HashMap<*, *>
+                    val doc = value.data as HashMap<*,*>
 
                     val timecurrent = System.currentTimeMillis()
                     for (i in doc) {
-                        val story = i.value as HashMap<*, *>
+                        val story = i.value as HashMap<*,*>
                         val timestart = story["timeStart"] as Long
                         val timeend = story["timeEnd"] as Long
                         val imageurl = story["imageurl"] as String
                         val storyId = story["storyId"] as String
 
                         if (timecurrent in (timestart + 1) until timeend) {
-
                             val storyi = Story(imageurl, timestart, storyId)
                             storyList.add(storyi)
                         }
@@ -130,9 +123,8 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
                         addView(storyList[counter].storyId)
                     }
 
-                } catch (_: java.lang.NullPointerException) {
-
-
+                } catch (e: java.lang.NullPointerException) {
+                    e.printStackTrace()
                 }
 
 
@@ -166,9 +158,6 @@ class StoryActivity : AppCompatActivity(), StoriesProgressView.StoriesListener {
 
 
     override fun onNext() {
-//        Picasso.get().load(imageList[++counter]).into(binding.image)
-//        addView(storyIds[counter])
-
         Picasso.get().load(storyList[++counter].imageurl).into(binding.image)
         addView(storyList[counter].storyId)
     }

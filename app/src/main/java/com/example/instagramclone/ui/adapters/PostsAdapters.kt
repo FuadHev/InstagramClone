@@ -273,6 +273,7 @@ class PostsAdapters(
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
         "contents": {"en": "Liked Your Post"},
+        "small_icon": "mipmap/ic_launcher_instalife",
         "big_picture": "$imageUrl"
     }"""
                 ),

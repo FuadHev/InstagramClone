@@ -6,10 +6,7 @@ import android.content.SharedPreferences
 object PreferenceHelper {
 
     fun getDefault(context: Context): SharedPreferences = context.getSharedPreferences("LoginInfo", Context.MODE_PRIVATE)
-/*
-    fun customPrefs(context: Context, name: String): SharedPreferences
-            = context.getSharedPreferences(name, Context.MODE_PRIVATE)
-*/
+
 
     private inline fun SharedPreferences.edit(operation: (SharedPreferences.Editor) -> Unit) {
         val editor = this.edit()

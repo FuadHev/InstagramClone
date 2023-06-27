@@ -43,7 +43,9 @@ class LoginFragment : Fragment() {
         auth = Firebase.auth
         binding.loginFragment = this
         firestore = Firebase.firestore
+
         sharedPreferences=PreferenceHelper.getDefault(requireActivity())
+
 
 
         return view
@@ -55,6 +57,9 @@ class LoginFragment : Fragment() {
 
     fun singIn(email: String, password: String) {
 
+        val email1=binding.email.text.toString()
+        val password1=binding.password.text.toString()
+
         if (email.trim() == "" || password.trim() == "") {
             Toast.makeText(requireContext(), "Enter Email and Password", Toast.LENGTH_SHORT).show()
         } else {
@@ -64,6 +69,7 @@ class LoginFragment : Fragment() {
             auth.signInWithEmailAndPassword(email.trim(), password.trim()).addOnSuccessListener {
                 sharedPreferences["email"] = email
                 sharedPreferences["password"] = password
+
                 activity?.let {
                     val intent = Intent(it, HomeActivity::class.java)
                     it.finish()
@@ -72,6 +78,8 @@ class LoginFragment : Fragment() {
             }.addOnFailureListener {
                 binding.singIn.visibility= VISIBLE
                 binding.loadingLottie.visibility= GONE
+
+
                 Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_SHORT).show()
 
             }

@@ -84,7 +84,7 @@ class SearchFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.readPost()
+//        viewModel.readPost() init metodunda yazmisam
         setRecyclerView()
         setRefreshLayout()
         setSearchViewLisneter()

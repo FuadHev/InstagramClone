@@ -312,6 +312,7 @@ class ProfileFragment : BaseFragment() {
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
         "contents": {"en": "started following you"},
+        "small_icon": "mipmap/ic_launcher_instalife",
         "large_icon": "$profileImage"
     }"""
             )
@@ -323,41 +324,7 @@ class ProfileFragment : BaseFragment() {
 
     }
 
-    // bu kodu silmeliyem.viewmodelde yazdim
-    private fun checkFollow() {
-        binding.editProfil.text = "follow"
-        firestore.collection("Follow").document(firbaseUser.uid)
-            .addSnapshotListener { documentSnapshot, error ->
-                if (error != null) {
-                    error.localizedMessage?.let {
-                        Log.e("", it)
-                        return@addSnapshotListener
-                    }
-                }
-                if (documentSnapshot != null && documentSnapshot.exists()) {
-                    val follow = documentSnapshot.data
-                    if (follow != null) {
-                        try {
-                            val following = follow["following"] as HashMap<*, *>
-                            if (following.containsKey(profileid)) {
-                                binding.editProfil.text = "following"
-                            } else {
-                                binding.editProfil.text = "follow"
-                            }
-                        } catch (_: java.lang.NullPointerException) {
 
-                        }
-
-                    }
-
-                } else {
-                    Log.e("", "Document not fount")
-                }
-
-            }
-
-
-    }
 
     override fun addObserves() {
         viewModel.postsList.observe(viewLifecycleOwner) {

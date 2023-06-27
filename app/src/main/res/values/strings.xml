@@ -21,6 +21,7 @@
     <string name="add_Story">Add story</string>
     <string name="delete_post_txt">Delete this post?</string>
     <string name="delete_post_comment">Delete this comment?</string>
+    <string name="delete_post_message">Delete this message?</string>
     <string name="view_all_comments">View all %s comments</string>
     <string name="likes_count">%s likes</string>
     <string name="follow">follow</string>
@@ -32,5 +33,6 @@
     <string name="edit_profile_biography">Biography</string>
     <string name="change_profile_photo">Change profile photo</string>
     <string name="instalife">InstaLife</string>
+    <string name="edit_profile">edit profile</string>
 
 </resources>

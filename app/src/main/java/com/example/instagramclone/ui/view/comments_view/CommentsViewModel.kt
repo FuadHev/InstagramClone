@@ -15,28 +15,6 @@ class CommentsViewModel:ViewModel() {
     val publisherInfoLiveData= MutableLiveData<List<Users>>()
     var firestore= Firebase.firestore
 
-
-    fun allUsers(publishersIds:List<String>) {
-        firestore.collection("user").get().addOnSuccessListener { value ->
-
-                if (value != null) {
-                    val allPublisherList=ArrayList<Users>()
-                    for (users in value.documents) {
-                        if (publishersIds.contains(users.id)){
-                            val userid = users.get("user_id") as String
-                            val username = users.get("username") as String
-                            val imageurl = users.get("image_url") as String
-                            val user = Users(userid, "", username, "",imageurl, "")
-                            allPublisherList.add(user)
-                        }
-                    }
-                    publisherInfoLiveData.postValue(allPublisherList)
-                }
-
-        }
-
-    }
-
     fun readComment(postId:String){
         firestore.collection("Comments").document(postId).addSnapshotListener { value, error ->
             if (error != null) {
@@ -84,6 +62,27 @@ class CommentsViewModel:ViewModel() {
 
 
     }
+    private fun allUsers(publishersIds:List<String>) {
+        firestore.collection("user").get().addOnSuccessListener { value ->
+
+            if (value != null) {
+                val allPublisherList=ArrayList<Users>()
+                for (users in value.documents) {
+                    if (publishersIds.contains(users.id)){
+                        val userid = users.get("user_id") as String
+                        val username = users.get("username") as String
+                        val imageurl = users.get("image_url") as String
+                        val user = Users(userid, "", username, "",imageurl, "")
+                        allPublisherList.add(user)
+                    }
+                }
+                publisherInfoLiveData.postValue(allPublisherList)
+            }
+
+        }
+
+    }
+
 
 
 }

@@ -30,7 +30,6 @@ class MessagesViewModel : ViewModel() {
 
                     val user = Users(username, imageurl)
 
-                    Log.e("checksession", online.toString())
                     if (online != null && online == true) {
                         checkSession.postValue("online")
                     } else {
@@ -78,8 +77,6 @@ class MessagesViewModel : ViewModel() {
 
 
                 }
-
-
             }
     }
 }

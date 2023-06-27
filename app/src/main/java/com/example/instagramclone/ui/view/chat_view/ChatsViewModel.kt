@@ -1,5 +1,6 @@
 package com.example.instagramclone.ui.view.chat_view
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.instagramclone.model.ChatUser
@@ -18,8 +19,13 @@ class ChatsViewModel : ViewModel() {
     init {
         getUsersId()
     }
+
     fun getUsersId() {
         Firebase.firestore.collection("Chats").addSnapshotListener { value, error ->
+            if (error != null) {
+                Log.e("chat_error", "getUsersId: ChatError ${error.localizedMessage}")
+                return@addSnapshotListener
+            }
 
             if (value != null && !value.isEmpty) {
                 val chatUserIdList = ArrayList<String>()
@@ -32,9 +38,8 @@ class ChatsViewModel : ViewModel() {
                     }
                 }
 
-
-                    chatLiveData.postValue(Resource.Loading())
-                    allUser(chatUserIdList)
+                chatLiveData.postValue(Resource.Loading())
+                allUser(chatUserIdList)
 
 
             }
@@ -49,24 +54,24 @@ class ChatsViewModel : ViewModel() {
             if (error != null) {
                 chatLiveData.postValue(error.localizedMessage?.let { Resource.Error(it) }
                     ?: Resource.Error("Chat_Error"))
-            } else {
-                if (value != null) {
-
-                    val alluser = ArrayList<Users>()
-                    for (users in value.documents) {
-                        val user_id = users.get("user_id") as String
-                        val username = users.get("username") as String
-                        val imageurl = users.get("image_url") as String
-
-                        if (chatUserIdList.contains(user_id)) {
-                            val user = Users(user_id, "", username, "", imageurl, "")
-                            alluser.add(user)
-                        }
-                    }
-                    getChatUser(alluser)
-
-                }
+                return@addSnapshotListener
             }
+            if (value != null) {
+                val alluser = ArrayList<Users>()
+                for (users in value.documents) {
+                    val userid = users.get("user_id") as String
+                    val username = users.get("username") as String
+                    val imageurl = users.get("image_url") as String
+
+                    if (chatUserIdList.contains(userid)) {
+                        val user = Users(userid, "", username, "", imageurl, "")
+                        alluser.add(user)
+                    }
+                }
+                getChatUser(alluser)
+
+            }
+
         }
 
 
@@ -80,34 +85,36 @@ class ChatsViewModel : ViewModel() {
             if (error != null) {
                 chatLiveData.postValue(error.localizedMessage?.let { Resource.Error(it) }
                     ?: Resource.Error("Chat_Error"))
-            } else {
-                if (value != null) {
-                    val chatlist = ArrayList<ChatUser>()
-                    for (doc in value.documents) {
-                        val time = doc.get("time") as Timestamp
-                        val seen = doc.get("seen") as Boolean
-                      //  val senderId = doc.get("senderId") as String
-                        val lastMessage = doc.get("lastmessage") as String
-                        for (user in alluser) {
-                            if (Firebase.auth.currentUser!!.uid + user.user_id == doc.id) {
-                                val chatUser = ChatUser(
-                                    user.user_id,
-                                    user.username,
-                                    user.imageurl,
-                                    lastMessage,
-                                    time,
-                                    seen
-                                )
-                                chatlist.add(chatUser)
-                            }
-                        }
-                        chatlist.sortByDescending { chatItem ->
-                            chatItem.time
+                return@addSnapshotListener
+            }
+            if (value != null) {
+                val chatlist = ArrayList<ChatUser>()
+                for (doc in value.documents) {
+                    val time = doc.get("time") as Timestamp
+                    val seen = doc.get("seen") as Boolean
+                    //  val senderId = doc.get("senderId") as String
+                    val lastMessage = doc.get("lastmessage") as String
+
+                    for (user in alluser) {
+                        if (Firebase.auth.currentUser!!.uid + user.user_id == doc.id) {
+                            val chatUser = ChatUser(
+                                user.user_id,
+                                user.username,
+                                user.imageurl,
+                                lastMessage,
+                                time,
+                                seen
+                            )
+                            chatlist.add(chatUser)
                         }
                     }
-                    chatLiveData.postValue(Resource.Success(chatlist))
+                    chatlist.sortByDescending { chatItem ->
+                        chatItem.time
+                    }
                 }
+                chatLiveData.postValue(Resource.Success(chatlist))
             }
+
         }
 
 

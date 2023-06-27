@@ -18,6 +18,9 @@ class SearchViewModel : ViewModel() {
 
     val firestore = Firebase.firestore
 
+    init {
+        readPost()
+    }
 
     fun readPost() {
         firestore.collection("Posts").get()

@@ -158,6 +158,7 @@ class UserAdapter(
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
         "contents": {"en": "started following you"},
+        "small_icon": "mipmap/ic_launcher_instalife",
         "large_icon": "$profileImage"
     }"""
             )

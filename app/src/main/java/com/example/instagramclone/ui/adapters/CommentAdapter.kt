@@ -48,9 +48,6 @@ class CommentAdapter(private val commentClickListener: CommentClickListener,
         this.commentlist = newCommentList
         notifyDataSetChanged()
 
-//       val callBack=MyDiffUtilCallBack(this.commentlist,newCommentList)
-//        val difference=DiffUtil.calculateDiff(callBack)
-//        difference.dispatchUpdatesTo(this)
     }
     @SuppressLint("NotifyDataSetChanged")
     fun updatePublisher(newPublisherList:List<Users>){
@@ -72,6 +69,12 @@ class CommentAdapter(private val commentClickListener: CommentClickListener,
             }
             true
         }
+
+        val timestamp = comment.time // Firestore'dan aldığınız timestamp
+        val date = timestamp.toDate()
+        val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.US)
+        val formattedDate: String = dateFormat.format(date)
+        b.time.text=formattedDate
 
 
         Picasso.get().load(user?.imageurl).into(b.imageProfile)

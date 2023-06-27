@@ -64,7 +64,6 @@ class HomeFragment : BaseFragment() {
                     }
                 }
             }
-
             override fun postOptionCLickListener(postId: String, view: View) {
                 setPopUpMenu(postId, view)
             }

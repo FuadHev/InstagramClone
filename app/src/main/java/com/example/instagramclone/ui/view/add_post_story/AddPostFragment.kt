@@ -95,7 +95,6 @@ class AddPostFragment : Fragment() {
                     val downloadUrl = it.toString()
                     progress.show()
                     val ref = firestore.collection("Posts").document()
-//                    firestore.collection("Comments").document(ref.id).set({FieldValue.delete()})
                     val hmap = hashMapOf<String, Any>(
                     )
                     val time=Timestamp.now()
@@ -104,9 +103,13 @@ class AddPostFragment : Fragment() {
                     hmap["postImage"] = downloadUrl
                     hmap["publisher"] = auth.currentUser!!.uid
                     hmap["time"]=time
+
+
                     val refc=firestore.collection("Comments").document(ref.id)
                     refc.set({})
                     refc.update("arity",FieldValue.delete())
+
+
                     ref.set(hmap, SetOptions.merge()).addOnSuccessListener {
                         progress.dismiss()
                         Toast.makeText(context, "Photo shared", Toast.LENGTH_SHORT).show()

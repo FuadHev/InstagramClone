@@ -51,6 +51,8 @@ class SingupFragment : Fragment() {
         } else {
             binding.progressBar3.visibility=VISIBLE
             auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
+
+                Toast.makeText(requireContext(), "Succesfully created", Toast.LENGTH_SHORT).show()
                 creatAccount(email, userName, password)
             }.addOnFailureListener {
                 binding.progressBar3.visibility= GONE

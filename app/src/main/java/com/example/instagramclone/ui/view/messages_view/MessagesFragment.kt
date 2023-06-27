@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,7 +19,6 @@ import com.example.instagramclone.databinding.DeleteMessageDialogBinding
 import com.example.instagramclone.databinding.FragmentMessagesBinding
 import com.example.instagramclone.ui.adapters.MessageClickListener
 import com.example.instagramclone.ui.adapters.MessaggeAdapter
-import com.example.instagramclone.ui.view.messages_view.MessagesFragmentArgs
 import com.example.instagramclone.utils.Constant
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
@@ -40,8 +38,8 @@ class MessagesFragment : BaseFragment() {
 
     private lateinit var binding: FragmentMessagesBinding
     private val args by navArgs<MessagesFragmentArgs>()
-    var senderRoom: String? = null
-    var receiverRoom: String? = null
+    private var senderRoom: String? = null
+    private var receiverRoom: String? = null
     private lateinit var firestore: FirebaseFirestore
     private val viewModel by viewModels<MessagesViewModel>()
     private val messageAdapter by lazy {
@@ -55,7 +53,7 @@ class MessagesFragment : BaseFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_messages, container, false)
 
         return binding.root
@@ -149,6 +147,12 @@ class MessagesFragment : BaseFragment() {
             .update("seen", true)
     }
 
+    override fun onStop() {
+        super.onStop()
+        firestore.collection("Chats").document(Firebase.auth.currentUser!!.uid + args.userId)
+            .update("seen", true)
+    }
+
     private fun getPlayerIdSendNotification(userId: String, message: String) {
 
         firestore.collection("user").document(Firebase.auth.currentUser!!.uid)
@@ -169,12 +173,12 @@ class MessagesFragment : BaseFragment() {
                         }
 
                     }.addOnFailureListener {
-                        it.localizedMessage?.let { Log.e("user_error", it) }
+                        it.localizedMessage?.let { error-> Log.e("user_error", error) }
                     }
 
                 }
             }.addOnFailureListener {
-                it.localizedMessage?.let { Log.e("user_error", it) }
+                it.localizedMessage?.let {error-> Log.e("user_error", error) }
             }
 
 
@@ -185,7 +189,7 @@ class MessagesFragment : BaseFragment() {
         val mDialog = Dialog(requireContext())
         mDialog.setContentView(dialogBinding.root)
         mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialogBinding.dInfo.text = "Delete this message?"
+        dialogBinding.dInfo.setText(R.string.delete_post_message)
 
         dialogBinding.yes.setOnClickListener {
             if (senderId == Firebase.auth.currentUser!!.uid) {
@@ -218,12 +222,22 @@ class MessagesFragment : BaseFragment() {
     ) {
         try {
 
+//            val notificationContent = JSONObject(
+//                """{
+//        "app_id": "${Constant.APP_ID}",
+//        "include_player_ids": ["$playerId"],
+//        "headings": {"en": "$username"},
+//        "contents": {"en": "$message"},
+//        "large_icon": "$profileImage"
+//    }"""
+//            )
             val notificationContent = JSONObject(
                 """{
         "app_id": "${Constant.APP_ID}", 
         "include_player_ids": ["$playerId"],
         "headings": {"en": "$username"},
         "contents": {"en": "$message"},
+        "small_icon": "mipmap/ic_launcher_instalife",
         "large_icon": "$profileImage"
     }"""
             )
