@@ -4,6 +4,8 @@ Hi everyone. This is a simple social-network app.
 
 Instalife is a social network program. Users can share their photos and discover what others have shared and chat with other users.
 
+I deleted google-service.json file.You must add own firebase service.
+
 Splashscreen,SingIn,SingUp and ForgotPassword screen
 
 ![beginActivity](https://github.com/FuadHev/InstagramClone/assets/121355264/6439449c-ddcd-4ae3-831d-959b8006f5a8)
